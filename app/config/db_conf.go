@@ -23,10 +23,9 @@ func (dbc *DBconf) InitDB() *gorm.DB {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		dbc.DB_Username,
 		dbc.DB_Password,
-		"db",
+		dbc.DB_Host,
 		dbc.DB_Port,
 		dbc.DB_Name)
-
 	newLogger := logger.New(
 		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
 		logger.Config{
