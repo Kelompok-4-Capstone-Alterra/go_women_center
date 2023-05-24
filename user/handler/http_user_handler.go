@@ -30,30 +30,30 @@ type userInfo struct {
 	Picture       string `json:"picture"`
 }
 
-func (u *userHandler) LoginHandler(e echo.Context) error {
+func (h *userHandler) LoginHandler(c echo.Context) error {
 	g := helper.NewGoogleUUID()
 	uuid, _ := g.GenerateUUID()
 	// oauthStateString = uuid
 	oauthstatemap[uuid] = true
 
-	url := u.OauthConf.AuthCodeURL(uuid)
+	url := h.OauthConf.AuthCodeURL(uuid)
 
-	return e.Redirect(http.StatusTemporaryRedirect, url)
+	return c.Redirect(http.StatusTemporaryRedirect, url)
 }
 
-func (u *userHandler) LoginGoogleCallback(e echo.Context) error {
-	content, err := u.getUserInfo(e.FormValue("state"), e.FormValue("code"))
+func (h *userHandler) LoginGoogleCallback(c echo.Context) error {
+	content, err := h.getUserInfo(c.FormValue("state"), c.FormValue("code"))
 	if err != nil {
-		return e.JSON(http.StatusInternalServerError, echo.Map{
+		return c.JSON(http.StatusInternalServerError, echo.Map{
 			"error": err.Error(),
 		})
 	}
 
 	//TODO: send token to response
-	return e.JSON(http.StatusOK, content)
+	return c.JSON(http.StatusOK, content)
 }
 
-func (u *userHandler) getUserInfo(state, code string) (userInfo, error) {
+func (h *userHandler) getUserInfo(state, code string) (userInfo, error) {
 
 	UserInfo := userInfo{}
 	if !oauthstatemap[state] {
@@ -61,7 +61,7 @@ func (u *userHandler) getUserInfo(state, code string) (userInfo, error) {
 	}
 	defer delete(oauthstatemap, state)
 
-	token, err := u.OauthConf.Exchange(context.Background(), code)
+	token, err := h.OauthConf.Exchange(context.Background(), code)
 	if err != nil {
 		return UserInfo, fmt.Errorf("code exchange failed: %s", err.Error())
 	}
