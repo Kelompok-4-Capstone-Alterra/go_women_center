@@ -23,14 +23,7 @@ func NewUserHandler(oauthConf *oauth2.Config) *userHandler {
 
 var oauthstatemap = map[string]bool{}
 
-type userInfo struct {
-	ID            string `json:"id"`
-	Email         string `json:"email"`
-	VerifiedEmail bool   `json:"verified_email"`
-	Picture       string `json:"picture"`
-}
-
-func (h *userHandler) LoginHandler(c echo.Context) error {
+func (h *userHandler) LoginGoogleHandler(c echo.Context) error {
 	g := helper.NewGoogleUUID()
 	uuid, _ := g.GenerateUUID()
 	// oauthStateString = uuid
@@ -53,9 +46,9 @@ func (h *userHandler) LoginGoogleCallback(c echo.Context) error {
 	return c.JSON(http.StatusOK, content)
 }
 
-func (h *userHandler) getUserInfo(state, code string) (userInfo, error) {
+func (h *userHandler) getUserInfo(state, code string) (userOauthInfo, error) {
 
-	UserInfo := userInfo{}
+	UserInfo := userOauthInfo{}
 	if !oauthstatemap[state] {
 		return UserInfo, fmt.Errorf("invalid oauth state")
 	}
