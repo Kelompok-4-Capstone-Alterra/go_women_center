@@ -1,22 +1,24 @@
 package domain
 
+import "github.com/Kelompok-4-Capstone-Alterra/go_women_center/counselor"
+
 type Counselor struct {
-	ID           string  `json:"id" gorm:"primary_key;type:varchar(36);uniqueindex;not null"`
-	PhotoProfile string  `json:"photo_profile,omitempty" gorm:"type:varchar(255)"`
-	FullName     string  `json:"full_name,omitempty" gorm:"type:varchar(150);not null"`
-	Email        string  `json:"email,omitempty" gorm:"type:varchar(150);uniqueindex;not null"`
-	Tarif        int     `json:"tarif,omitempty" gorm:"type:float64"`
-	Rating       float32 `json:"rating,omitempty" gorm:"type:decimal(2,1)"`
-	Category     string  `json:"category,omitempty" gorm:"type:varchar(150)"`
-	Description  string  `json:"description,omitempty"`
-	Topic        string  `json:"topic,omitempty" gorm:"type:varchar(150)"`
+	ID             string  `json:"id,omitempty" form:"id,omitempty" gorm:"primary_key;type:varchar(36);uniqueindex;not null"`
+	ProfilePicture string  `json:"profile_picture,omitempty" form:"profile_picture,omitempty" gorm:"type:varchar(255)"`
+	Username       string  `json:"username,omitempty" form:"username,omitempty" gorm:"type:varchar(150);uniqueindex;not null"`
+	FullName       string  `json:"full_name,omitempty" form:"full_name,omitempty" gorm:"type:varchar(150);not null"`
+	Email          string  `json:"email,omitempty" form:"email,omitempty" gorm:"type:varchar(150);uniqueindex;not null"`
+	Topic          string  `json:"topic,omitempty" form:"topic,omitempty" gorm:"type:varchar(50)"`
+	Tarif          float64 `json:"tarif,omitempty" form:"tarif,omitempty" gorm:"type:float"`
+	Rating         float32 `json:"rating,omitempty" form:"rating,omitempty" gorm:"type:decimal(2,1)"`
+	Description    string  `json:"description,omitempty" form:"description,omitempty"`
 }
 
 type CounselorUsecase interface {
 	GetAll(page, limit int) ([]Counselor, error)
 	GetTotalPages(limit int) (int, error)
 	// GetById(id string) (Counselor, error)
-	Create(counselor Counselor) error
+	Create(input counselor.CreateRequest) error
 	// Update(id string, counselor Counselor) error
 	// Delete(id string) error
 }

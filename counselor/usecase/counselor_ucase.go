@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/counselor"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/domain"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
 )
@@ -21,7 +22,7 @@ func(u *counselorUsecase) GetAll(page, limit int) ([]domain.Counselor, error) {
 	counselors, err := u.counselorRepo.GetAll(offset, limit)
 
 	if err != nil {
-		return nil, domain.ErrInternalServerError
+		return nil, counselor.ErrInternalServerError
 	}
 
 	return counselors, nil
@@ -31,7 +32,7 @@ func(u *counselorUsecase) GetTotalPages(limit int) (int, error) {
 
 	totalData, err := u.counselorRepo.Count()
 	if err != nil {
-		return 0, domain.ErrInternalServerError
+		return 0, counselor.ErrInternalServerError
 	}
 
 	totalPages := helper.GetTotalPages(totalData, limit)
@@ -39,13 +40,25 @@ func(u *counselorUsecase) GetTotalPages(limit int) (int, error) {
 	return totalPages, nil
 }
 
-func(u *counselorUsecase) Create(counselor domain.Counselor) error {
-
+func(u *counselorUsecase) Create(input counselor.CreateRequest) error {
 	
+	uuid, _ := helper.NewGoogleUUID().GenerateUUID()
+	
+	newCounselor := domain.Counselor{
+		ID: uuid,
+		FullName: input.FullName,
+		Email: input.Email,
+		Username: input.Username,
+		Topic: input.Topic,
+		Description: input.Description,
+		Tarif: input.Tarif,
+		ProfilePicture: input.ProfilePicture,
+	}
 
-	err := u.counselorRepo.Create(counselor)
+	err := u.counselorRepo.Create(newCounselor)
+	
 	if err != nil {
-		return domain.ErrInternalServerError
+		return counselor.ErrInternalServerError
 	}
 	return nil
 }

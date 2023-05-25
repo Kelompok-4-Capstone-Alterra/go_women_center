@@ -6,6 +6,9 @@ import (
 	"os"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/app/config"
+	CounselorHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/counselor/handler"
+	CounselorRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/counselor/repository"
+	CounselorUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/counselor/usecase"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
 	UserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/handler"
 	_ "github.com/joho/godotenv/autoload"
@@ -42,13 +45,33 @@ func main() {
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+
 	
+	
+	// e.Static("/images", "images/")
+
 	e.GET("/healthcheck", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, "hello")
 	})
 
+	// user
 	e.GET("/google/login", userHandler.LoginHandler)
 	e.GET("/google/callback", userHandler.LoginGoogleCallback)
+
+
+	// counselor
+
+	counselorRepo := CounselorRepository.NewMysqlCounselorRepository(db)
+	counselorUsecase := CounselorUsecase.NewCounselorUsecase(counselorRepo)
+	counselorHandler := CounselorHandler.NewCounselorHandler(counselorUsecase)
+
+	{
+		e.POST("/admins/counselors", counselorHandler.Create)
+	}
+	
+	e.GET("/testimage", func(c echo.Context) error {
+		return c.HTML(http.StatusOK, "<img src='https://bucket-test-556.s3.ap-southeast-1.amazonaws.com/644b12a8-fafd-11ed-95df-5efc22537c1d_status_pending.png'/>")
+	})
 
 	e.Logger.Fatal(e.Start(":8080"))
 }
