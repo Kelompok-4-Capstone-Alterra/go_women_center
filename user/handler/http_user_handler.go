@@ -14,14 +14,16 @@ import (
 )
 
 type userHandler struct {
-	Usecase usecase.UserUsecase
-	OauthConf *oauth2.Config
+	Usecase     usecase.UserUsecase
+	OauthConf   *oauth2.Config
+	EmailSender helper.EmailSender
 }
 
-func NewUserHandler(u usecase.UserUsecase, oauthConf *oauth2.Config) *userHandler {
+func NewUserHandler(u usecase.UserUsecase, oauthConf *oauth2.Config, EmailSenderService helper.EmailSender) *userHandler {
 	return &userHandler{
-		Usecase: u,
-		OauthConf: oauthConf,
+		Usecase:     u,
+		OauthConf:   oauthConf,
+		EmailSender: EmailSenderService,
 	}
 }
 
@@ -77,6 +79,34 @@ func (h *userHandler) getUserInfo(state, code string) (user.UserOauthInfo, error
 	}
 
 	return UserInfo, nil
+}
+
+func (h *userHandler) VerifyEmail(c echo.Context) error {
+	emailDTO := user.VerifyEmailDTO{}
+	err := c.Bind(&emailDTO)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"error": err.Error(),
+		})
+	}
+
+	otp, err := helper.GetOtp()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"error": err.Error(), //TODO: write better error message
+		})
+	}
+
+	err = h.EmailSender.SendEmail(emailDTO.Email, "OTP verification code", otp) //TODO: write subject and body template
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"error": err.Error(), //TODO: write better error message
+		})
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"message": "success sending otp",
+	})
 }
 
 func (h *userHandler) RegisterHandler(c echo.Context) error {

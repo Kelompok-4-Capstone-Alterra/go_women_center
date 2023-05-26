@@ -35,13 +35,21 @@ func main() {
 		Endpoint:     google.Endpoint,
 	}
 
+	mailConf := helper.NewEmailSender(
+		587, 
+		"smtp.gmail.com",
+		os.Getenv("CONFIG_AUTH_EMAIL"),
+		os.Getenv("CONFIG_AUTH_PASSWORD"), 
+		"Women Center <ivanhilmideran@gmail.com>", //TODO: set email to the proper one
+	)
+
 	db := dbconf.InitDB()
 	googleUUID := helper.NewGoogleUUID()
 	log.Print(db, googleUUID)
 
 	userRepo := UserRepo.NewUserRepo(db)
-	userUsecase := UserUsecase.NewUserUsecase(userRepo)
-	userHandler := UserHandler.NewUserHandler(userUsecase, googleOauthConfig)
+	userUsecase := UserUsecase.NewUserUsecase(userRepo, googleUUID)
+	userHandler := UserHandler.NewUserHandler(userUsecase, googleOauthConfig, &mailConf)
 
 	e := echo.New()
 	e.Use(middleware.Logger())
@@ -51,6 +59,7 @@ func main() {
 		return c.JSON(http.StatusOK, "hello")
 	})
 
+	e.POST("/verify", userHandler.VerifyEmail) 
 	e.POST("/register", userHandler.RegisterHandler)
 	e.GET("/google/login", userHandler.LoginGoogleHandler)
 	e.GET("/google/callback", userHandler.LoginGoogleCallback)
