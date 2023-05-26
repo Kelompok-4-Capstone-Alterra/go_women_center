@@ -7,16 +7,20 @@ import (
 	"net/http"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user"
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/usecase"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/oauth2"
 )
 
 type userHandler struct {
+	Usecase usecase.UserUsecase
 	OauthConf *oauth2.Config
 }
 
-func NewUserHandler(oauthConf *oauth2.Config) *userHandler {
+func NewUserHandler(u usecase.UserUsecase, oauthConf *oauth2.Config) *userHandler {
 	return &userHandler{
+		Usecase: u,
 		OauthConf: oauthConf,
 	}
 }
@@ -43,12 +47,13 @@ func (h *userHandler) LoginGoogleCallback(c echo.Context) error {
 	}
 
 	//TODO: send token to response
+
 	return c.JSON(http.StatusOK, content)
 }
 
-func (h *userHandler) getUserInfo(state, code string) (userOauthInfo, error) {
+func (h *userHandler) getUserInfo(state, code string) (user.UserOauthInfo, error) {
 
-	UserInfo := userOauthInfo{}
+	UserInfo := user.UserOauthInfo{}
 	if !oauthstatemap[state] {
 		return UserInfo, fmt.Errorf("invalid oauth state")
 	}
@@ -72,4 +77,26 @@ func (h *userHandler) getUserInfo(state, code string) (userOauthInfo, error) {
 	}
 
 	return UserInfo, nil
+}
+
+func (h *userHandler) RegisterHandler(c echo.Context) error {
+	reqDTO := user.RegisterUserDTO{}
+	err := c.Bind(&reqDTO)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"error": err.Error(),
+		})
+	}
+
+	// TODO: validate req
+
+	content, err := h.Usecase.Register(reqDTO)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"error": err.Error(),
+		})
+	}
+
+	//TODO: send token to response
+	return c.JSON(http.StatusOK, content)
 }

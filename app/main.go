@@ -7,6 +7,8 @@ import (
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/app/config"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
+	UserRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/repository"
+	UserUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/usecase"
 	UserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/handler"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/labstack/echo/v4"
@@ -37,7 +39,9 @@ func main() {
 	googleUUID := helper.NewGoogleUUID()
 	log.Print(db, googleUUID)
 
-	userHandler := UserHandler.NewUserHandler(googleOauthConfig)
+	userRepo := UserRepo.NewUserRepo(db)
+	userUsecase := UserUsecase.NewUserUsecase(userRepo)
+	userHandler := UserHandler.NewUserHandler(userUsecase, googleOauthConfig)
 
 	e := echo.New()
 	e.Use(middleware.Logger())
@@ -47,7 +51,8 @@ func main() {
 		return c.JSON(http.StatusOK, "hello")
 	})
 
-	e.GET("/google/login", userHandler.LoginHandler)
+	e.POST("/register", userHandler.RegisterHandler)
+	e.GET("/google/login", userHandler.LoginGoogleHandler)
 	e.GET("/google/callback", userHandler.LoginGoogleCallback)
 
 	e.Logger.Fatal(e.Start(":8080"))
