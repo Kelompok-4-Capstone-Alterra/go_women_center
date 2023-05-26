@@ -1,6 +1,6 @@
 package helper
 
-func GetOffsetAndLimit(page, limit int) (int, int) {
+func GetPaginateData(page, limit int) (int, int, int) {
 
 	if page <= 0 {
 		page = 1
@@ -15,7 +15,7 @@ func GetOffsetAndLimit(page, limit int) (int, int) {
 
 	offset := (page - 1) * limit
 
-	return offset, limit
+	return page, offset, limit
 }
 
 func GetTotalPages(totalData, limit int) int {

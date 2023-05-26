@@ -15,6 +15,7 @@ import (
 )
 
 func IsImageValid(fh *multipart.FileHeader) bool {
+
 	file, err := fh.Open()
 
 	if err != nil {
@@ -47,7 +48,7 @@ func IsImageValid(fh *multipart.FileHeader) bool {
 
 }
 
-func UploadImageToS3(fh *multipart.FileHeader) (string, error) {
+func UploadImageToS3(fh *multipart.FileHeader, bucketName string) (string, error) {
 	
 	cfg, err := config.LoadDefaultConfig(context.TODO())
 	
@@ -73,7 +74,7 @@ func UploadImageToS3(fh *multipart.FileHeader) (string, error) {
 	newFileName :=  uuid +  "-" + strconv.Itoa(int(currentTime)) + ext
 
 	result, err := uploader.Upload(context.TODO(), &s3.PutObjectInput{
-		Bucket: aws.String("women-center"),
+		Bucket: aws.String(bucketName),
 		Key:    aws.String(newFileName),
 		Body:   file,
 	})

@@ -1,16 +1,24 @@
 package counselor
 
-import "errors"
+import (
+	"errors"
+)
+
 
 var (
-	ErrInternalServerError = errors.New("internal Server Error")
-	// ErrNotFound will throw if the requested item is not exists
-	ErrNotFound = errors.New("your requested Item is not found")
-	// ErrConflict will throw if the current action already exists
-	ErrConflict = errors.New("your Item already exist")
-	// ErrBadParamInput will throw if the given request-body or params is not valid
-	ErrBadParamInput = errors.New("given Param is not valid")
+	ErrInternalServerError = errors.New("internal server error")
+	
+	ErrNotFound = errors.New("counselor not found")
 
-	ErrProfilePicture = errors.New("profile picture must be an image and png/jpg/jpeg format")
+	ErrConflict = errors.New("counselor already registered")
+
+	
+
+	// validation error
+	ErrProfilePictureFormat = errors.New("profile picture must be an image and png/jpg/jpeg format")
+	ErrEmailFormat = errors.New("email must be a valid email")
+	ErrTarifFormat = errors.New("tarif must be a number")
+	ErrRequired = errors.New("all fields are required")
+	ErrInvalidTopic = errors.New("invalid topic")
 )
 

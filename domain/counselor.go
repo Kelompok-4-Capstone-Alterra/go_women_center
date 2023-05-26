@@ -15,7 +15,7 @@ type Counselor struct {
 }
 
 type CounselorUsecase interface {
-	GetAll(page, limit int) ([]Counselor, error)
+	GetAll(offset, limit int) ([]Counselor, error)
 	GetTotalPages(limit int) (int, error)
 	// GetById(id string) (Counselor, error)
 	Create(input counselor.CreateRequest) error

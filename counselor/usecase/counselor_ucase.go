@@ -15,9 +15,7 @@ func NewCounselorUsecase(counselorRepo domain.CounselorRepository) domain.Counse
 	return &counselorUsecase{counselorRepo: counselorRepo}
 }
 
-func(u *counselorUsecase) GetAll(page, limit int) ([]domain.Counselor, error) {
-	
-	offset, limit := helper.GetOffsetAndLimit(page, limit)
+func(u *counselorUsecase) GetAll(offset, limit int) ([]domain.Counselor, error) {
 	
 	counselors, err := u.counselorRepo.GetAll(offset, limit)
 
@@ -60,5 +58,6 @@ func(u *counselorUsecase) Create(input counselor.CreateRequest) error {
 	if err != nil {
 		return counselor.ErrInternalServerError
 	}
+	
 	return nil
 }

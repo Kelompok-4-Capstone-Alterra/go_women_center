@@ -1,10 +1,11 @@
 package handler
 
 import (
-	"errors"
+	"mime/multipart"
 	"net/http"
 	"strings"
 
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/constant"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/counselor"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/domain"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
@@ -25,38 +26,55 @@ func (h *counselorHandler) GetAll(c echo.Context) error {
 	page, _ :=  helper.StringToInt(c.QueryParam("page"))
 	limit, _ := helper.StringToInt(c.QueryParam("limit"))
 	
-	counselors, err := h.CUscase.GetAll(page, limit)
+	page, offset, limit := helper.GetPaginateData(page, limit)
+
+	counselors, err := h.CUscase.GetAll(offset, limit)
 	
 	if err != nil {
-		status := getStatusCode(err)
-		return c.JSON(status, helper.ResponseError(err.Error(), status))
+		return c.JSON(getStatusCode(err), helper.ResponseError(err.Error(), getStatusCode(err)))
 	}
 
-	return c.JSON(getStatusCode(err), counselors)
+	totalPages, err := h.CUscase.GetTotalPages(limit)
+
+	if err != nil {
+		return c.JSON(getStatusCode(err), helper.ResponseError(err.Error(), getStatusCode(err)))
+	}
+
+	return c.JSON(getStatusCode(err), helper.ResponseSuccess("success get all conselor", getStatusCode(err), echo.Map{
+		"counselors": counselors,
+		"current_page": page,
+		"total_pages": totalPages,
+	}))
 }
 
-func isRequestValid(m interface{}) error {
+func isRequestValid(c counselor.CreateRequest) error {
+
 	validate := validator.New()
-	err := validate.Struct(m)
+	err := validate.Struct(c)
 	
 	if err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
 			field := strings.ToLower(err.Field())
 			
 			if err.Tag() == "required" {
-				return errors.New(field + " is required")
+				return counselor.ErrRequired
 			}
 
-			if err.Tag() == "email" {
-				return errors.New(field + " must be a valid email")
+			if field == "email" {
+				return counselor.ErrEmailFormat
 			}
 			
-			if err.Tag() == "number" {
-				return errors.New(field + " must be a number")
+			if field == "tarif" {
+				return counselor.ErrTarifFormat
 			}
 			
 		}
 	}
+
+	if !constant.TOPIC[c.Topic] {
+		return counselor.ErrInvalidTopic
+	}
+	
 	return nil
 }
 
@@ -67,24 +85,28 @@ func (h *counselorHandler) Create(c echo.Context) error {
 	c.Bind(&counselorReq)
 
 	if err := isRequestValid(counselorReq); err != nil {
-		return c.JSON(getStatusCode(err), helper.ResponseError(err.Error(), getStatusCode(err)))
+		return c.JSON(
+			getStatusCode(err), 
+			helper.ResponseError(err.Error(),
+			getStatusCode(err)),
+		)
 	}
 	
-	imgInput, err := c.FormFile("profile_picture")
+	imgInput, _ := c.FormFile("profile_picture")
 
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, "failed to profile picture is required")
-	}
-
-	if !helper.IsImageValid(imgInput) {
-		return c.JSON(http.StatusBadRequest, "profile picture must be an image and png/jpg/jpeg format")
+	if err := isImageValid(imgInput); err != nil {
+		return c.JSON(
+			getStatusCode(err),
+			helper.ResponseError(err.Error(),
+			getStatusCode(err)),
+		)
 	}
 
 	// upload image to s3
-	path, err := helper.UploadImageToS3(imgInput)
+	path, err := helper.UploadImageToS3(imgInput, "women-center")
 
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, "failed to upload image")
+		return c.JSON(getStatusCode(err), helper.ResponseError(counselor.ErrInternalServerError.Error(), getStatusCode(err)))
 	}
 
 	counselorReq.ProfilePicture = path
@@ -95,25 +117,49 @@ func (h *counselorHandler) Create(c echo.Context) error {
 		return c.JSON(getStatusCode(err), helper.ResponseError(err.Error(), getStatusCode(err)))
 	}
 
-	return c.JSON(http.StatusOK, "success create counselor")
+	return c.JSON(getStatusCode(err), helper.ResponseSuccess("success create counselor", getStatusCode(err), nil))
 
 }
 
+func isImageValid(img *multipart.FileHeader) error {
+
+	if img == nil {
+		return counselor.ErrRequired
+	}
+
+	if !helper.IsImageValid(img) {
+		return counselor.ErrProfilePictureFormat
+	}
+
+	return nil
+}
 
 func getStatusCode(err error) int {
 
 	if err == nil {
 		return http.StatusOK
 	}
+
 	switch err {
-	case counselor.ErrInternalServerError:
-		return http.StatusInternalServerError
-	case counselor.ErrNotFound:
-		return http.StatusNotFound
-	case counselor.ErrConflict:
-		return http.StatusConflict
-	default:
-		return http.StatusInternalServerError
+		case counselor.ErrInternalServerError:
+			return http.StatusInternalServerError
+			
+		case counselor.ErrNotFound:
+			return http.StatusNotFound
+
+		case counselor.ErrConflict:
+			return http.StatusConflict
+		
+		case 
+		 	counselor.ErrProfilePictureFormat,
+			counselor.ErrEmailFormat,
+			counselor.ErrTarifFormat,
+			counselor.ErrInvalidTopic,
+		 	counselor.ErrRequired:
+			return http.StatusBadRequest
+
+		default:
+			return http.StatusInternalServerError
 	}
 
 }
