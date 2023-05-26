@@ -6,21 +6,25 @@ import (
 	"gopkg.in/gomail.v2"
 )
 
+type EmailSender interface {
+	SendEmail(sendTo, subject, body string) error
+}
+
 type emailSender struct {
-	CONFIG_SMTP_HOST     string
 	CONFIG_SMTP_PORT     int
+	CONFIG_SMTP_HOST     string
 	CONFIG_AUTH_EMAIL    string
 	CONFIG_AUTH_PASSWORD string
 	CONFIG_SENDER_NAME   string
 }
 
-func NewEmailSender(SMTP_HOST string, SMTP_PORT int, AUTH_EMAIL string, AUTH_PASSWORD string, SENDER_NAME string) emailSender {
+func NewEmailSender(SMTP_PORT int, SMTP_HOST, AUTH_EMAIL, AUTH_PASSWORD, SENDER_NAME string) emailSender {
 	return emailSender{
-		CONFIG_SMTP_HOST:     SMTP_HOST,
-		CONFIG_SMTP_PORT:     SMTP_PORT,
-		CONFIG_AUTH_EMAIL:    AUTH_EMAIL,
+		CONFIG_SMTP_PORT: SMTP_PORT,
+		CONFIG_SMTP_HOST: SMTP_HOST,
+		CONFIG_AUTH_EMAIL: AUTH_EMAIL,
 		CONFIG_AUTH_PASSWORD: AUTH_PASSWORD,
-		CONFIG_SENDER_NAME:   SENDER_NAME,
+		CONFIG_SENDER_NAME: SENDER_NAME,
 	}
 }
 
