@@ -9,17 +9,20 @@ import (
 
 type UserUsecase interface {
 	Register(userDTO user.RegisterUserDTO) (domain.User, error)
+	VerifyEmail(email string) (error)
 }
 
 type userUsecase struct {
 	repo repository.UserRepo
 	UuidGenerator helper.UuidGenerator
+	EmailSender helper.EmailSender
 }
 
-func NewUserUsecase(repo repository.UserRepo, idGenerator helper.UuidGenerator) *userUsecase {
+func NewUserUsecase(repo repository.UserRepo, idGenerator helper.UuidGenerator, emailSender helper.EmailSender) *userUsecase {
 	return &userUsecase{
 		repo: repo,
 		UuidGenerator: idGenerator,
+		EmailSender: emailSender,
 	}
 }
 
@@ -38,4 +41,18 @@ func (u *userUsecase) Register(userDTO user.RegisterUserDTO) (domain.User, error
 	}
 
 	return u.repo.Create(data)
+}
+
+func (u *userUsecase) VerifyEmail(email string) (error) {
+	otp, err := helper.GetOtp()
+	if err != nil {
+		return err
+	}
+
+	err = u.EmailSender.SendEmail(email, "OTP verification code", otp) //TODO: write subject and body template
+	if err != nil {
+		return err
+	}
+	
+	return nil
 }

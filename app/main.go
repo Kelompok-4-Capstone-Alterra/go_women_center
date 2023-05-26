@@ -48,8 +48,8 @@ func main() {
 	log.Print(db, googleUUID)
 
 	userRepo := UserRepo.NewUserRepo(db)
-	userUsecase := UserUsecase.NewUserUsecase(userRepo, googleUUID)
-	userHandler := UserHandler.NewUserHandler(userUsecase, googleOauthConfig, &mailConf)
+	userUsecase := UserUsecase.NewUserUsecase(userRepo, googleUUID, &mailConf)
+	userHandler := UserHandler.NewUserHandler(userUsecase, googleOauthConfig)
 
 	e := echo.New()
 	e.Use(middleware.Logger())

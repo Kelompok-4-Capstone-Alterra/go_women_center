@@ -14,16 +14,14 @@ import (
 )
 
 type userHandler struct {
-	Usecase     usecase.UserUsecase
-	OauthConf   *oauth2.Config
-	EmailSender helper.EmailSender
+	Usecase   usecase.UserUsecase
+	OauthConf *oauth2.Config
 }
 
-func NewUserHandler(u usecase.UserUsecase, oauthConf *oauth2.Config, EmailSenderService helper.EmailSender) *userHandler {
+func NewUserHandler(u usecase.UserUsecase, oauthConf *oauth2.Config) *userHandler {
 	return &userHandler{
-		Usecase:     u,
-		OauthConf:   oauthConf,
-		EmailSender: EmailSenderService,
+		Usecase:   u,
+		OauthConf: oauthConf,
 	}
 }
 
@@ -90,14 +88,7 @@ func (h *userHandler) VerifyEmail(c echo.Context) error {
 		})
 	}
 
-	otp, err := helper.GetOtp()
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, echo.Map{
-			"error": err.Error(), //TODO: write better error message
-		})
-	}
-
-	err = h.EmailSender.SendEmail(emailDTO.Email, "OTP verification code", otp) //TODO: write subject and body template
+	err = h.Usecase.VerifyEmail(emailDTO.Email)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, echo.Map{
 			"error": err.Error(), //TODO: write better error message
