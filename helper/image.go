@@ -4,6 +4,7 @@ import (
 	"context"
 	"mime/multipart"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"time"
 
@@ -48,8 +49,8 @@ func IsImageValid(fh *multipart.FileHeader) bool {
 
 }
 
-func UploadImageToS3(fh *multipart.FileHeader, bucketName string) (string, error) {
-	
+func UploadImageToS3(fh *multipart.FileHeader) (string, error) {
+
 	cfg, err := config.LoadDefaultConfig(context.TODO())
 	
 	if err != nil {
@@ -65,16 +66,18 @@ func UploadImageToS3(fh *multipart.FileHeader, bucketName string) (string, error
 	defer file.Close()
 
 	client := s3.NewFromConfig(cfg)
+
 	ext := filepath.Ext(fh.Filename)
 
 	uploader := manager.NewUploader(client)
+
 	uuid, _ := NewGoogleUUID().GenerateUUID()
 	currentTime := time.Now().UnixNano()
 
 	newFileName :=  uuid +  "-" + strconv.Itoa(int(currentTime)) + ext
 
 	result, err := uploader.Upload(context.TODO(), &s3.PutObjectInput{
-		Bucket: aws.String(bucketName),
+		Bucket: aws.String("women-center"),
 		Key:    aws.String(newFileName),
 		Body:   file,
 	})
@@ -83,7 +86,50 @@ func UploadImageToS3(fh *multipart.FileHeader, bucketName string) (string, error
 		return "", err
 	}
 
-
 	return result.Location, nil
 
+}
+
+func getFileName(path_link string) string {
+	pattern := `/([^/]+)$`
+
+	regex := regexp.MustCompile(pattern)
+
+	matches := regex.FindStringSubmatch(path_link)
+
+	if len(matches) < 2 {
+		return ""
+	}
+
+	return matches[1]
+}
+
+func DeleteImageFromS3(path_link string) error {
+	
+	filename := getFileName(path_link)
+
+	if filename == "" {
+		return nil
+	}
+
+	cfg, err := config.LoadDefaultConfig(context.TODO())
+	
+	if err != nil {
+		return err
+	}
+
+	client := s3.NewFromConfig(cfg)
+
+	input := &s3.DeleteObjectInput{
+		Bucket: aws.String("women-center"),
+		Key: 	aws.String(filename),
+	}
+
+	_, err = client.DeleteObject(context.TODO(), input)
+	
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
