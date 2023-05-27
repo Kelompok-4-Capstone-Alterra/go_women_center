@@ -1,6 +1,9 @@
 package usecase
 
 import (
+	"errors"
+	"time"
+
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/domain"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user"
@@ -27,6 +30,18 @@ func NewUserUsecase(repo repository.UserRepo, idGenerator helper.UuidGenerator, 
 }
 
 func (u *userUsecase) Register(userDTO user.RegisterUserDTO) (domain.User, error) {
+	storedOtp, notEmpty := otpCache[userDTO.Email]
+	if !notEmpty {
+		return domain.User{}, errors.New("otp is not registed")
+	}
+	
+	timeSinceOtpSent := time.Since(storedOtp.Deadline).Minutes()
+	if timeSinceOtpSent > 1 {
+		return domain.User{}, errors.New("invalid or past expirations otp")
+	}
+
+	defer delete(otpCache, userDTO.Email)
+
 	uuid, err := u.UuidGenerator.GenerateUUID()
 	if err != nil {
 		return domain.User{}, err
@@ -39,7 +54,7 @@ func (u *userUsecase) Register(userDTO user.RegisterUserDTO) (domain.User, error
 		Username: userDTO.Username,
 		Password: userDTO.Password,
 	}
-
+	
 	return u.repo.Create(data)
 }
 
