@@ -67,6 +67,9 @@ func main() {
 	{
 		groupAdmins.POST("/counselors", counselorHandler.Create)
 		groupAdmins.GET("/counselors", counselorHandler.GetAll)
+		groupAdmins.GET("/counselors/:id", counselorHandler.GetById)
+		groupAdmins.PUT("/counselors/:id", counselorHandler.Update)
+		groupAdmins.DELETE("/counselors/:id", counselorHandler.Delete)
 	}
 
 	e.Logger.Fatal(e.Start(":8080"))
