@@ -20,3 +20,15 @@ type User struct {
   	UpdatedAt time.Time
   	DeletedAt gorm.DeletedAt `gorm:"index"`
 }
+
+type OTP struct {
+	Token string
+	Deadline time.Time
+}
+
+func NewOTP(token string) OTP {
+	return OTP{
+		Token: token,
+		Deadline: time.Now().Add(2 * time.Minute),
+	}
+}
