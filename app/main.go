@@ -7,9 +7,9 @@ import (
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/app/config"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
+	UserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/handler"
 	UserRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/repository"
 	UserUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/usecase"
-	UserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/handler"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -36,10 +36,10 @@ func main() {
 	}
 
 	mailConf := helper.NewEmailSender(
-		587, 
+		587,
 		"smtp.gmail.com",
 		os.Getenv("CONFIG_AUTH_EMAIL"),
-		os.Getenv("CONFIG_AUTH_PASSWORD"), 
+		os.Getenv("CONFIG_AUTH_PASSWORD"),
 		"Women Center <ivanhilmideran@gmail.com>", //TODO: set email to the proper one
 	)
 
@@ -54,12 +54,12 @@ func main() {
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
-	
+
 	e.GET("/healthcheck", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, "hello")
 	})
 
-	e.POST("/verify", userHandler.VerifyEmail) 
+	e.POST("/verify", userHandler.VerifyEmail)
 	e.POST("/register", userHandler.RegisterHandler)
 	e.GET("/google/login", userHandler.LoginGoogleHandler)
 	e.GET("/google/callback", userHandler.LoginGoogleCallback)
