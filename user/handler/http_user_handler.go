@@ -111,7 +111,7 @@ func (h *userHandler) RegisterHandler(c echo.Context) error {
 
 	// TODO: validate req
 
-	content, err := h.Usecase.Register(reqDTO)
+	err = h.Usecase.Register(reqDTO)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, echo.Map{
 			"error": err.Error(),
@@ -119,5 +119,7 @@ func (h *userHandler) RegisterHandler(c echo.Context) error {
 	}
 
 	//TODO: send token to response
-	return c.JSON(http.StatusOK, content)
+	return c.JSON(http.StatusOK, echo.Map{
+		"message": "register success",
+	})
 }

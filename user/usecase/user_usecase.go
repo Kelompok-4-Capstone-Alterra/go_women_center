@@ -11,7 +11,7 @@ import (
 )
 
 type UserUsecase interface {
-	Register(userDTO user.RegisterUserDTO) (domain.User, error)
+	Register(userDTO user.RegisterUserDTO) (error)
 	VerifyEmail(email string) error
 }
 
@@ -29,22 +29,22 @@ func NewUserUsecase(repo repository.UserRepo, idGenerator helper.UuidGenerator, 
 	}
 }
 
-func (u *userUsecase) Register(userDTO user.RegisterUserDTO) (domain.User, error) {
+func (u *userUsecase) Register(userDTO user.RegisterUserDTO) (error) {
 	storedOtp, notEmpty := otpCache[userDTO.Email]
 	if !notEmpty {
-		return domain.User{}, errors.New("otp is not registed")
+		return errors.New("otp is not registed")
 	}
 
 	timeSinceOtpSent := time.Since(storedOtp.Deadline).Minutes()
 	if timeSinceOtpSent > 1 {
-		return domain.User{}, errors.New("invalid or past expirations otp")
+		return errors.New("invalid or past expirations otp")
 	}
 
 	defer delete(otpCache, userDTO.Email)
 
 	uuid, err := u.UuidGenerator.GenerateUUID()
 	if err != nil {
-		return domain.User{}, err
+		return err
 	}
 
 	data := domain.User{
@@ -55,7 +55,12 @@ func (u *userUsecase) Register(userDTO user.RegisterUserDTO) (domain.User, error
 		Password: userDTO.Password,
 	}
 
-	return u.repo.Create(data)
+	_, err = u.repo.Create(data)
+	if err != nil {
+		return err
+	}
+	
+	return nil
 }
 
 func (u *userUsecase) VerifyEmail(email string) error {
