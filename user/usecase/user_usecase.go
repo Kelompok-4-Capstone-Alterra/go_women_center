@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"errors"
 	"time"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/domain"
@@ -13,39 +12,37 @@ import (
 type UserUsecase interface {
 	Register(userDTO user.RegisterUserDTO) (error)
 	VerifyEmail(email string) error
+	
 }
 
 type userUsecase struct {
 	repo          repository.UserRepo
 	UuidGenerator helper.UuidGenerator
 	EmailSender   helper.EmailSender
+	otpRepo repository.LocalCache
 }
 
-func NewUserUsecase(repo repository.UserRepo, idGenerator helper.UuidGenerator, emailSender helper.EmailSender) *userUsecase {
+func NewUserUsecase(repo repository.UserRepo, idGenerator helper.UuidGenerator, emailSender helper.EmailSender, otpRepo repository.LocalCache) *userUsecase {
 	return &userUsecase{
 		repo:          repo,
 		UuidGenerator: idGenerator,
 		EmailSender:   emailSender,
+		otpRepo: otpRepo,
 	}
 }
 
 func (u *userUsecase) Register(userDTO user.RegisterUserDTO) (error) {
-	storedOtp, notEmpty := otpCache[userDTO.Email]
-	if !notEmpty {
-		return errors.New("otp is not registed")
+	storedOtp, err := u.otpRepo.Read(userDTO.Email)
+	if err != nil {
+		return err
 	}
-
-	timeSinceOtpSent := time.Since(storedOtp.Deadline).Minutes()
-	if timeSinceOtpSent > 1 {
-		return errors.New("invalid or past expirations otp")
-	}
-
-	defer delete(otpCache, userDTO.Email)
-
+	
 	uuid, err := u.UuidGenerator.GenerateUUID()
 	if err != nil {
 		return err
 	}
+	
+	defer u.otpRepo.Delete(storedOtp.Email)
 
 	data := domain.User{
 		ID:       uuid,
@@ -59,7 +56,7 @@ func (u *userUsecase) Register(userDTO user.RegisterUserDTO) (error) {
 	if err != nil {
 		return err
 	}
-	
+
 	return nil
 }
 
@@ -68,14 +65,16 @@ func (u *userUsecase) VerifyEmail(email string) error {
 	if err != nil {
 		return err
 	}
+	otp := repository.Otp{
+		Email: email,
+		Code: otpCode,
+	}
 
 	err = u.EmailSender.SendEmail(email, "OTP verification code", otpCode) //TODO: write subject and body template
 	if err != nil {
 		return err
 	}
 
-	otpCache[email] = domain.NewOTP(otpCode)
+	u.otpRepo.Update(otp, time.Now().Add(time.Minute).Unix())
 	return nil
 }
-
-var otpCache = map[string]domain.OTP{}

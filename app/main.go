@@ -48,7 +48,8 @@ func main() {
 	log.Print(db, googleUUID)
 
 	userRepo := UserRepo.NewUserRepo(db)
-	userUsecase := UserUsecase.NewUserUsecase(userRepo, googleUUID, &mailConf)
+	otpRepo := UserRepo.NewLocalCache(config.CLEANUP_INTERVAL)
+	userUsecase := UserUsecase.NewUserUsecase(userRepo, googleUUID, &mailConf, otpRepo)
 	userHandler := UserHandler.NewUserHandler(userUsecase, googleOauthConfig)
 
 	e := echo.New()
