@@ -44,15 +44,18 @@ func (u *userUsecase) Register(userDTO user.RegisterUserDTO) (domain.User, error
 }
 
 func (u *userUsecase) VerifyEmail(email string) (error) {
-	otp, err := helper.GetOtp()
+	otpCode, err := helper.GetOtp()
 	if err != nil {
 		return err
 	}
 
-	err = u.EmailSender.SendEmail(email, "OTP verification code", otp) //TODO: write subject and body template
+	err = u.EmailSender.SendEmail(email, "OTP verification code", otpCode) //TODO: write subject and body template
 	if err != nil {
 		return err
 	}
-	
+
+	otpCache[email] = domain.NewOTP(otpCode)
 	return nil
 }
+
+var otpCache = map[string]domain.OTP{}
