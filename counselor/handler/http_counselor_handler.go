@@ -1,15 +1,11 @@
 package handler
 
 import (
-	"mime/multipart"
 	"net/http"
-	"strings"
 
-	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/constant"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/counselor"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/domain"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
-	"github.com/go-playground/validator"
 	"github.com/labstack/echo/v4"
 )
 
@@ -47,36 +43,6 @@ func (h *counselorHandler) GetAll(c echo.Context) error {
 	}))
 }
 
-func isRequestValid(c counselor.CreateRequest) error {
-
-	validate := validator.New()
-	err := validate.Struct(c)
-	
-	if err != nil {
-		for _, err := range err.(validator.ValidationErrors) {
-			field := strings.ToLower(err.Field())
-			
-			if err.Tag() == "required" {
-				return counselor.ErrRequired
-			}
-
-			if field == "email" {
-				return counselor.ErrEmailFormat
-			}
-			
-			if field == "tarif" {
-				return counselor.ErrTarifFormat
-			}
-			
-		}
-	}
-
-	if !constant.TOPIC[c.Topic] {
-		return counselor.ErrInvalidTopic
-	}
-	
-	return nil
-}
 
 func (h *counselorHandler) Create(c echo.Context) error {
 
@@ -85,10 +51,10 @@ func (h *counselorHandler) Create(c echo.Context) error {
 	c.Bind(&counselorReq)
 
 	if err := isRequestValid(counselorReq); err != nil {
+		
 		return c.JSON(
 			getStatusCode(err), 
-			helper.ResponseError(err.Error(),
-			getStatusCode(err)),
+			helper.ResponseError(err.Error(), getStatusCode(err)),
 		)
 	}
 	
@@ -97,41 +63,107 @@ func (h *counselorHandler) Create(c echo.Context) error {
 	if err := isImageValid(imgInput); err != nil {
 		return c.JSON(
 			getStatusCode(err),
-			helper.ResponseError(err.Error(),
-			getStatusCode(err)),
+			helper.ResponseError(err.Error(), getStatusCode(err)),
 		)
 	}
 
-	// upload image to s3
-	path, err := helper.UploadImageToS3(imgInput, "women-center")
+	err := h.CUscase.Create(counselorReq, imgInput)
 
 	if err != nil {
-		return c.JSON(getStatusCode(err), helper.ResponseError(counselor.ErrInternalServerError.Error(), getStatusCode(err)))
-	}
-
-	counselorReq.ProfilePicture = path
-
-	err = h.CUscase.Create(counselorReq)
-
-	if err != nil {
-		return c.JSON(getStatusCode(err), helper.ResponseError(err.Error(), getStatusCode(err)))
+		return c.JSON(
+			getStatusCode(err),
+			helper.ResponseError(err.Error(), getStatusCode(err)),
+		)
 	}
 
 	return c.JSON(getStatusCode(err), helper.ResponseSuccess("success create counselor", getStatusCode(err), nil))
 
 }
 
-func isImageValid(img *multipart.FileHeader) error {
+func (h *counselorHandler) GetById(c echo.Context) error {
 
-	if img == nil {
-		return counselor.ErrRequired
+	var id counselor.IdRequest
+
+	c.Bind(&id)
+
+	if err := isRequestValid(id); err != nil {
+		return c.JSON(
+			getStatusCode(err),
+			helper.ResponseError(err.Error(), getStatusCode(err)),
+		)
 	}
 
-	if !helper.IsImageValid(img) {
-		return counselor.ErrProfilePictureFormat
+	counselor, err := h.CUscase.GetById(id.ID)
+
+	if err != nil {
+		return c.JSON(
+			getStatusCode(err),
+			helper.ResponseError(err.Error(), getStatusCode(err)),
+	)
 	}
 
-	return nil
+	return c.JSON(getStatusCode(err), helper.ResponseSuccess("success get counselor by id", getStatusCode(err), counselor))
+
+}
+
+func (h *counselorHandler) Update(c echo.Context) error {
+
+	var counselorReq counselor.UpdateRequest
+
+	c.Bind(&counselorReq)
+	 
+	if err := isRequestValid(counselorReq); err != nil {	
+		return c.JSON(
+			getStatusCode(err), 
+			helper.ResponseError(err.Error(), getStatusCode(err)),
+		)
+	}
+
+	imgInput, _ := c.FormFile("profile_picture")
+
+	if err := isImageValid(imgInput); err != nil {
+		return c.JSON(
+			getStatusCode(err),
+			helper.ResponseError(err.Error(), getStatusCode(err)),
+		)
+	}
+
+	err := h.CUscase.Update(counselorReq, imgInput)
+
+	if err != nil {
+		return c.JSON(
+			getStatusCode(err),
+			helper.ResponseError(err.Error(), getStatusCode(err)),
+		)
+	}
+
+	return c.JSON(getStatusCode(err), helper.ResponseSuccess("success update counselor", getStatusCode(err), nil))
+}
+
+func (h *counselorHandler) Delete(c echo.Context) error {
+
+	var id counselor.IdRequest
+
+	c.Bind(&id)
+
+	if err := isRequestValid(id); err != nil {
+		return c.JSON(
+			getStatusCode(err),
+			helper.ResponseError(err.Error(), getStatusCode(err)),
+		)
+	}
+
+	err := h.CUscase.Delete(id.ID)
+
+	if err != nil {
+		return c.JSON(
+			getStatusCode(err),
+			helper.ResponseError(err.Error(), getStatusCode(err)),
+		)
+	}
+
+	return c.JSON(getStatusCode(err), helper.ResponseSuccess("success delete counselor", getStatusCode(err), nil))
+
 }
 
 func getStatusCode(err error) int {
@@ -147,7 +179,9 @@ func getStatusCode(err error) int {
 		case counselor.ErrNotFound:
 			return http.StatusNotFound
 
-		case counselor.ErrConflict:
+		case 
+			counselor.ErrCounselorConflict,
+			counselor.ErrEmailConflict:
 			return http.StatusConflict
 		
 		case 
@@ -155,6 +189,7 @@ func getStatusCode(err error) int {
 			counselor.ErrEmailFormat,
 			counselor.ErrTarifFormat,
 			counselor.ErrInvalidTopic,
+			counselor.ErrIdFormat,
 		 	counselor.ErrRequired:
 			return http.StatusBadRequest
 

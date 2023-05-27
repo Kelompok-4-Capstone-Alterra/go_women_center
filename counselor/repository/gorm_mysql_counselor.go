@@ -34,7 +34,16 @@ func (r *mysqlCounselorRepository) Count() (int, error) {
 
 func (r *mysqlCounselorRepository) GetById(id string) (domain.Counselor, error) {
 	var counselor domain.Counselor
-	err := r.DB.Where("id = ?", id).Find(&counselor).Error
+	err := r.DB.First(&counselor, "id = ?", id).Error
+	if err != nil {
+		return counselor, err
+	}
+	return counselor, nil
+}
+
+func (r *mysqlCounselorRepository) GetByEmail(email string) (domain.Counselor, error) {
+	var counselor domain.Counselor
+	err := r.DB.First(&counselor, "email = ?", email).Error
 	if err != nil {
 		return counselor, err
 	}
@@ -50,10 +59,22 @@ func (r *mysqlCounselorRepository) Create(counselor domain.Counselor) error {
 }
 
 func (r *mysqlCounselorRepository) Update(id string, counselor domain.Counselor) error {
+	
+	err := r.DB.Model(&domain.Counselor{}).Where("id = ?", id).Updates(counselor).Error
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
 func (r *mysqlCounselorRepository) Delete(id string) error {
+
+	err := r.DB.Delete(&domain.Counselor{}, "id = ?", id).Error
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
