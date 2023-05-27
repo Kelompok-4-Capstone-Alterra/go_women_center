@@ -5,6 +5,7 @@ type RegisterUserDTO struct {
 	Email    string `json:"email"`
 	Username string `json:"username"`
 	Password string `json:"password"`
+	OTP      string `json:"otp"`
 }
 
 type VerifyEmailDTO struct {
