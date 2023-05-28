@@ -8,7 +8,8 @@ import (
 )
 
 type AuthJWT interface {
-	GenerateToken(id string, email string, authBy constant.AuthBy) (string, error)
+	GenerateUserToken(id string, email string, authBy constant.AuthBy) (string, error)
+	GenerateAdminToken(email string) (string, error)
 }
 
 type authJWT struct {
@@ -21,8 +22,8 @@ func NewAuthJWT(secret string) *authJWT {
 	}
 }
 
-func (aj *authJWT) GenerateToken(id string, email string, authBy constant.AuthBy) (string, error) {
-	claims := &JwtCustomClaims{
+func (aj *authJWT) GenerateUserToken(id string, email string, authBy constant.AuthBy) (string, error) {
+	claims := &JwtCustomUserClaims{
 		id,
 		email,
 		authBy,
@@ -38,9 +39,29 @@ func (aj *authJWT) GenerateToken(id string, email string, authBy constant.AuthBy
 	return token.SignedString([]byte(aj.secret))
 }
 
-type JwtCustomClaims struct {
+type JwtCustomUserClaims struct {
 	Id     string          `json:"id"`
 	Email  string          `json:"email"`
 	AuthBy constant.AuthBy `json:"auth_by"`
+	jwt.RegisteredClaims
+}
+
+func (aj *authJWT) GenerateAdminToken(email string) (string, error) {
+	claims := &JwtCustomAdminClaims{
+		email,
+		jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 72)),
+		},
+	}
+
+	// Create token with claims
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	// Generate encoded token and send it as response.
+	return token.SignedString([]byte(aj.secret))
+}
+
+type JwtCustomAdminClaims struct {
+	Email  string          `json:"email"`
 	jwt.RegisteredClaims
 }

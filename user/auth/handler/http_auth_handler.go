@@ -8,7 +8,7 @@ import (
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/constant"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
-	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth"
+	user "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth/usecase"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/oauth2"
@@ -24,7 +24,7 @@ func NewUserHandler(u usecase.UserUsecase, oauthConf *oauth2.Config, jwtConf hel
 	return &userHandler{
 		Usecase:   u,
 		OauthConf: oauthConf,
-		JwtConf: jwtConf,
+		JwtConf:   jwtConf,
 	}
 }
 
@@ -145,7 +145,7 @@ func (h *userHandler) LoginHandler(c echo.Context) error {
 		})
 	}
 
-	token, err := h.JwtConf.GenerateToken(data.ID, data.Email, constant.Auth)
+	token, err := h.JwtConf.GenerateUserToken(data.ID, data.Email, constant.Auth)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, echo.Map{
 			"error": err.Error(),
@@ -154,6 +154,6 @@ func (h *userHandler) LoginHandler(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"message": "login success",
-		"token": token,
+		"token":   token,
 	})
 }
