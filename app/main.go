@@ -7,9 +7,9 @@ import (
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/app/config"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
-	UserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/handler"
-	UserRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/repository"
-	UserUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/usecase"
+	UserAuthHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth/handler"
+	UserAuthRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth/repository"
+	UserAuthUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth/usecase"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -49,10 +49,10 @@ func main() {
 	googleUUID := helper.NewGoogleUUID()
 	log.Print(db, googleUUID)
 
-	userRepo := UserRepo.NewUserRepo(db)
-	otpRepo := UserRepo.NewLocalCache(config.CLEANUP_INTERVAL)
-	userUsecase := UserUsecase.NewUserUsecase(userRepo, googleUUID, &mailConf, otpRepo)
-	userHandler := UserHandler.NewUserHandler(userUsecase, googleOauthConfig, jwtConf)
+	userRepo := UserAuthRepo.NewUserRepo(db)
+	otpRepo := UserAuthRepo.NewLocalCache(config.CLEANUP_INTERVAL)
+	userUsecase := UserAuthUsecase.NewUserUsecase(userRepo, googleUUID, &mailConf, otpRepo)
+	userHandler := UserAuthHandler.NewUserHandler(userUsecase, googleOauthConfig, jwtConf)
 
 	e := echo.New()
 	e.Use(middleware.Logger())

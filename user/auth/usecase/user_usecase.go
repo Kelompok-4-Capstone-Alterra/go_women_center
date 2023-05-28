@@ -6,8 +6,8 @@ import (
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/constant"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/domain"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
-	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user"
-	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/repository"
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth"
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth/repository"
 )
 
 type UserUsecase interface {
