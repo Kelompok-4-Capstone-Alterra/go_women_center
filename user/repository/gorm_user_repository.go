@@ -7,6 +7,7 @@ import (
 
 type UserRepo interface {
 	Create(userData domain.User) (domain.User, error)
+	GetByEmail(email string) (domain.User, error)
 }
 
 type userGormMysqlRepo struct {
@@ -25,4 +26,14 @@ func (u *userGormMysqlRepo) Create(userData domain.User) (domain.User, error) {
 		return domain.User{}, err
 	}
 	return userData, nil
+}
+
+func (u *userGormMysqlRepo) GetByEmail(email string) (domain.User, error) {
+	savedUser := domain.User{}
+	err := u.DB.Where("email = ?", email).First(&savedUser).Error
+	if err != nil {
+		return domain.User{}, err
+	}
+
+	return savedUser, nil
 }
