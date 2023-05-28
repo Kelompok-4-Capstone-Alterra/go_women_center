@@ -48,6 +48,7 @@ func (dbc *DBconf) InitDB() *gorm.DB {
 
 	db.AutoMigrate(
 		&domain.User{},
+		&domain.Admin{},
 	)
 
 	return db
