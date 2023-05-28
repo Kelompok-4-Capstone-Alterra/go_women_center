@@ -8,6 +8,11 @@ type RegisterUserDTO struct {
 	OTP      string `json:"otp"`
 }
 
+type LoginUserDTO struct {
+	Email string `json:"email"`
+	Password string `json:"password"`
+}
+
 type VerifyEmailDTO struct {
 	Email string `json:"email"`
 }
