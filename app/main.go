@@ -5,6 +5,9 @@ import (
 	"net/http"
 	"os"
 
+	AdminAuthHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/auth/handler"
+	AdminAuthRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/auth/repository"
+	AdminAuthUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/auth/usecase"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/app/config"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
 	UserAuthHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth/handler"
@@ -49,10 +52,14 @@ func main() {
 	googleUUID := helper.NewGoogleUUID()
 	log.Print(db, googleUUID)
 
-	userRepo := UserAuthRepo.NewUserRepo(db)
+	userAuthRepo := UserAuthRepo.NewUserRepo(db)
 	otpRepo := UserAuthRepo.NewLocalCache(config.CLEANUP_INTERVAL)
-	userUsecase := UserAuthUsecase.NewUserUsecase(userRepo, googleUUID, &mailConf, otpRepo)
-	userHandler := UserAuthHandler.NewUserHandler(userUsecase, googleOauthConfig, jwtConf)
+	userAuthUsecase := UserAuthUsecase.NewUserUsecase(userAuthRepo, googleUUID, &mailConf, otpRepo)
+	userAuthHandler := UserAuthHandler.NewUserHandler(userAuthUsecase, googleOauthConfig, jwtConf)
+
+	adminAuthRepo := AdminAuthRepo.NewAdminRepo(db)
+	adminAuthUsecase := AdminAuthUsecase.NewAuthUsecase(adminAuthRepo)
+	adminAuthHandler := AdminAuthHandler.NewAuthHandler(adminAuthUsecase, jwtConf)
 
 	e := echo.New()
 	e.Use(middleware.Logger())
@@ -62,11 +69,13 @@ func main() {
 		return c.JSON(http.StatusOK, "hello")
 	})
 
-	e.POST("/verify", userHandler.VerifyEmailHandler)
-	e.POST("/register", userHandler.RegisterHandler)
-	e.POST("/login", userHandler.LoginHandler)
-	e.GET("/google/login", userHandler.LoginGoogleHandler)
-	e.GET("/google/callback", userHandler.LoginGoogleCallback)
+	e.POST("/verify", userAuthHandler.VerifyEmailHandler)
+	e.POST("/register", userAuthHandler.RegisterHandler)
+	e.POST("/login", userAuthHandler.LoginHandler)
+	e.GET("/google/login", userAuthHandler.LoginGoogleHandler)
+	e.GET("/google/callback", userAuthHandler.LoginGoogleCallback)
+
+	e.POST("/admin/login", adminAuthHandler.LoginHandler)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }

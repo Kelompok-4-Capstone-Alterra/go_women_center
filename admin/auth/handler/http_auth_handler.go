@@ -14,24 +14,41 @@ type authHandler struct {
 	JwtConf helper.AuthJWT
 }
 
-func NewUserHandler(u usecase.AuthUsecase, jwtConf helper.AuthJWT) *authHandler {
+func NewAuthHandler(u usecase.AuthUsecase, jwtConf helper.AuthJWT) *authHandler {
 	return &authHandler{
 		Usecase: u,
 		JwtConf: jwtConf,
 	}
 }
 
-func (h *authHandler) Login(c echo.Context) error {
+func (h *authHandler) LoginHandler(c echo.Context) error {
 	request := auth.LoginAdminDTO{}
 	err := c.Bind(&request)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, echo.Map{
 			"message": "login failed",
 			"error": err.Error(),
-		})	
+		})
+	}
+
+	data, err := h.Usecase.Login(request)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"message": "login failed",
+			"error": err.Error(),
+		})
+	}
+
+	token, err := h.JwtConf.GenerateAdminToken(data.Email)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"message": "login failed",
+			"error": err.Error(),
+		})
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"message": "login successfull",
+		"token": token,
 	})
 }
