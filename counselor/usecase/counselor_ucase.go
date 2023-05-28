@@ -11,10 +11,11 @@ import (
 
 type counselorUsecase struct {
 	counselorRepo domain.CounselorRepository
+	reviewRepo domain.ReviewRepository
 }
 
-func NewCounselorUsecase(counselorRepo domain.CounselorRepository) domain.CounselorUsecase {
-	return &counselorUsecase{counselorRepo: counselorRepo}
+func NewCounselorUsecase(CRepo domain.CounselorRepository, RRepo domain.ReviewRepository ) domain.CounselorUsecase {
+	return &counselorUsecase{counselorRepo: CRepo, reviewRepo: RRepo}
 }
 
 func(u *counselorUsecase) GetAll(offset, limit int) ([]domain.Counselor, error) {
@@ -45,10 +46,7 @@ func(u *counselorUsecase) GetById(id string) (domain.Counselor, error) {
 	counselorData, err := u.counselorRepo.GetById(id)
 
 	if err != nil {
-		if err.Error() == "record not found" {
-			return counselorData, counselor.ErrNotFound
-		}
-		return counselorData, counselor.ErrInternalServerError
+		return counselorData, counselor.ErrReviewNotFound
 	}
 
 	return counselorData, nil
@@ -72,7 +70,7 @@ func(u *counselorUsecase) Create(inputDetail counselor.CreateRequest, inputProfi
 	
 	newCounselor := domain.Counselor{
 		ID: uuid,
-		FullName: inputDetail.FullName,
+		Name: inputDetail.Name,
 		Email: inputDetail.Email,
 		Username: inputDetail.Username,
 		Topic: inputDetail.Topic,
@@ -95,10 +93,7 @@ func(u *counselorUsecase) Update(inputDetail counselor.UpdateRequest, inputProfi
 	counselorData, err := u.counselorRepo.GetById(inputDetail.ID)
 	
 	if err != nil {
-		if err.Error() == "record not found" {
-			return counselor.ErrNotFound
-		}
-		return counselor.ErrInternalServerError
+		return counselor.ErrReviewNotFound
 	}
 
 	_, err = u.counselorRepo.GetByEmail(inputDetail.Email)
@@ -110,7 +105,7 @@ func(u *counselorUsecase) Update(inputDetail counselor.UpdateRequest, inputProfi
 	}
 
 	counselorUpdate := domain.Counselor{
-		FullName: inputDetail.FullName,
+		Name: inputDetail.Name,
 		Email: inputDetail.Email,
 		Username: inputDetail.Username,
 		Topic: inputDetail.Topic,
@@ -144,17 +139,12 @@ func(u *counselorUsecase) Update(inputDetail counselor.UpdateRequest, inputProfi
 	return nil
 }
 
-
-
 func(u *counselorUsecase) Delete(id string) error {
 	
 	counselorData, err := u.counselorRepo.GetById(id)
 
 	if err != nil {
-		if err.Error() == "record not found" {
-			return counselor.ErrNotFound
-		}
-		return counselor.ErrInternalServerError
+		return counselor.ErrReviewNotFound
 	}
 	
 	err = u.counselorRepo.Delete(counselorData.ID)
@@ -162,6 +152,63 @@ func(u *counselorUsecase) Delete(id string) error {
 	if err != nil {
 		return counselor.ErrInternalServerError
 	}
+
+	return nil
+}
+
+func(u *counselorUsecase) CreateReview(inputReview counselor.CreateReviewRequest) error {
+	
+	_, err := u.counselorRepo.GetById(inputReview.CounselorID)
+
+	if err != nil {
+		return counselor.ErrCounselorNotFound
+	}
+
+	
+	newReview := domain.Review{
+		CounselorID: inputReview.CounselorID,
+		UserID: inputReview.UserID,
+		Rating: inputReview.Rating,
+		Comment: inputReview.Comment,
+	}
+	
+	// Check if user already give review
+	
+	oldReview, err := u.reviewRepo.GetByUserIdAndCounselorId(inputReview.UserID, inputReview.CounselorID)
+
+	if err == nil {
+		
+		// Update review
+		newReview.ID = oldReview.ID
+		
+	}else {
+
+		// Create new review
+		uuid, _ := helper.NewGoogleUUID().GenerateUUID()
+		newReview.ID = uuid
+	}
+
+	newReview.Rating = inputReview.Rating
+	newReview.Comment = inputReview.Comment
+
+	// fmt.Println("result new -> ",newReview)
+
+	err = u.reviewRepo.Save(newReview)
+	
+	if err != nil {
+		return counselor.ErrInternalServerError
+	}
+
+	// Update counselor rating
+	rating, err := u.reviewRepo.GetAverageRating(inputReview.CounselorID)
+
+	if err != nil {
+		return counselor.ErrInternalServerError
+	}
+
+	u.counselorRepo.Update(inputReview.CounselorID, domain.Counselor{
+		Rating: rating,
+	})
 
 	return nil
 }

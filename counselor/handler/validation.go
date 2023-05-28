@@ -23,16 +23,15 @@ func isRequestValid(m interface{}) error {
 				return counselor.ErrRequired
 			}
 
-			if field == "email" {
-				return counselor.ErrEmailFormat
-			}
-
-			if field == "tarif" {
-				return counselor.ErrTarifFormat
-			}
-
-			if field == "id" {
-				return counselor.ErrIdFormat
+			switch field {
+				case "email":
+					return counselor.ErrEmailFormat
+				case "tarif":
+					return counselor.ErrTarifFormat
+				case "rating":
+					return counselor.ErrRatingFormat
+				case "id":
+					return counselor.ErrIdFormat
 			}
 
 		}

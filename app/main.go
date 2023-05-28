@@ -8,6 +8,8 @@ import (
 	CounselorHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/counselor/handler"
 	CounselorRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/counselor/repository"
 	CounselorUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/counselor/usecase"
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/domain"
+	ReviewRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/review/repository"
 	UserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/handler"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/labstack/echo/v4"
@@ -55,12 +57,27 @@ func main() {
 
 
 	groupAdmins := e.Group("/admins")
-	// groupUsers := e.Group("/users")
+	groupUsers := e.Group("/users", func(next echo.HandlerFunc) echo.HandlerFunc {
+		// dummy user
+		return func(c echo.Context) error {
+			user := &domain.UserDecodeJWT{
+				ID: "05b9B469-fc5d-21ed-ad1c-5efc22537c1d",
+				Name: "dummy",
+				Email: "dummy@gmail.com",
+				Method: "basic",
+				Role: "user",
+			}
+			c.Set("user", user)
+
+			return next(c)
+		}
+	})
 
 	// counselor
 
 	counselorRepo := CounselorRepository.NewMysqlCounselorRepository(db)
-	counselorUsecase := CounselorUsecase.NewCounselorUsecase(counselorRepo)
+	reviewRepo := ReviewRepository.NewMysqlReviewRepository(db)
+	counselorUsecase := CounselorUsecase.NewCounselorUsecase(counselorRepo, reviewRepo)
 	counselorHandler := CounselorHandler.NewCounselorHandler(counselorUsecase)
 
 	// admins
@@ -70,6 +87,14 @@ func main() {
 		groupAdmins.GET("/counselors/:id", counselorHandler.GetById)
 		groupAdmins.PUT("/counselors/:id", counselorHandler.Update)
 		groupAdmins.DELETE("/counselors/:id", counselorHandler.Delete)
+	}
+
+	// users
+	{
+		groupUsers.GET("/counselors", counselorHandler.GetAll)
+		groupUsers.GET("/counselors/:id", counselorHandler.GetById)
+		groupUsers.POST("/counselors/:id/reviews", counselorHandler.CreateReview)
+		// groupUsers.GET("/counselors/:id/reviews", counselorHandler.GetAllReview)
 	}
 
 	e.Logger.Fatal(e.Start(":8080"))

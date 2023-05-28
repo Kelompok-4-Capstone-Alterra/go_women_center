@@ -43,7 +43,6 @@ func (h *counselorHandler) GetAll(c echo.Context) error {
 	}))
 }
 
-
 func (h *counselorHandler) Create(c echo.Context) error {
 
 	counselorReq := counselor.CreateRequest{}
@@ -166,6 +165,51 @@ func (h *counselorHandler) Delete(c echo.Context) error {
 
 }
 
+type Tuser struct{
+	ID string 
+	Name string
+	Email string
+	Method string
+	Role string
+}
+
+
+func(h *counselorHandler) CreateReview(c echo.Context) error {
+
+	var user = c.Get("user").(*domain.UserDecodeJWT)
+
+	var reviewReq counselor.CreateReviewRequest
+
+	reviewReq.UserID = user.ID
+	
+	c.Bind(&reviewReq)
+
+	// r := c.Param("counselor_id")
+
+	// fmt.Println(reviewReq)
+
+	if err := isRequestValid(reviewReq); err != nil {
+		return c.JSON(
+			getStatusCode(err),
+			helper.ResponseError(err.Error(), getStatusCode(err)),
+		)
+	}
+
+	// fmt.Println(reviewReq)
+	// var err error 
+
+	err := h.CUscase.CreateReview(reviewReq)
+
+	if err != nil {
+		return c.JSON(
+			getStatusCode(err),
+			helper.ResponseError(err.Error(), getStatusCode(err)),
+		)
+	}
+
+	return c.JSON(getStatusCode(err), helper.ResponseSuccess("success create review", getStatusCode(err), nil))
+}
+
 func getStatusCode(err error) int {
 
 	if err == nil {
@@ -176,7 +220,7 @@ func getStatusCode(err error) int {
 		case counselor.ErrInternalServerError:
 			return http.StatusInternalServerError
 			
-		case counselor.ErrNotFound:
+		case counselor.ErrCounselorNotFound:
 			return http.StatusNotFound
 
 		case 
