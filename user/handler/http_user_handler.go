@@ -79,7 +79,7 @@ func (h *userHandler) getUserInfo(state, code string) (user.UserOauthInfo, error
 	return UserInfo, nil
 }
 
-func (h *userHandler) VerifyEmail(c echo.Context) error {
+func (h *userHandler) VerifyEmail(c echo.Context) error { // TODO: rename with suffix handler
 	emailDTO := user.VerifyEmailDTO{}
 	err := c.Bind(&emailDTO)
 	if err != nil {
@@ -121,5 +121,28 @@ func (h *userHandler) RegisterHandler(c echo.Context) error {
 	//TODO: send token to response
 	return c.JSON(http.StatusOK, echo.Map{
 		"message": "register success",
+	})
+}
+
+func (h *userHandler) LoginHandler(c echo.Context) error {
+	reqDTO := user.LoginUserDTO{}
+	err := c.Bind(&reqDTO)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"error": err.Error(),
+		})
+	}
+
+	// TODO: validate req
+
+	err = h.Usecase.Login(reqDTO)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"message": "login success",
 	})
 }

@@ -3,6 +3,7 @@ package usecase
 import (
 	"time"
 
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/constant"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/domain"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user"
@@ -12,7 +13,7 @@ import (
 type UserUsecase interface {
 	Register(userDTO user.RegisterUserDTO) (error)
 	VerifyEmail(email string) error
-	
+	Login(userDTO user.LoginUserDTO) error
 }
 
 type userUsecase struct {
@@ -76,5 +77,18 @@ func (u *userUsecase) VerifyEmail(email string) error {
 	}
 
 	u.otpRepo.Update(otp, time.Now().Add(time.Minute).Unix())
+	return nil
+}
+
+func (u *userUsecase) Login(userDTO user.LoginUserDTO) error {
+	data, err := u.repo.GetByEmail(userDTO.Email)
+	if err != nil {
+		return constant.ErrInvalidCredential
+	}
+
+	if userDTO.Password != data.Password {
+		return constant.ErrInvalidCredential
+	}
+	
 	return nil
 }

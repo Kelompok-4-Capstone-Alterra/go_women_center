@@ -62,6 +62,7 @@ func main() {
 
 	e.POST("/verify", userHandler.VerifyEmail)
 	e.POST("/register", userHandler.RegisterHandler)
+	e.POST("/login", userHandler.LoginHandler)
 	e.GET("/google/login", userHandler.LoginGoogleHandler)
 	e.GET("/google/callback", userHandler.LoginGoogleCallback)
 
