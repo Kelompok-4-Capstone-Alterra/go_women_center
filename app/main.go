@@ -60,7 +60,7 @@ func main() {
 		return c.JSON(http.StatusOK, "hello")
 	})
 
-	e.POST("/verify", userHandler.VerifyEmail)
+	e.POST("/verify", userHandler.VerifyEmailHandler)
 	e.POST("/register", userHandler.RegisterHandler)
 	e.POST("/login", userHandler.LoginHandler)
 	e.GET("/google/login", userHandler.LoginGoogleHandler)

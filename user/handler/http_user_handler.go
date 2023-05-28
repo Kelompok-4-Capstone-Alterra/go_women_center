@@ -79,7 +79,7 @@ func (h *userHandler) getUserInfo(state, code string) (user.UserOauthInfo, error
 	return UserInfo, nil
 }
 
-func (h *userHandler) VerifyEmail(c echo.Context) error { // TODO: rename with suffix handler
+func (h *userHandler) VerifyEmailHandler(c echo.Context) error { // TODO: rename with suffix handler
 	emailDTO := user.VerifyEmailDTO{}
 	err := c.Bind(&emailDTO)
 	if err != nil {
