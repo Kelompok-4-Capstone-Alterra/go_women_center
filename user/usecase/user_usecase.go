@@ -11,7 +11,7 @@ import (
 )
 
 type UserUsecase interface {
-	Register(userDTO user.RegisterUserDTO) (error)
+	Register(userDTO user.RegisterUserDTO) error
 	VerifyEmail(email string) error
 	Login(userDTO user.LoginUserDTO) error
 }
@@ -20,7 +20,7 @@ type userUsecase struct {
 	repo          repository.UserRepo
 	UuidGenerator helper.UuidGenerator
 	EmailSender   helper.EmailSender
-	otpRepo repository.LocalCache
+	otpRepo       repository.LocalCache
 }
 
 func NewUserUsecase(repo repository.UserRepo, idGenerator helper.UuidGenerator, emailSender helper.EmailSender, otpRepo repository.LocalCache) *userUsecase {
@@ -28,21 +28,21 @@ func NewUserUsecase(repo repository.UserRepo, idGenerator helper.UuidGenerator, 
 		repo:          repo,
 		UuidGenerator: idGenerator,
 		EmailSender:   emailSender,
-		otpRepo: otpRepo,
+		otpRepo:       otpRepo,
 	}
 }
 
-func (u *userUsecase) Register(userDTO user.RegisterUserDTO) (error) {
+func (u *userUsecase) Register(userDTO user.RegisterUserDTO) error {
 	storedOtp, err := u.otpRepo.Read(userDTO.Email)
 	if err != nil {
 		return err
 	}
-	
+
 	uuid, err := u.UuidGenerator.GenerateUUID()
 	if err != nil {
 		return err
 	}
-	
+
 	defer u.otpRepo.Delete(storedOtp.Email)
 
 	data := domain.User{
@@ -68,7 +68,7 @@ func (u *userUsecase) VerifyEmail(email string) error {
 	}
 	otp := repository.Otp{
 		Email: email,
-		Code: otpCode,
+		Code:  otpCode,
 	}
 
 	err = u.EmailSender.SendEmail(email, "OTP verification code", otpCode) //TODO: write subject and body template
@@ -89,6 +89,6 @@ func (u *userUsecase) Login(userDTO user.LoginUserDTO) error {
 	if userDTO.Password != data.Password {
 		return constant.ErrInvalidCredential
 	}
-	
+
 	return nil
 }

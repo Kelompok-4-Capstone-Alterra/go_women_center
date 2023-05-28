@@ -10,7 +10,7 @@ import (
 
 type Otp struct {
 	Email string `json:"email"`
-	Code  string  `json:"code"`
+	Code  string `json:"code"`
 }
 
 type cachedOtp struct {
