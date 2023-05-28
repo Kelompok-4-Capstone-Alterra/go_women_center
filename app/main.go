@@ -43,6 +43,8 @@ func main() {
 		"Women Center <ivanhilmideran@gmail.com>", //TODO: set email to the proper one
 	)
 
+	jwtConf := helper.NewAuthJWT(os.Getenv("JWT_SECRET"))
+
 	db := dbconf.InitDB()
 	googleUUID := helper.NewGoogleUUID()
 	log.Print(db, googleUUID)
@@ -50,7 +52,7 @@ func main() {
 	userRepo := UserRepo.NewUserRepo(db)
 	otpRepo := UserRepo.NewLocalCache(config.CLEANUP_INTERVAL)
 	userUsecase := UserUsecase.NewUserUsecase(userRepo, googleUUID, &mailConf, otpRepo)
-	userHandler := UserHandler.NewUserHandler(userUsecase, googleOauthConfig)
+	userHandler := UserHandler.NewUserHandler(userUsecase, googleOauthConfig, jwtConf)
 
 	e := echo.New()
 	e.Use(middleware.Logger())

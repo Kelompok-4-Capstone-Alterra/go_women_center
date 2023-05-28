@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/constant"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/usecase"
@@ -16,12 +17,14 @@ import (
 type userHandler struct {
 	Usecase   usecase.UserUsecase
 	OauthConf *oauth2.Config
+	JwtConf   helper.AuthJWT
 }
 
-func NewUserHandler(u usecase.UserUsecase, oauthConf *oauth2.Config) *userHandler {
+func NewUserHandler(u usecase.UserUsecase, oauthConf *oauth2.Config, jwtConf helper.AuthJWT) *userHandler {
 	return &userHandler{
 		Usecase:   u,
 		OauthConf: oauthConf,
+		JwtConf: jwtConf,
 	}
 }
 
@@ -135,7 +138,14 @@ func (h *userHandler) LoginHandler(c echo.Context) error {
 
 	// TODO: validate req
 
-	err = h.Usecase.Login(reqDTO)
+	data, err := h.Usecase.Login(reqDTO)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"error": err.Error(),
+		})
+	}
+
+	token, err := h.JwtConf.GenerateToken(data.ID, data.Email, constant.Auth)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, echo.Map{
 			"error": err.Error(),
@@ -144,5 +154,6 @@ func (h *userHandler) LoginHandler(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"message": "login success",
+		"token": token,
 	})
 }

@@ -13,7 +13,7 @@ import (
 type UserUsecase interface {
 	Register(userDTO user.RegisterUserDTO) error
 	VerifyEmail(email string) error
-	Login(userDTO user.LoginUserDTO) error
+	Login(userDTO user.LoginUserDTO) (domain.User, error)
 }
 
 type userUsecase struct {
@@ -80,15 +80,15 @@ func (u *userUsecase) VerifyEmail(email string) error {
 	return nil
 }
 
-func (u *userUsecase) Login(userDTO user.LoginUserDTO) error {
+func (u *userUsecase) Login(userDTO user.LoginUserDTO) (domain.User, error) {
 	data, err := u.repo.GetByEmail(userDTO.Email)
 	if err != nil {
-		return constant.ErrInvalidCredential
+		return domain.User{}, constant.ErrInvalidCredential
 	}
 
 	if userDTO.Password != data.Password {
-		return constant.ErrInvalidCredential
+		return domain.User{}, constant.ErrInvalidCredential
 	}
 
-	return nil
+	return data, nil
 }
