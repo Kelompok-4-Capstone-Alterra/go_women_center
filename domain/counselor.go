@@ -7,15 +7,15 @@ import (
 )
 
 type Counselor struct {
-	ID             string  `json:"id,omitempty" form:"id,omitempty" gorm:"primary_key;type:varchar(36);uniqueindex;not null"`
-	ProfilePicture string  `json:"profile_picture,omitempty" form:"profile_picture,omitempty" gorm:"type:varchar(255)"`
-	Username       string  `json:"username,omitempty" form:"username,omitempty" gorm:"type:varchar(150);not null"`
-	FullName       string  `json:"full_name,omitempty" form:"full_name,omitempty" gorm:"type:varchar(150);not null"`
-	Email          string  `json:"email,omitempty" form:"email,omitempty" gorm:"type:varchar(150);uniqueindex;not null"`
-	Topic          string  `json:"topic,omitempty" form:"topic,omitempty" gorm:"type:varchar(50)"`
-	Tarif          float64 `json:"tarif,omitempty" form:"tarif,omitempty" gorm:"type:float"`
-	Rating         float32 `json:"rating,omitempty" form:"rating,omitempty" gorm:"type:decimal(2,1)"`
-	Description    string  `json:"description,omitempty" form:"description,omitempty"`
+	ID             string  `json:"id,omitempty" gorm:"primary_key;type:varchar(36);uniqueindex;not null"`
+	ProfilePicture string  `json:"profile_picture,omitempty" gorm:"type:varchar(255)"`
+	Username       string  `json:"username,omitempty" gorm:"type:varchar(150);not null"`
+	FullName       string  `json:"full_name,omitempty" gorm:"type:varchar(150);not null"`
+	Email          string  `json:"email,omitempty" gorm:"type:varchar(150);uniqueindex;not null"`
+	Topic          string  `json:"topic,omitempty" gorm:"type:varchar(50)"`
+	Tarif          float64 `json:"tarif,omitempty" gorm:"type:float"`
+	Rating         float32 `json:"rating,omitempty" gorm:"type:decimal(2,1)"`
+	Description    string  `json:"description,omitempty"`
 }
 
 type CounselorUsecase interface {
