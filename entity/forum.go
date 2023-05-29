@@ -3,6 +3,7 @@ package entity
 import (
 	"time"
 
+	"github.com/labstack/echo"
 	"gorm.io/gorm"
 )
 
@@ -14,6 +15,14 @@ type Forum struct {
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 	DeletedAt     gorm.DeletedAt `gorm:"index"`
+}
+
+type ForumHandler interface {
+	GetAll(c echo.Context) error
+	GetById(c echo.Context) error
+	Create(c echo.Context) error
+	Update(c echo.Context) error
+	Delete(c echo.Context) error
 }
 
 type ForumUsecase interface {
