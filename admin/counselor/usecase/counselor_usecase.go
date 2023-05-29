@@ -3,22 +3,32 @@ package usecase
 import (
 	"mime/multipart"
 
-	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/counselor"
-	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/domain"
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor"
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor/repository"
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/constant"
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
 )
 
+type CounselorUsecase interface {
+	GetAll(offset, limit int) ([]counselor.GetAllResponse, error)
+	GetTotalPages(limit int) (int, error)
+	GetById(id string) (counselor.GetByResponse, error)
+	Create(inputDetail counselor.CreateRequest, inputProfilePicture *multipart.FileHeader) error
+	Update(inputDetail counselor.UpdateRequest, inputProfilePicture *multipart.FileHeader) error
+	Delete(id string) error
+	// CreateReview(inputReview counselor.CreateReviewRequest) error
+}
 
 type counselorUsecase struct {
-	counselorRepo domain.CounselorRepository
-	reviewRepo domain.ReviewRepository
+	counselorRepo repository.CounselorRepository	
 }
 
-func NewCounselorUsecase(CRepo domain.CounselorRepository, RRepo domain.ReviewRepository ) domain.CounselorUsecase {
-	return &counselorUsecase{counselorRepo: CRepo, reviewRepo: RRepo}
+func NewCounselorUsecase(CRepo repository.CounselorRepository) CounselorUsecase {
+	return &counselorUsecase{counselorRepo: CRepo}
 }
 
-func(u *counselorUsecase) GetAll(offset, limit int) ([]domain.Counselor, error) {
+func(u *counselorUsecase) GetAll(offset, limit int) ([]counselor.GetAllResponse, error) {
 	
 	counselors, err := u.counselorRepo.GetAll(offset, limit)
 
@@ -41,7 +51,7 @@ func(u *counselorUsecase) GetTotalPages(limit int) (int, error) {
 	return totalPages, nil
 }
 
-func(u *counselorUsecase) GetById(id string) (domain.Counselor, error) {
+func(u *counselorUsecase) GetById(id string) (counselor.GetByResponse, error) {
 	
 	counselorData, err := u.counselorRepo.GetById(id)
 
@@ -68,12 +78,12 @@ func(u *counselorUsecase) Create(inputDetail counselor.CreateRequest, inputProfi
 
 	uuid, _ := helper.NewGoogleUUID().GenerateUUID()
 	
-	newCounselor := domain.Counselor{
+	newCounselor := entity.Counselor{
 		ID: uuid,
 		Name: inputDetail.Name,
 		Email: inputDetail.Email,
 		Username: inputDetail.Username,
-		Topic: inputDetail.Topic,
+		Topic: constant.TOPICS[inputDetail.Topic],
 		Description: inputDetail.Description,
 		Tarif: inputDetail.Tarif,
 		ProfilePicture: path,
@@ -104,11 +114,11 @@ func(u *counselorUsecase) Update(inputDetail counselor.UpdateRequest, inputProfi
 		}
 	}
 
-	counselorUpdate := domain.Counselor{
+	counselorUpdate := entity.Counselor{
 		Name: inputDetail.Name,
 		Email: inputDetail.Email,
 		Username: inputDetail.Username,
-		Topic: inputDetail.Topic,
+		Topic: constant.TOPICS[inputDetail.Topic],
 		Description: inputDetail.Description,
 		Tarif: inputDetail.Tarif,
 	}
@@ -152,63 +162,6 @@ func(u *counselorUsecase) Delete(id string) error {
 	if err != nil {
 		return counselor.ErrInternalServerError
 	}
-
-	return nil
-}
-
-func(u *counselorUsecase) CreateReview(inputReview counselor.CreateReviewRequest) error {
-	
-	_, err := u.counselorRepo.GetById(inputReview.CounselorID)
-
-	if err != nil {
-		return counselor.ErrCounselorNotFound
-	}
-
-	
-	newReview := domain.Review{
-		CounselorID: inputReview.CounselorID,
-		UserID: inputReview.UserID,
-		Rating: inputReview.Rating,
-		Comment: inputReview.Comment,
-	}
-	
-	// Check if user already give review
-	
-	oldReview, err := u.reviewRepo.GetByUserIdAndCounselorId(inputReview.UserID, inputReview.CounselorID)
-
-	if err == nil {
-		
-		// Update review
-		newReview.ID = oldReview.ID
-		
-	}else {
-
-		// Create new review
-		uuid, _ := helper.NewGoogleUUID().GenerateUUID()
-		newReview.ID = uuid
-	}
-
-	newReview.Rating = inputReview.Rating
-	newReview.Comment = inputReview.Comment
-
-	// fmt.Println("result new -> ",newReview)
-
-	err = u.reviewRepo.Save(newReview)
-	
-	if err != nil {
-		return counselor.ErrInternalServerError
-	}
-
-	// Update counselor rating
-	rating, err := u.reviewRepo.GetAverageRating(inputReview.CounselorID)
-
-	if err != nil {
-		return counselor.ErrInternalServerError
-	}
-
-	u.counselorRepo.Update(inputReview.CounselorID, domain.Counselor{
-		Rating: rating,
-	})
 
 	return nil
 }

@@ -4,14 +4,14 @@ import (
 	"mime/multipart"
 	"strings"
 
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/constant"
-	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/counselor"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
 	"github.com/go-playground/validator"
 )
 
 func isRequestValid(m interface{}) error {
-
+	
 	validate := validator.New()
 	err := validate.Struct(m)
 
@@ -38,15 +38,17 @@ func isRequestValid(m interface{}) error {
 	}
 
 	if data, ok := m.(counselor.CreateRequest); ok {
-		topic := strings.ToLower(data.Topic)
-		if !constant.TOPIC[topic] {
+		
+		if _, ok := constant.TOPICS[data.Topic]; !ok {
 			return counselor.ErrInvalidTopic
 		}
+		// if !constant.TOPIC[topic] {
+		// 	return counselor.ErrInvalidTopic
+		// }
 	}
 
 	if data, ok := m.(counselor.UpdateRequest); ok {
-		topic := strings.ToLower(data.Topic)
-		if topic != "" && !constant.TOPIC[topic] {
+		if _, ok := constant.TOPICS[data.Topic]; !ok {
 			return counselor.ErrInvalidTopic
 		}
 	}
@@ -58,6 +60,10 @@ func isImageValid(img *multipart.FileHeader) error {
 
 	if img == nil {
 		return counselor.ErrRequired
+	}
+	
+	if img.Size > 10 * 1024 * 1024 { // 10 MB
+		return counselor.ErrProfilePictureSize
 	}
 
 	if !helper.IsImageValid(img) {

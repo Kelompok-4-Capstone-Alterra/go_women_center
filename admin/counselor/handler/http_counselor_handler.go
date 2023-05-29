@@ -3,17 +3,18 @@ package handler
 import (
 	"net/http"
 
-	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/counselor"
-	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/domain"
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor"
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor/usecase"
+
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
 	"github.com/labstack/echo/v4"
 )
 
 type counselorHandler struct{
-	CUscase domain.CounselorUsecase
+	CUscase usecase.CounselorUsecase
 }
 
-func NewCounselorHandler(CUcase domain.CounselorUsecase) *counselorHandler {
+func NewCounselorHandler(CUcase usecase.CounselorUsecase) *counselorHandler {
 	return &counselorHandler{CUscase: CUcase}
 }
 
@@ -38,7 +39,7 @@ func (h *counselorHandler) GetAll(c echo.Context) error {
 
 	return c.JSON(getStatusCode(err), helper.ResponseSuccess("success get all conselor", getStatusCode(err), echo.Map{
 		"counselors": counselors,
-		"current_page": page,
+		"current_pages": page,
 		"total_pages": totalPages,
 	}))
 }
@@ -163,51 +164,6 @@ func (h *counselorHandler) Delete(c echo.Context) error {
 
 	return c.JSON(getStatusCode(err), helper.ResponseSuccess("success delete counselor", getStatusCode(err), nil))
 
-}
-
-type Tuser struct{
-	ID string 
-	Name string
-	Email string
-	Method string
-	Role string
-}
-
-
-func(h *counselorHandler) CreateReview(c echo.Context) error {
-
-	var user = c.Get("user").(*domain.UserDecodeJWT)
-
-	var reviewReq counselor.CreateReviewRequest
-
-	reviewReq.UserID = user.ID
-	
-	c.Bind(&reviewReq)
-
-	// r := c.Param("counselor_id")
-
-	// fmt.Println(reviewReq)
-
-	if err := isRequestValid(reviewReq); err != nil {
-		return c.JSON(
-			getStatusCode(err),
-			helper.ResponseError(err.Error(), getStatusCode(err)),
-		)
-	}
-
-	// fmt.Println(reviewReq)
-	// var err error 
-
-	err := h.CUscase.CreateReview(reviewReq)
-
-	if err != nil {
-		return c.JSON(
-			getStatusCode(err),
-			helper.ResponseError(err.Error(), getStatusCode(err)),
-		)
-	}
-
-	return c.JSON(getStatusCode(err), helper.ResponseSuccess("success create review", getStatusCode(err), nil))
 }
 
 func getStatusCode(err error) int {
