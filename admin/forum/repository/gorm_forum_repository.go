@@ -14,21 +14,52 @@ func NewMysqlForumRepository(db *gorm.DB) entity.ForumRepository {
 }
 
 func (fr mysqlForumRepository) GetAll() ([]entity.Forum, error) {
+	var forums []entity.Forum
+	err := fr.DB.Find(&forums).Error
+
+	if err != nil {
+		return nil, err
+	}
 	return []entity.Forum{}, nil
 }
 
-func (fr mysqlForumRepository) GetById(id string) (entity.Forum, error) {
-	return entity.Forum{}, nil
+func (fr mysqlForumRepository) GetById(id string) (*entity.Forum, error) {
+	var forums entity.Forum
+	err := fr.DB.First(&forums, "id = ?", id).Error
+
+	if err != nil {
+		return nil, err
+	}
+	return &forums, nil
 }
 
-func (fr mysqlForumRepository) Create(forum entity.Forum) (entity.Forum, error) {
-	return entity.Forum{}, nil
+func (fr mysqlForumRepository) Create(forum *entity.Forum) (*entity.Forum, error) {
+	err := fr.DB.Save(&forum).Error
+
+	if err != nil {
+		return nil, err
+	}
+	return forum, nil
 }
 
-func (fr mysqlForumRepository) Update(id string, forumId entity.Forum) (entity.Forum, error) {
-	return entity.Forum{}, nil
+func (fr mysqlForumRepository) Update(id string, forumId *entity.Forum) (*entity.Forum, error) {
+	err := fr.DB.Model(&entity.Forum{}).Where("id = ?", id).Updates(forumId).Error
+	if err != nil {
+		return nil, err
+	}
+	return forumId, nil
 }
 
 func (fr mysqlForumRepository) Delete(id string) error {
+	err := fr.DB.Where("id = ?", id).Take(&entity.Forum{}).Error
+
+	if err != nil {
+		return err
+	}
+
+	err2 := fr.DB.Delete(&entity.Forum{}, &id).Error
+	if err != nil {
+		return err2
+	}
 	return nil
 }

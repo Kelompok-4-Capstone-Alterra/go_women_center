@@ -27,7 +27,7 @@ type ForumHandler interface {
 
 type ForumUsecase interface {
 	GetAll() ([]Forum, error)
-	GetById(id string) (Forum, error)
+	GetById(id string) (*Forum, error)
 	Create(forum Forum) (Forum, error)
 	Update(id string, forumId Forum) (Forum, error)
 	Delete(id string) error
@@ -35,8 +35,8 @@ type ForumUsecase interface {
 
 type ForumRepository interface {
 	GetAll() ([]Forum, error)
-	GetById(id string) (Forum, error)
-	Create(forum Forum) (Forum, error)
-	Update(id string, forumId Forum) (Forum, error)
+	GetById(id string) (*Forum, error)
+	Create(forum *Forum) (*Forum, error)
+	Update(id string, forumId *Forum) (*Forum, error)
 	Delete(id string) error
 }

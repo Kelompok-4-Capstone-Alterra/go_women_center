@@ -16,8 +16,8 @@ func (fu ForumUsecase) GetAll() ([]entity.Forum, error) {
 	return []entity.Forum{}, nil
 }
 
-func (fu ForumUsecase) GetById(id string) (entity.Forum, error) {
-	return entity.Forum{}, nil
+func (fu ForumUsecase) GetById(id string) (*entity.Forum, error) {
+	return &entity.Forum{}, nil
 }
 
 func (fu ForumUsecase) Create(forum entity.Forum) (entity.Forum, error) {
