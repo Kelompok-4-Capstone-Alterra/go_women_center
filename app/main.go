@@ -56,7 +56,12 @@ func main() {
 	forumR := ForumAdminRepository.NewMysqlForumRepository(db)
 	forumU := ForumAdminUsecase.NewForumUsecase(forumR)
 	forumH := ForumAdminHandler.NewForumHandler(forumU)
+
 	e.GET("/admin/forums", forumH.GetAll)
+	e.GET("/admin/forums/:id", forumH.GetById)
+	e.POST("/admin/forums", forumH.Create)
+	e.PUT("/admin/forums/:id", forumH.Update)
+	e.DELETE("/admin/forums/:id", forumH.Delete)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }

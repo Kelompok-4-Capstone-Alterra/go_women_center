@@ -22,17 +22,36 @@ func (fu ForumUsecase) GetAll() ([]entity.Forum, error) {
 }
 
 func (fu ForumUsecase) GetById(id string) (*entity.Forum, error) {
-	return &entity.Forum{}, nil
+	forum, err := fu.ForumR.GetById(id)
+
+	if err != nil {
+		return nil, err
+	}
+	return forum, nil
 }
 
-func (fu ForumUsecase) Create(forum entity.Forum) (entity.Forum, error) {
-	return entity.Forum{}, nil
+func (fu ForumUsecase) Create(forum *entity.Forum) (*entity.Forum, error) {
+	forum, err := fu.ForumR.Create(forum)
+	if err != nil {
+		return nil, err
+	}
+	return forum, nil
 }
 
-func (fu ForumUsecase) Update(id string, forumId entity.Forum) (entity.Forum, error) {
-	return entity.Forum{}, nil
+func (fu ForumUsecase) Update(id string, forumId *entity.Forum) (*entity.Forum, error) {
+	forumId, err := fu.ForumR.Update(id, forumId)
+
+	if err != nil {
+		return nil, err
+	}
+	return forumId, nil
 }
 
 func (fu ForumUsecase) Delete(id string) error {
+	err := fu.ForumR.Delete(id)
+
+	if err != nil {
+		return err
+	}
 	return nil
 }
