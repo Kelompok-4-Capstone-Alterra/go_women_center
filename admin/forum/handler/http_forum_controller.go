@@ -5,7 +5,7 @@ import (
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 type ForumHandler struct {
@@ -19,7 +19,12 @@ func NewForumHandler(ForumU entity.ForumUsecase) entity.ForumHandler {
 }
 
 func (fh ForumHandler) GetAll(c echo.Context) error {
-	return c.JSON(http.StatusOK, helper.ResponseData(http.StatusOK, "success", entity.Forum{}))
+	forums, err := fh.ForumU.GetAll()
+
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(http.StatusBadRequest, "Failed get all forums", nil))
+	}
+	return c.JSON(http.StatusOK, helper.ResponseData(http.StatusOK, "success", forums))
 }
 
 func (fh ForumHandler) GetById(c echo.Context) error {

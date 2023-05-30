@@ -13,7 +13,12 @@ func NewForumUsecase(ForumR entity.ForumRepository) entity.ForumUsecase {
 }
 
 func (fu ForumUsecase) GetAll() ([]entity.Forum, error) {
-	return []entity.Forum{}, nil
+	forums, err := fu.ForumR.GetAll()
+
+	if err != nil {
+		return nil, err
+	}
+	return forums, nil
 }
 
 func (fu ForumUsecase) GetById(id string) (*entity.Forum, error) {
