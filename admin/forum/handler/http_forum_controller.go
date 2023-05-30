@@ -4,16 +4,25 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/forum/usecase"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
 	"github.com/labstack/echo/v4"
 )
 
-type ForumHandler struct {
-	ForumU entity.ForumUsecase
+type ForumHandlerInterface interface {
+	GetAll(c echo.Context) error
+	GetById(c echo.Context) error
+	Create(c echo.Context) error
+	Update(c echo.Context) error
+	Delete(c echo.Context) error
 }
 
-func NewForumHandler(ForumU entity.ForumUsecase) entity.ForumHandler {
+type ForumHandler struct {
+	ForumU usecase.ForumUsecaseInterface
+}
+
+func NewForumHandler(ForumU usecase.ForumUsecaseInterface) ForumHandlerInterface {
 	return &ForumHandler{
 		ForumU: ForumU,
 	}

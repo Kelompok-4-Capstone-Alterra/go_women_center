@@ -2,11 +2,19 @@ package usecase
 
 import "github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 
-type ForumUsecase struct {
-	ForumR entity.ForumRepository
+type ForumUsecaseInterface interface {
+	GetAll() ([]entity.Forum, error)
+	GetById(id string) (*entity.Forum, error)
+	Create(forum *entity.Forum) (*entity.Forum, error)
+	Update(id string, forumId *entity.Forum) (*entity.Forum, error)
+	Delete(id string) error
 }
 
-func NewForumUsecase(ForumR entity.ForumRepository) entity.ForumUsecase {
+type ForumUsecase struct {
+	ForumR ForumUsecaseInterface
+}
+
+func NewForumUsecase(ForumR ForumUsecaseInterface) ForumUsecaseInterface {
 	return &ForumUsecase{
 		ForumR: ForumR,
 	}

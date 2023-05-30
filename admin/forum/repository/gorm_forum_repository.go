@@ -7,11 +7,19 @@ import (
 	"gorm.io/gorm"
 )
 
+type ForumRepository interface {
+	GetAll() ([]entity.Forum, error)
+	GetById(id string) (*entity.Forum, error)
+	Create(forum *entity.Forum) (*entity.Forum, error)
+	Update(id string, forumId *entity.Forum) (*entity.Forum, error)
+	Delete(id string) error
+}
+
 type mysqlForumRepository struct {
 	DB *gorm.DB
 }
 
-func NewMysqlForumRepository(db *gorm.DB) entity.ForumRepository {
+func NewMysqlForumRepository(db *gorm.DB) ForumRepository {
 	return &mysqlForumRepository{DB: db}
 }
 
