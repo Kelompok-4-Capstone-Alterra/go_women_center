@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  app:
+    image: ivanhd/go-women_center:prod
+    env_file:
+      - .env
+    networks:
+      - network_go_women_center
+    ports:
+      - 8080:8080
+    volumes:
+      - ./:/usr/src/app
+    restart: always
+  db:
+    image: mysql:8-debian
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_USER=${DB_USERNAME}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+    networks:
+      - network_go_women_center
+    ports:
+      - 5432:5432
+    volumes:
+      - ./db/backup:/var/lib/mysql
+
+networks:
+  network_go_women_center:
+    driver: bridge
