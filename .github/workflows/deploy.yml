@@ -39,4 +39,4 @@ jobs:
         port: ${{ secrets.PORT }}
         script: |
           cd app/go-women-center
-          sudo docker compose down && sudo docker compose -f docker-compose.prod.yml up -d --build
+          sudo docker compose -f docker-compose.prod.yml && sudo docker compose -f docker-compose.prod.yml up -d --build
