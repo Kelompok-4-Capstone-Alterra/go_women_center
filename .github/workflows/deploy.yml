@@ -38,6 +38,6 @@ jobs:
         key: ${{ secrets.KEY }}
         port: ${{ secrets.PORT }}
         script: |
-          cd app/go-online-lawyer
-          git pull origin master
+          cd app/go-women-center
+          git pull origin feature/user-auth-test
           sudo docker compose down && sudo docker compose -f docker-compose.prod.yml up -d --build
