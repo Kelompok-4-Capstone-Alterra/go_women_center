@@ -1,12 +1,13 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/forum/usecase"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
@@ -50,8 +51,13 @@ func (fh ForumHandler) GetById(c echo.Context) error {
 func (fh ForumHandler) Create(c echo.Context) error {
 	var forum entity.Forum
 	c.Bind(&forum)
+
+	uuidWithHyphen := uuid.New()
+	uuid := strings.Replace(uuidWithHyphen.String(), "-", "", -1)
+	forum.ID = uuid
+
 	data, err := fh.ForumU.Create(&forum)
-	fmt.Println("forum :", forum)
+
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(http.StatusBadRequest, "Failed create forums", nil))
 	}
