@@ -1,6 +1,10 @@
 package entity
 
-import "gorm.io/gorm"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type Review struct {
 	ID          string  `gorm:"primary_key;type:varchar(36);uniqueindex;not null"`
@@ -8,6 +12,9 @@ type Review struct {
 	UserID      string  `gorm:"type:varchar(36);not null"`
 	Rating      float32 `gorm:"type:decimal(2,1)"`
 	Comment     string  `gorm:"type:varchar(255)"`
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	DeletedAt 	gorm.DeletedAt `gorm:"index"`
 }
 
 func (r *Review) AfterCreate(tx *gorm.DB) error {

@@ -91,7 +91,7 @@ func main() {
 			return next(c)
 		}
 	})
-
+	
 	{
 		userAuthHandler := UserAuthHandler.NewUserHandler(googleOauthConfig)
 		{
@@ -102,11 +102,11 @@ func main() {
 		reviewRepo := ReviewUserRepository.NewMysqlReviewRepository(db)
 		counselorUsecase := CounselorUserUsecase.NewCounselorUsecase(counselorRepo, reviewRepo)
 		counselorHandler := CounselorUserHandler.NewCounselorHandler(counselorUsecase)
-		{			
+		{	
 			groupUsers.GET("/counselors", counselorHandler.GetAll)
+			groupUsers.GET("/counselors/:id", counselorHandler.GetById)
 		}
 
-		// groupUsers.GET("/counselors/:id", counselorHandler.GetById)
 		// groupUsers.POST("/counselors/:id/reviews", counselorHandler.CreateReview)
 		// groupUsers.GET("/counselors/:id/reviews", counselorHandler.GetAllReview)
 	}
