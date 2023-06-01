@@ -14,6 +14,7 @@ FROM alpine:3
 WORKDIR /root/
 COPY --from=builder /app/main .
 RUN mkdir -p ./ssl
-COPY --from=builder /app/ssl ./ssl
+RUN touch ./ssl/certificate.crt
+RUN touch ./ssl/private.key
 EXPOSE 8080
 CMD ["./main"]

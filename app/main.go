@@ -25,6 +25,11 @@ func main() {
 		DB_Name:     os.Getenv("DB_NAME"),
 	}
 
+	sslconf := config.SSLconf{
+		SSL_CERT:        os.Getenv("SSL_CERT"),
+		SSL_PRIVATE_KEY: os.Getenv("SSL_PRIVATE_KEY"),
+	}
+
 	googleOauthConfig := &oauth2.Config{
 		RedirectURL:  "http://localhost:8080/google/callback",
 		ClientID:     os.Getenv("GOOGLE_OAUTH_CLIENT_ID"),
@@ -34,6 +39,7 @@ func main() {
 	}
 
 	db := dbconf.InitDB()
+	sslconf.InitSSL()
 	googleUUID := helper.NewGoogleUUID()
 	log.Print(db, googleUUID)
 
