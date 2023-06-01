@@ -1,0 +1,42 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - feature/cicd
+
+jobs:
+  push-to-docker-hub:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ivanhd/go-women_center:prod
+
+  build:
+    needs: push-to-docker-hub
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: pull-test-deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            cd app/go-women-center
+            sudo docker compose -f docker-compose.prod.yml && sudo docker compose -f docker-compose.prod.yml up -d --build

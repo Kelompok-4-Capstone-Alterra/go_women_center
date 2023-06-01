@@ -13,5 +13,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build app/main.go
 FROM alpine:3
 WORKDIR /root/
 COPY --from=builder /app/main .
+RUN mkdir -p ./ssl
+COPY --from=builder /app/ssl ./ssl
 EXPOSE 8080
 CMD ["./main"]
