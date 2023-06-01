@@ -3,7 +3,10 @@ name: Deploy
 on:
   push:
     branches:
-      - feature/cicd
+      - main
+  pull_request:
+    branches:
+      - development
 
 jobs:
   push-to-docker-hub:
