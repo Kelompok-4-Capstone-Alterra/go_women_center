@@ -42,6 +42,7 @@ func main() {
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+	e.Use(middleware.CORS())
 	
 	e.GET("/healthcheck", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, "hello")
@@ -50,5 +51,8 @@ func main() {
 	e.GET("/google/login", userHandler.LoginHandler)
 	e.GET("/google/callback", userHandler.LoginGoogleCallback)
 
-	e.Logger.Fatal(e.Start(":8080"))
+	// ssl
+	e.Logger.Fatal(e.StartTLS(":8080", "./ssl/certificate.crt", "./ssl/private.key"))
+
+	// e.Logger.Fatal(e.Start(":8080"))
 }
