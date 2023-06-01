@@ -7,11 +7,13 @@ import (
 )
 
 type Forum struct {
-	ID         string `gorm:"primarykey"`
-	UserId     uint   `json:"user_id" form:"user_id"`
-	CategoryId uint   `json:"category_id" form:"category_id"`
-	Link       string `json:"link" form:"link"`
-	Topic      string `json:"topic" form:"topic"`
+	ID         string      `gorm:"primarykey"`
+	UserId     uint        `json:"user_id" form:"user_id"`
+	CategoryId uint        `json:"category_id" form:"category_id"`
+	Link       string      `json:"link" form:"link"`
+	Topic      string      `json:"topic" form:"topic"`
+	Status     bool        `json:"status" gorm:"-:all"`
+	UserForums []UserForum `gorm:"foreignKey:ForumId"`
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
 	DeletedAt  gorm.DeletedAt `gorm:"index"`

@@ -5,12 +5,15 @@ import (
 	"net/http"
 	"os"
 
-	ForumAdminHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/forum/handler"
-	ForumAdminRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/forum/repository"
-	ForumAdminUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/forum/usecase"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/app/config"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
+	ForumAdminHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum/handler"
+	ForumAdminRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum/repository"
+	ForumAdminUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum/usecase"
 	UserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/handler"
+	UserForumAdminHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/user_forum/handler"
+	UserForumAdminRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/user_forum/repository"
+	UserForumAdminUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/user_forum/usecase"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -56,12 +59,17 @@ func main() {
 	forumR := ForumAdminRepository.NewMysqlForumRepository(db)
 	forumU := ForumAdminUsecase.NewForumUsecase(forumR)
 	forumH := ForumAdminHandler.NewForumHandler(forumU)
+	e.GET("/user/forums", forumH.GetAll)
+	e.GET("/user/forums/:id", forumH.GetById)
+	e.POST("/user/forums", forumH.Create)
+	e.PUT("/user/forums/:id", forumH.Update)
+	e.DELETE("/user/forums/:id", forumH.Delete)
 
-	e.GET("/admin/forums", forumH.GetAll)
-	e.GET("/admin/forums/:id", forumH.GetById)
-	e.POST("/admin/forums", forumH.Create)
-	e.PUT("/admin/forums/:id", forumH.Update)
-	e.DELETE("/admin/forums/:id", forumH.Delete)
+	// create user forum
+	userForumR := UserForumAdminRepository.NewMysqlUserForumRepository(db)
+	userForumU := UserForumAdminUsecase.NewUserForumUsecase(userForumR)
+	userForumH := UserForumAdminHandler.NewUserForumHandler(userForumU)
+	e.POST("/user/forums/joins", userForumH.Create)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }

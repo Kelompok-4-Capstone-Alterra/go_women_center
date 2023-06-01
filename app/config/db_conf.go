@@ -47,6 +47,7 @@ func (dbc *DBconf) InitDB() *gorm.DB {
 	}
 
 	db.AutoMigrate(&entity.UserReplika{}, &entity.Category{}, &entity.Forum{})
+	db.AutoMigrate(&entity.UserForum{})
 
 	return db
 }

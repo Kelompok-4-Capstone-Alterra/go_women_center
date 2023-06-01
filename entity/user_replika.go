@@ -7,12 +7,13 @@ import (
 )
 
 type UserReplika struct {
-	ID        uint `gorm:"primaryKey"`
-	Username  string
-	Email     string
-	Password  string
-	Forums    []Forum `gorm:"foreignKey:UserId"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
+	ID         uint `gorm:"primaryKey"`
+	Username   string
+	Email      string
+	Password   string
+	Forums     []Forum     `gorm:"foreignKey:UserId"`
+	UserForums []UserForum `gorm:"foreignKey:UserId"`
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
+	DeletedAt  gorm.DeletedAt `gorm:"index"`
 }
