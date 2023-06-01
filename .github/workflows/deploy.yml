@@ -39,4 +39,7 @@ jobs:
           port: ${{ secrets.PORT }}
           script: |
             cd app/go-women-center
-            sudo docker compose -f docker-compose.prod.yml && sudo docker compose -f docker-compose.prod.yml up -d --build
+            docker pull ivanhd/go-women_center:prod
+            docker rmi $(docker images -f "dangling=true" -q)
+            docker-compose -f docker-compose.prod.yml down
+            sudo docker compose -f docker-compose.prod.yml up -d

@@ -3,7 +3,6 @@ version: '3.8'
 services:
   app:
     image: ivanhd/go-women_center:prod
-    build: .
     env_file:
       - .env
     networks:
