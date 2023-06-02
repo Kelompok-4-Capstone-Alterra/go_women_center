@@ -11,7 +11,7 @@ type Review struct {
 	CounselorID string  `gorm:"type:varchar(36);not null"`
 	UserID      string  `gorm:"type:varchar(36);not null"`
 	Rating      float32 `gorm:"type:decimal(2,1)"`
-	Comment     string  `gorm:"type:varchar(255)"`
+	Review     string  `gorm:"type:varchar(255)"`
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 	DeletedAt 	gorm.DeletedAt `gorm:"index"`
