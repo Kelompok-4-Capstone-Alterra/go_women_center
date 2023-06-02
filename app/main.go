@@ -44,11 +44,9 @@ func main() {
 	// googleUUID := helper.NewGoogleUUID()
 	// log.Print(db, googleUUID)
 
-	
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
-	
 	
 	e.GET("/healthcheck", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, "hello")
@@ -106,9 +104,8 @@ func main() {
 			groupUsers.GET("/counselors", counselorHandler.GetAll)
 			groupUsers.GET("/counselors/:id", counselorHandler.GetById)
 		}
-
-		// groupUsers.POST("/counselors/:id/reviews", counselorHandler.CreateReview)
-		// groupUsers.GET("/counselors/:id/reviews", counselorHandler.GetAllReview)
+		groupUsers.POST("/counselors/:id/reviews", counselorHandler.CreateReview)
+		groupUsers.GET("/counselors/:id/reviews", counselorHandler.GetAllReview)
 	}
 
 	e.Logger.Fatal(e.Start(":8080"))

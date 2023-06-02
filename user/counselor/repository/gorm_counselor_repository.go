@@ -9,7 +9,7 @@ import (
 type CounselorRepository interface {
 	GetAll(offset, limit int) ([]counselor.GetAllResponse, error)
 	Count() (int, error)
-	// GetById(id string) (counselor.GetByIdResponse, error)
+	GetById(id string) (counselor.GetByResponse, error)
 }
 
 type mysqlCounselorRepository struct {
@@ -21,6 +21,7 @@ func NewMysqlCounselorRepository(db *gorm.DB) CounselorRepository{
 }
 
 func (r *mysqlCounselorRepository) GetAll(offset, limit int) ([]counselor.GetAllResponse, error) {
+
 	var counselors []counselor.GetAllResponse
 
 	err := r.DB.Model(&entity.Counselor{}).Offset(offset).Limit(limit).Find(&counselors).Error
@@ -43,4 +44,17 @@ func (r *mysqlCounselorRepository) Count() (int, error) {
 	}
 
 	return int(totalData), nil
+}
+
+func(r *mysqlCounselorRepository) GetById(id string) (counselor.GetByResponse, error) {
+	
+	var counselor counselor.GetByResponse
+
+	err := r.DB.Model(&entity.Counselor{}).Where("id = ?", id).First(&counselor).Error
+	
+	if err != nil {
+		return counselor, err
+	}
+
+	return counselor, nil
 }

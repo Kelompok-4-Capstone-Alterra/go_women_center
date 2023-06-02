@@ -1,9 +1,5 @@
 package counselor
 
-import (
-	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
-)
-
 type GetAllResponse struct {
 	ID             string  `json:"id"`
 	ProfilePicture string  `json:"profile_picture"`
@@ -11,6 +7,21 @@ type GetAllResponse struct {
 	Topic          string  `json:"topic"`
 	Tarif          float64 `json:"tarif"`
 	Rating         float32 `json:"rating"`
+}
+
+type ReviewResponse struct {
+	ID             string  `json:"id"`
+	ProfilePicture string  `json:"profile_picture"`
+	Name           string  `json:"name"`
+	Rating         float32 `json:"rating"`
+	Review         string  `json:"review"`
+	CreatedAt      string  `json:"created_at"`
+}
+
+type TimeResponse struct {
+	ID     string `json:"id"`
+	Time   string `json:"time"`
+	Status uint8  `json:"status"`
 }
 
 type GetByResponse struct {
@@ -22,6 +33,4 @@ type GetByResponse struct {
 	Tarif          float64 `json:"tarif"`
 	Rating         float32 `json:"rating"`
 	Description    string  `json:"description"`
-	Reviews        []entity.Review `json:"reviews" gorm:"foreignKey:CounselorID"`
-	Times      		 []entity.Time `json:"times" gorm:"foreignKey:DateID"`
 }
