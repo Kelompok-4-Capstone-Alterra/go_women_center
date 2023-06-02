@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/career"
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/career"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"gorm.io/gorm"
 )

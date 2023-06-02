@@ -17,6 +17,10 @@ import (
 	CareerAdminHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/career/handler"
 	CareerAdminRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/career/repository"
 	CareerAdminUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/career/usecase"
+	
+	CareerUserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/career/handler"
+	CareerUserRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/career/repository"
+	CareerUserUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/career/usecase"
 )
 
 func main() {
@@ -68,6 +72,15 @@ func main() {
 		}
 	}
 
+	groupUsers := e.Group("/users")
+	{
+		careerUserRepo := CareerUserRepository.NewMysqlCareerRepository(db)
+		careerUsecase := CareerUserUsecase.NewCareerUsecase(careerUserRepo)
+		careerHandler := CareerUserHandler.NewCareerHandler(careerUsecase)
+		{
+			groupUsers.GET("/careers", careerHandler.GetAll)
+		}
+	}
 	
 
 	e.Logger.Fatal(e.Start(":8080"))

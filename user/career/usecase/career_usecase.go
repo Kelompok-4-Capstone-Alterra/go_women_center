@@ -1,8 +1,8 @@
 package usecase
 
 import (
-	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/career"
-	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/career/repository"
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/career"
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/career/repository"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
 )

@@ -16,5 +16,5 @@ var (
 	// ErrImageSize = errors.New("image size must be less than 10MB")
 	// ErrEmailFormat = errors.New("email must be a valid email")
 	ErrIdFormat = errors.New("id must be a valid uuid")
-	// ErrRequired = errors.New("all fields are required")
+	ErrRequired = errors.New("all fields are required")
 )

@@ -3,7 +3,7 @@ package handler
 import (
 	"strings"
 
-	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/career"
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/career"
 	"github.com/go-playground/validator"
 )
 

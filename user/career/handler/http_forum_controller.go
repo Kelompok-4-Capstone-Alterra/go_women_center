@@ -3,8 +3,8 @@ package handler
 import (
 	"net/http"
 
-	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/career"
-	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/career/usecase"
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/career"
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/career/usecase"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
 	"github.com/labstack/echo/v4"
