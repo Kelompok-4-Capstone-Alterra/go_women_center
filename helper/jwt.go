@@ -22,6 +22,10 @@ func NewAuthJWT(secret string) *authJWT {
 	}
 }
 
+func (aj *authJWT) GetSecret() string {
+	return aj.secret
+}
+
 func (aj *authJWT) GenerateUserToken(id string, email string, authBy constant.AuthBy) (string, error) {
 	claims := &JwtCustomUserClaims{
 		id,
@@ -49,6 +53,7 @@ type JwtCustomUserClaims struct {
 func (aj *authJWT) GenerateAdminToken(email string) (string, error) {
 	claims := &JwtCustomAdminClaims{
 		email,
+		true,
 		jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 72)),
 		},
@@ -62,6 +67,16 @@ func (aj *authJWT) GenerateAdminToken(email string) (string, error) {
 }
 
 type JwtCustomAdminClaims struct {
-	Email  string          `json:"email"`
+	Email   string `json:"email"`
+	IsAdmin bool   `json:"is_admin"`
 	jwt.RegisteredClaims
+}
+
+func (aj *authJWT) CheckIfAdmin(token *jwt.Token) (error) {
+	claims := token.Claims.(jwt.MapClaims)
+	idPayload, ok := claims["is_admin"].(bool)
+	if !ok || !idPayload {
+		return constant.ErrInvalidCredential
+	}
+	return nil
 }
