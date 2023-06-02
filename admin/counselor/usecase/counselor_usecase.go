@@ -17,7 +17,6 @@ type CounselorUsecase interface {
 	Create(inputDetail counselor.CreateRequest, inputProfilePicture *multipart.FileHeader) error
 	Update(inputDetail counselor.UpdateRequest, inputProfilePicture *multipart.FileHeader) error
 	Delete(id string) error
-	// CreateReview(inputReview counselor.CreateReviewRequest) error
 }
 
 type counselorUsecase struct {
@@ -53,13 +52,13 @@ func(u *counselorUsecase) GetTotalPages(limit int) (int, error) {
 
 func(u *counselorUsecase) GetById(id string) (counselor.GetByResponse, error) {
 	
-	counselorData, err := u.counselorRepo.GetById(id)
+	counselorRes, err := u.counselorRepo.GetById(id)
 
 	if err != nil {
-		return counselorData, counselor.ErrReviewNotFound
+		return counselorRes, counselor.ErrReviewNotFound
 	}
 
-	return counselorData, nil
+	return counselorRes, nil
 }
 
 func(u *counselorUsecase) Create(inputDetail counselor.CreateRequest, inputProfilePicture *multipart.FileHeader) error{
