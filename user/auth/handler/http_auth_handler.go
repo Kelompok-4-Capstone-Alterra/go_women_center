@@ -18,13 +18,15 @@ type userHandler struct {
 	Usecase   usecase.UserUsecase
 	OauthConf *oauth2.Config
 	JwtConf   helper.AuthJWT
+	Validator helper.Validator
 }
 
-func NewUserHandler(u usecase.UserUsecase, oauthConf *oauth2.Config, jwtConf helper.AuthJWT) *userHandler {
+func NewUserHandler(u usecase.UserUsecase, oauthConf *oauth2.Config, jwtConf helper.AuthJWT, vld helper.Validator) *userHandler {
 	return &userHandler{
 		Usecase:   u,
 		OauthConf: oauthConf,
 		JwtConf:   jwtConf,
+		Validator: vld,
 	}
 }
 
@@ -95,6 +97,15 @@ func (h *userHandler) VerifyEmailHandler(c echo.Context) error { // TODO: rename
 		))
 	}
 
+	err = h.Validator.ValidateStruct(emailDTO)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(
+			http.StatusBadRequest,
+			err.Error(),
+			nil,
+		))
+	}
+
 	err = h.Usecase.VerifyEmail(emailDTO.Email)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
@@ -121,7 +132,15 @@ func (h *userHandler) RegisterHandler(c echo.Context) error {
 			nil,
 		))
 	}
-	// TODO: validate req
+
+	err = h.Validator.ValidateStruct(reqDTO)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(
+			http.StatusBadRequest,
+			err.Error(),
+			nil,
+		))
+	}
 
 	err = h.Usecase.Register(reqDTO)
 	if err != nil {
@@ -151,7 +170,14 @@ func (h *userHandler) LoginHandler(c echo.Context) error {
 		))
 	}
 
-	// TODO: validate req
+	err = h.Validator.ValidateStruct(reqDTO)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(
+			http.StatusBadRequest,
+			err.Error(),
+			nil,
+		))
+	}
 
 	data, err := h.Usecase.Login(reqDTO)
 	if err != nil {
