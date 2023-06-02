@@ -10,22 +10,12 @@ type response struct {
 	Data interface{}  `json:"data"`
 }
 
-func ResponseSuccess(message string, status int, data interface{}) response {
+func ResponseData(message string, status int,  data interface{}) response {
 	return response{
 		Meta: responseMeta{
 			Message: message,
 			Status:  status,
 		},
 		Data: data,
-	}
-}
-
-func ResponseError(message string, status int) response {
-	return response{
-		Meta: responseMeta{
-			Message: message,
-			Status:  status,
-		},
-		Data: nil,
 	}
 }

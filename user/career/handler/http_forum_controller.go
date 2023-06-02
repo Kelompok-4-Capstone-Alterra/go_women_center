@@ -50,16 +50,16 @@ func (h *careerHandler) GetAll(c echo.Context) error {
 	careers, err := h.CareerUsecase.GetAll(offset, limit)
 
 	if err != nil {
-		return c.JSON(getStatusCode(err), helper.ResponseError(err.Error(), getStatusCode(err)))
+		return c.JSON(getStatusCode(err), helper.ResponseData(err.Error(), getStatusCode(err), nil))
 	}
 
 	totalPages, err := h.CareerUsecase.GetTotalPages(limit)
 
 	if err != nil {
-		return c.JSON(getStatusCode(err), helper.ResponseError(err.Error(), getStatusCode(err)))
+		return c.JSON(getStatusCode(err), helper.ResponseData(err.Error(), getStatusCode(err), nil))
 	}
 
-	return c.JSON(getStatusCode(err), helper.ResponseSuccess("success get all conselor", getStatusCode(err), echo.Map{
+	return c.JSON(getStatusCode(err), helper.ResponseData("success get all conselor", getStatusCode(err), echo.Map{
 		"careers":       careers,
 		"current_pages": page,
 		"total_pages":   totalPages,
@@ -75,7 +75,7 @@ func (h *careerHandler) GetById(c echo.Context) error {
 	if err := isRequestValid(id); err != nil {
 		return c.JSON(
 			getStatusCode(err),
-			helper.ResponseError(err.Error(), getStatusCode(err)),
+			helper.ResponseData(err.Error(), getStatusCode(err), nil),
 		)
 	}
 
@@ -84,10 +84,10 @@ func (h *careerHandler) GetById(c echo.Context) error {
 	if err != nil {
 		return c.JSON(
 			getStatusCode(err),
-			helper.ResponseError(err.Error(), getStatusCode(err)),
+			helper.ResponseData(err.Error(), getStatusCode(err), nil),
 		)
 	}
 
-	return c.JSON(getStatusCode(err), helper.ResponseSuccess("success get career by id", getStatusCode(err), career))
+	return c.JSON(getStatusCode(err), helper.ResponseData("success get career by id", getStatusCode(err), career))
 
 }

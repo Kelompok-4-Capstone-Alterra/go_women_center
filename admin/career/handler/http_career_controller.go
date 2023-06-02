@@ -55,16 +55,16 @@ func (h *careerHandler) GetAll(c echo.Context) error {
 	careers, err := h.CareerUsecase.GetAll(offset, limit)
 
 	if err != nil {
-		return c.JSON(getStatusCode(err), helper.ResponseError(err.Error(), getStatusCode(err)))
+		return c.JSON(getStatusCode(err), helper.ResponseData(err.Error(), getStatusCode(err), nil))
 	}
 
 	totalPages, err := h.CareerUsecase.GetTotalPages(limit)
 
 	if err != nil {
-		return c.JSON(getStatusCode(err), helper.ResponseError(err.Error(), getStatusCode(err)))
+		return c.JSON(getStatusCode(err), helper.ResponseData(err.Error(), getStatusCode(err), nil))
 	}
 
-	return c.JSON(getStatusCode(err), helper.ResponseSuccess("success get all conselor", getStatusCode(err), echo.Map{
+	return c.JSON(getStatusCode(err), helper.ResponseData("success get all conselor", getStatusCode(err), echo.Map{
 		"careers":       careers,
 		"current_pages": page,
 		"total_pages":   totalPages,
@@ -81,7 +81,7 @@ func (h *careerHandler) Create(c echo.Context) error {
 
 		return c.JSON(
 			getStatusCode(err),
-			helper.ResponseError(err.Error(), getStatusCode(err)),
+			helper.ResponseData(err.Error(), getStatusCode(err), nil),
 		)
 	}
 
@@ -90,7 +90,7 @@ func (h *careerHandler) Create(c echo.Context) error {
 	if err := isImageValid(imgInput); err != nil {
 		return c.JSON(
 			getStatusCode(err),
-			helper.ResponseError(err.Error(), getStatusCode(err)),
+			helper.ResponseData(err.Error(), getStatusCode(err), nil),
 		)
 	}
 
@@ -99,11 +99,11 @@ func (h *careerHandler) Create(c echo.Context) error {
 	if err != nil {
 		return c.JSON(
 			getStatusCode(err),
-			helper.ResponseError(err.Error(), getStatusCode(err)),
+			helper.ResponseData(err.Error(), getStatusCode(err), nil),
 		)
 	}
 
-	return c.JSON(getStatusCode(err), helper.ResponseSuccess("success create career", getStatusCode(err), nil))
+	return c.JSON(getStatusCode(err), helper.ResponseData("success create career", getStatusCode(err), nil))
 
 }
 
@@ -116,7 +116,7 @@ func (h *careerHandler) GetById(c echo.Context) error {
 	if err := isRequestValid(id); err != nil {
 		return c.JSON(
 			getStatusCode(err),
-			helper.ResponseError(err.Error(), getStatusCode(err)),
+			helper.ResponseData(err.Error(), getStatusCode(err), nil),
 		)
 	}
 
@@ -125,11 +125,11 @@ func (h *careerHandler) GetById(c echo.Context) error {
 	if err != nil {
 		return c.JSON(
 			getStatusCode(err),
-			helper.ResponseError(err.Error(), getStatusCode(err)),
-	)
+			helper.ResponseData(err.Error(), getStatusCode(err), nil),
+		)
 	}
 
-	return c.JSON(getStatusCode(err), helper.ResponseSuccess("success get career by id", getStatusCode(err), career))
+	return c.JSON(getStatusCode(err), helper.ResponseData("success get career by id", getStatusCode(err), career))
 
 }
 
@@ -138,11 +138,11 @@ func (h *careerHandler) Update(c echo.Context) error {
 	var careerReq career.UpdateRequest
 
 	c.Bind(&careerReq)
-	 
-	if err := isRequestValid(careerReq); err != nil {	
+
+	if err := isRequestValid(careerReq); err != nil {
 		return c.JSON(
-			getStatusCode(err), 
-			helper.ResponseError(err.Error(), getStatusCode(err)),
+			getStatusCode(err),
+			helper.ResponseData(err.Error(), getStatusCode(err), nil),
 		)
 	}
 
@@ -151,7 +151,7 @@ func (h *careerHandler) Update(c echo.Context) error {
 	if err := isImageValid(imgInput); err != nil {
 		return c.JSON(
 			getStatusCode(err),
-			helper.ResponseError(err.Error(), getStatusCode(err)),
+			helper.ResponseData(err.Error(), getStatusCode(err), nil),
 		)
 	}
 
@@ -160,11 +160,11 @@ func (h *careerHandler) Update(c echo.Context) error {
 	if err != nil {
 		return c.JSON(
 			getStatusCode(err),
-			helper.ResponseError(err.Error(), getStatusCode(err)),
+			helper.ResponseData(err.Error(), getStatusCode(err), nil),
 		)
 	}
 
-	return c.JSON(getStatusCode(err), helper.ResponseSuccess("success update career", getStatusCode(err), nil))
+	return c.JSON(getStatusCode(err), helper.ResponseData("success update career", getStatusCode(err), nil))
 }
 
 func (h *careerHandler) Delete(c echo.Context) error {
@@ -176,7 +176,7 @@ func (h *careerHandler) Delete(c echo.Context) error {
 	if err := isRequestValid(id); err != nil {
 		return c.JSON(
 			getStatusCode(err),
-			helper.ResponseError(err.Error(), getStatusCode(err)),
+			helper.ResponseData(err.Error(), getStatusCode(err), nil),
 		)
 	}
 
@@ -185,10 +185,10 @@ func (h *careerHandler) Delete(c echo.Context) error {
 	if err != nil {
 		return c.JSON(
 			getStatusCode(err),
-			helper.ResponseError(err.Error(), getStatusCode(err)),
+			helper.ResponseData(err.Error(), getStatusCode(err), nil),
 		)
 	}
 
-	return c.JSON(getStatusCode(err), helper.ResponseSuccess("success delete career", getStatusCode(err), nil))
+	return c.JSON(getStatusCode(err), helper.ResponseData("success delete career", getStatusCode(err), nil))
 
 }
