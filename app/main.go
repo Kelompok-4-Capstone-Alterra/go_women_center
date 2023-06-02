@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/app/config"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
 	UserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/handler"
@@ -15,13 +14,9 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 
-	
 	CareerAdminHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/career/handler"
 	CareerAdminRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/career/repository"
 	CareerAdminUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/career/usecase"
-	CareerUserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/career/handler"
-	CareerUserRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/career/repository"
-	CareerUserUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/career/usecase"
 )
 
 func main() {
@@ -51,13 +46,29 @@ func main() {
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
-	
+
 	e.GET("/healthcheck", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, "hello")
 	})
 
 	e.GET("/google/login", userHandler.LoginHandler)
 	e.GET("/google/callback", userHandler.LoginGoogleCallback)
+
+	groupAdmins := e.Group("/admin")
+	{
+		careerRepo := CareerAdminRepository.NewMysqlCareerRepository(db)
+		careerUsecase := CareerAdminUsecase.NewCareerUsecase(careerRepo)
+		careerHandler := CareerAdminHandler.NewCareerHandler(careerUsecase)
+		{
+			groupAdmins.POST("/careers", careerHandler.Create)
+			groupAdmins.GET("/careers", careerHandler.GetAll)
+			groupAdmins.GET("/careers/:id", careerHandler.GetById)
+			groupAdmins.PUT("/careers/:id", careerHandler.Update)
+			groupAdmins.DELETE("/careers/:id", careerHandler.Delete)
+		}
+	}
+
+	
 
 	e.Logger.Fatal(e.Start(":8080"))
 }
