@@ -44,9 +44,11 @@ func (h *userHandler) LoginGoogleHandler(c echo.Context) error {
 func (h *userHandler) LoginGoogleCallback(c echo.Context) error {
 	content, err := h.getUserInfo(c.FormValue("state"), c.FormValue("code"))
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, echo.Map{
-			"error": err.Error(),
-		})
+		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
+			http.StatusInternalServerError,
+			err.Error(),
+			nil,
+		))
 	}
 
 	//TODO: send token to response
@@ -86,74 +88,92 @@ func (h *userHandler) VerifyEmailHandler(c echo.Context) error { // TODO: rename
 	emailDTO := user.VerifyEmailDTO{}
 	err := c.Bind(&emailDTO)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, echo.Map{
-			"error": err.Error(),
-		})
+		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
+			http.StatusInternalServerError,
+			err.Error(),
+			nil,
+		))
 	}
 
 	err = h.Usecase.VerifyEmail(emailDTO.Email)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, echo.Map{
-			"error": err.Error(), //TODO: write better error message
-		})
+		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
+			http.StatusInternalServerError,
+			err.Error(), //TODO: write better error message
+			nil,
+		))
 	}
 
-	return c.JSON(http.StatusOK, echo.Map{
-		"message": "success sending otp",
-	})
+	return c.JSON(http.StatusOK, helper.ResponseData(
+		http.StatusOK,
+		"success sending otp",
+		nil,
+	))
 }
 
 func (h *userHandler) RegisterHandler(c echo.Context) error {
 	reqDTO := user.RegisterUserDTO{}
 	err := c.Bind(&reqDTO)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, echo.Map{
-			"error": err.Error(),
-		})
+		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
+			http.StatusInternalServerError,
+			err.Error(),
+			nil,
+		))
 	}
-
 	// TODO: validate req
 
 	err = h.Usecase.Register(reqDTO)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, echo.Map{
-			"error": err.Error(),
-		})
+		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
+			http.StatusInternalServerError,
+			err.Error(),
+			nil,
+		))
 	}
 
 	//TODO: send token to response
-	return c.JSON(http.StatusOK, echo.Map{
-		"message": "register success",
-	})
+	return c.JSON(http.StatusOK, helper.ResponseData(
+		http.StatusOK,
+		"register success",
+		nil,
+	))
 }
 
 func (h *userHandler) LoginHandler(c echo.Context) error {
 	reqDTO := user.LoginUserDTO{}
 	err := c.Bind(&reqDTO)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, echo.Map{
-			"error": err.Error(),
-		})
+		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
+			http.StatusInternalServerError,
+			err.Error(),
+			nil,
+		))
 	}
 
 	// TODO: validate req
 
 	data, err := h.Usecase.Login(reqDTO)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, echo.Map{
-			"error": err.Error(),
-		})
+		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
+			http.StatusInternalServerError,
+			err.Error(),
+			nil,
+		))
 	}
 
 	token, err := h.JwtConf.GenerateUserToken(data.ID, data.Email, constant.Auth)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, echo.Map{
-			"error": err.Error(),
-		})
+		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
+			http.StatusInternalServerError,
+			"fail to generate user token",
+			nil,
+		))
 	}
 
-	return c.JSON(http.StatusOK, echo.Map{
-		"message": "login success",
-		"token":   token,
-	})
+	return c.JSON(http.StatusOK, helper.ResponseData(
+		http.StatusOK,
+		"login success",
+		token,
+	))
 }

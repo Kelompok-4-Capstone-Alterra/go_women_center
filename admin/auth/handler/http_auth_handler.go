@@ -25,30 +25,34 @@ func (h *authHandler) LoginHandler(c echo.Context) error {
 	request := auth.LoginAdminDTO{}
 	err := c.Bind(&request)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, echo.Map{
-			"message": "login failed",
-			"error": err.Error(),
-		})
+		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
+			http.StatusInternalServerError,
+			err.Error(),
+			nil,
+		))
 	}
 
 	data, err := h.Usecase.Login(request)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, echo.Map{
-			"message": "login failed",
-			"error": err.Error(),
-		})
+		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
+			http.StatusInternalServerError,
+			err.Error(),
+			nil,
+		))
 	}
 
 	token, err := h.JwtConf.GenerateAdminToken(data.Email)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, echo.Map{
-			"message": "login failed",
-			"error": err.Error(),
-		})
+		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
+			http.StatusInternalServerError,
+			err.Error(),
+			nil,
+		))
 	}
 
-	return c.JSON(http.StatusOK, echo.Map{
-		"message": "login successfull",
-		"token": token,
-	})
+	return c.JSON(http.StatusInternalServerError, helper.ResponseData(
+		http.StatusInternalServerError,
+		err.Error(),
+		token,
+	))
 }
