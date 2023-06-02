@@ -178,6 +178,9 @@ func getStatusCode(err error) int {
 			
 		case counselor.ErrCounselorNotFound:
 			return http.StatusNotFound
+		
+		case counselor.ErrProfilePictureSize:
+			return http.StatusRequestEntityTooLarge
 
 		case 
 			counselor.ErrCounselorConflict,
