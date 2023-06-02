@@ -29,16 +29,16 @@ func (h *counselorHandler) GetAll(c echo.Context) error {
 	counselors, err := h.CUscase.GetAll(offset, limit)
 	
 	if err != nil {
-		return c.JSON(getStatusCode(err), helper.ResponseError(err.Error(), getStatusCode(err)))
+		return c.JSON(getStatusCode(err), helper.ResponseData(err.Error(), getStatusCode(err), nil))
 	}
 
 	totalPages, err := h.CUscase.GetTotalPages(limit)
 
 	if err != nil {
-		return c.JSON(getStatusCode(err), helper.ResponseError(err.Error(), getStatusCode(err)))
+		return c.JSON(getStatusCode(err), helper.ResponseData(err.Error(), getStatusCode(err), nil))
 	}
 
-	return c.JSON(getStatusCode(err), helper.ResponseSuccess("success get all conselor", getStatusCode(err), echo.Map{
+	return c.JSON(getStatusCode(err), helper.ResponseData("success get all conselor", getStatusCode(err), echo.Map{
 		"counselors": counselors,
 		"current_pages": page,
 		"total_pages": totalPages,
@@ -52,16 +52,16 @@ func (h *counselorHandler) GetById(c echo.Context) error {
 	c.Bind(&id)
 
 	if err := isRequestValid(&id); err != nil {
-		return c.JSON(getStatusCode(err), helper.ResponseError(err.Error(), getStatusCode(err)))
+		return c.JSON(getStatusCode(err), helper.ResponseData(err.Error(), getStatusCode(err), nil))
 	}
 
 	counselor, err := h.CUscase.GetById(id.ID)
 	fmt.Println(err)
 	if err != nil {
-		return c.JSON(getStatusCode(err), helper.ResponseError(err.Error(), getStatusCode(err)))
+		return c.JSON(getStatusCode(err), helper.ResponseData(err.Error(), getStatusCode(err), nil))
 	}
 
-	return c.JSON(getStatusCode(err), helper.ResponseSuccess("success get counselor by id", getStatusCode(err), echo.Map{
+	return c.JSON(getStatusCode(err), helper.ResponseData("success get counselor by id", getStatusCode(err), echo.Map{
 		"counselor": counselor,
 	}))
 }
@@ -73,7 +73,7 @@ func (h *counselorHandler) GetAllReview(c echo.Context) error {
 	c.Bind(&id)
 
 	if err := isRequestValid(&id); err != nil {
-		return c.JSON(getStatusCode(err), helper.ResponseError(err.Error(), getStatusCode(err)))
+		return c.JSON(getStatusCode(err), helper.ResponseData(err.Error(), getStatusCode(err), nil))
 	}
 
 	page, _ :=  helper.StringToInt(c.QueryParam("page"))
@@ -84,16 +84,16 @@ func (h *counselorHandler) GetAllReview(c echo.Context) error {
 	reviews, err := h.CUscase.GetAllReview(id.ID, offset, limit)
 
 	if err != nil {
-		return c.JSON(getStatusCode(err), helper.ResponseError(err.Error(), getStatusCode(err)))
+		return c.JSON(getStatusCode(err), helper.ResponseData(err.Error(), getStatusCode(err), nil))
 	}
 
 	totalPage, err := h.CUscase.GetTotalPagesReview(id.ID, limit)
 
 	if err != nil {
-		return c.JSON(getStatusCode(err), helper.ResponseError(err.Error(), getStatusCode(err)))
+		return c.JSON(getStatusCode(err), helper.ResponseData(err.Error(), getStatusCode(err), nil))
 	}
 
-	return c.JSON(getStatusCode(err), helper.ResponseSuccess("success get all counselor review", getStatusCode(err), echo.Map{
+	return c.JSON(getStatusCode(err), helper.ResponseData("success get all counselor review", getStatusCode(err), echo.Map{
 		"reviews": reviews,
 		"current_pages": page,
 		"total_pages": totalPage,
@@ -109,7 +109,7 @@ func (h *counselorHandler) CreateReview(c echo.Context) error {
 	c.Bind(&reviewReq)
 
 	if err := isRequestValid(&reviewReq); err != nil {
-		return c.JSON(getStatusCode(err), helper.ResponseError(err.Error(), getStatusCode(err)))
+		return c.JSON(getStatusCode(err), helper.ResponseData(err.Error(), getStatusCode(err), nil))
 	}
 	fmt.Println("user -> ", user)
 	reviewReq.UserID = user.ID
@@ -117,10 +117,10 @@ func (h *counselorHandler) CreateReview(c echo.Context) error {
 	err := h.CUscase.CreateReview(reviewReq)
 
 	if err != nil {
-		return c.JSON(getStatusCode(err), helper.ResponseError(err.Error(), getStatusCode(err)))
+		return c.JSON(getStatusCode(err), helper.ResponseData(err.Error(), getStatusCode(err), nil))
 	}
 
-	return c.JSON(getStatusCode(err), helper.ResponseSuccess("success create review", getStatusCode(err), nil))
+	return c.JSON(getStatusCode(err), helper.ResponseData("success create review", getStatusCode(err), nil))
 }
 
 

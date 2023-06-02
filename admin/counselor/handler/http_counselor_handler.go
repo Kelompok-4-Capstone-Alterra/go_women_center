@@ -28,16 +28,16 @@ func (h *counselorHandler) GetAll(c echo.Context) error {
 	counselors, err := h.CUscase.GetAll(offset, limit)
 	
 	if err != nil {
-		return c.JSON(getStatusCode(err), helper.ResponseError(err.Error(), getStatusCode(err)))
+		return c.JSON(getStatusCode(err), helper.ResponseData(err.Error(), getStatusCode(err), nil))
 	}
 
 	totalPages, err := h.CUscase.GetTotalPages(limit)
 
 	if err != nil {
-		return c.JSON(getStatusCode(err), helper.ResponseError(err.Error(), getStatusCode(err)))
+		return c.JSON(getStatusCode(err), helper.ResponseData(err.Error(), getStatusCode(err), nil))
 	}
 
-	return c.JSON(getStatusCode(err), helper.ResponseSuccess("success get all conselor", getStatusCode(err), echo.Map{
+	return c.JSON(getStatusCode(err), helper.ResponseData("success get all conselor", getStatusCode(err), echo.Map{
 		"counselors": counselors,
 		"current_pages": page,
 		"total_pages": totalPages,
@@ -54,7 +54,7 @@ func (h *counselorHandler) Create(c echo.Context) error {
 		
 		return c.JSON(
 			getStatusCode(err), 
-			helper.ResponseError(err.Error(), getStatusCode(err)),
+			helper.ResponseData(err.Error(), getStatusCode(err), nil),
 		)
 	}
 	
@@ -63,7 +63,7 @@ func (h *counselorHandler) Create(c echo.Context) error {
 	if err := isImageValid(imgInput); err != nil {
 		return c.JSON(
 			getStatusCode(err),
-			helper.ResponseError(err.Error(), getStatusCode(err)),
+			helper.ResponseData(err.Error(), getStatusCode(err), nil),
 		)
 	}
 
@@ -72,11 +72,11 @@ func (h *counselorHandler) Create(c echo.Context) error {
 	if err != nil {
 		return c.JSON(
 			getStatusCode(err),
-			helper.ResponseError(err.Error(), getStatusCode(err)),
+			helper.ResponseData(err.Error(), getStatusCode(err), nil),
 		)
 	}
 
-	return c.JSON(getStatusCode(err), helper.ResponseSuccess("success create counselor", getStatusCode(err), nil))
+	return c.JSON(getStatusCode(err), helper.ResponseData("success create counselor", getStatusCode(err), nil))
 
 }
 
@@ -89,7 +89,7 @@ func (h *counselorHandler) GetById(c echo.Context) error {
 	if err := isRequestValid(id); err != nil {
 		return c.JSON(
 			getStatusCode(err),
-			helper.ResponseError(err.Error(), getStatusCode(err)),
+			helper.ResponseData(err.Error(), getStatusCode(err), nil),
 		)
 	}
 
@@ -98,11 +98,11 @@ func (h *counselorHandler) GetById(c echo.Context) error {
 	if err != nil {
 		return c.JSON(
 			getStatusCode(err),
-			helper.ResponseError(err.Error(), getStatusCode(err)),
+			helper.ResponseData(err.Error(), getStatusCode(err), nil),
 	)
 	}
 
-	return c.JSON(getStatusCode(err), helper.ResponseSuccess("success get counselor by id", getStatusCode(err), echo.Map{
+	return c.JSON(getStatusCode(err), helper.ResponseData("success get counselor by id", getStatusCode(err), echo.Map{
 		"counselor": counselor,
 	}))
 
@@ -117,7 +117,7 @@ func (h *counselorHandler) Update(c echo.Context) error {
 	if err := isRequestValid(counselorReq); err != nil {	
 		return c.JSON(
 			getStatusCode(err), 
-			helper.ResponseError(err.Error(), getStatusCode(err)),
+			helper.ResponseData(err.Error(), getStatusCode(err), nil),
 		)
 	}
 
@@ -126,7 +126,7 @@ func (h *counselorHandler) Update(c echo.Context) error {
 	if err := isImageValid(imgInput); err != nil {
 		return c.JSON(
 			getStatusCode(err),
-			helper.ResponseError(err.Error(), getStatusCode(err)),
+			helper.ResponseData(err.Error(), getStatusCode(err), nil),
 		)
 	}
 
@@ -135,11 +135,11 @@ func (h *counselorHandler) Update(c echo.Context) error {
 	if err != nil {
 		return c.JSON(
 			getStatusCode(err),
-			helper.ResponseError(err.Error(), getStatusCode(err)),
+			helper.ResponseData(err.Error(), getStatusCode(err), nil),
 		)
 	}
 
-	return c.JSON(getStatusCode(err), helper.ResponseSuccess("success update counselor", getStatusCode(err), nil))
+	return c.JSON(getStatusCode(err), helper.ResponseData("success update counselor", getStatusCode(err), nil))
 }
 
 func (h *counselorHandler) Delete(c echo.Context) error {
@@ -151,7 +151,7 @@ func (h *counselorHandler) Delete(c echo.Context) error {
 	if err := isRequestValid(id); err != nil {
 		return c.JSON(
 			getStatusCode(err),
-			helper.ResponseError(err.Error(), getStatusCode(err)),
+			helper.ResponseData(err.Error(), getStatusCode(err), nil),
 		)
 	}
 
@@ -160,11 +160,11 @@ func (h *counselorHandler) Delete(c echo.Context) error {
 	if err != nil {
 		return c.JSON(
 			getStatusCode(err),
-			helper.ResponseError(err.Error(), getStatusCode(err)),
+			helper.ResponseData(err.Error(), getStatusCode(err), nil),
 		)
 	}
 
-	return c.JSON(getStatusCode(err), helper.ResponseSuccess("success delete counselor", getStatusCode(err), nil))
+	return c.JSON(getStatusCode(err), helper.ResponseData("success delete counselor", getStatusCode(err), nil))
 
 }
 

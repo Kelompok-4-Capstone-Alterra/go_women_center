@@ -27,7 +27,7 @@ func (h *topicHandler) GetAll(c echo.Context) error{
 	}
 	
 	return c.JSON(http.StatusOK,
-		helper.ResponseSuccess("success get all topic",
+		helper.ResponseData("success get all topic",
 		http.StatusOK,
 		echo.Map{
 			"topics": topicsRes,

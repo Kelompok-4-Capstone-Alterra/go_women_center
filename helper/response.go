@@ -7,25 +7,15 @@ type responseMeta struct {
 
 type response struct {
 	Meta responseMeta `json:"meta"`
-	Data map[string]interface{}  `json:"data"`
+	Data interface{}  `json:"data"`
 }
 
-func ResponseSuccess(message string, status int, data map[string]interface{}) response {
+func ResponseData(message string, status int, data interface{}) response {
 	return response{
 		Meta: responseMeta{
 			Message: message,
 			Status:  status,
 		},
 		Data: data,
-	}
-}
-
-func ResponseError(message string, status int) response {
-	return response{
-		Meta: responseMeta{
-			Message: message,
-			Status:  status,
-		},
-		Data: nil,
 	}
 }
