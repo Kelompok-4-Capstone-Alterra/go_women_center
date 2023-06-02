@@ -3,9 +3,9 @@ package handler
 import (
 	"net/http"
 
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/auth"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/auth/usecase"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
-	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/auth"
 	"github.com/labstack/echo/v4"
 )
 
@@ -50,9 +50,11 @@ func (h *authHandler) LoginHandler(c echo.Context) error {
 		))
 	}
 
-	return c.JSON(http.StatusInternalServerError, helper.ResponseData(
-		http.StatusInternalServerError,
-		err.Error(),
-		token,
+	return c.JSON(http.StatusOK, helper.ResponseData(
+		http.StatusOK,
+		"login success",
+		map[string]interface{}{
+			"token": token,
+		},
 	))
 }

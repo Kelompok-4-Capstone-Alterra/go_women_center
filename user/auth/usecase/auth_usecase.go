@@ -71,7 +71,7 @@ func (u *userUsecase) VerifyEmail(email string) error {
 		Code:  otpCode,
 	}
 
-	err = u.EmailSender.SendEmail(email, "OTP verification code", otpCode) //TODO: write subject and body template
+	err = u.EmailSender.SendEmail(email, "OTP verification code (valid for 1 minute)", otpCode) //TODO: write subject and body template
 	if err != nil {
 		return err
 	}

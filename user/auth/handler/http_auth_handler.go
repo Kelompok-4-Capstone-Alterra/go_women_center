@@ -106,7 +106,7 @@ func (h *userHandler) VerifyEmailHandler(c echo.Context) error { // TODO: rename
 
 	return c.JSON(http.StatusOK, helper.ResponseData(
 		http.StatusOK,
-		"success sending otp",
+		"success sending otp, valid for 1 minute",
 		nil,
 	))
 }
@@ -174,6 +174,8 @@ func (h *userHandler) LoginHandler(c echo.Context) error {
 	return c.JSON(http.StatusOK, helper.ResponseData(
 		http.StatusOK,
 		"login success",
-		token,
+		map[string]interface{}{
+			"token": token,
+		},
 	))
 }
