@@ -30,7 +30,7 @@ type userInfo struct {
 	Picture       string `json:"picture"`
 }
 
-func (h *userHandler) LoginHandler(c echo.Context) error {
+func(h *userHandler) LoginHandler(c echo.Context) error {
 	g := helper.NewGoogleUUID()
 	uuid, _ := g.GenerateUUID()
 	// oauthStateString = uuid
@@ -41,7 +41,7 @@ func (h *userHandler) LoginHandler(c echo.Context) error {
 	return c.Redirect(http.StatusTemporaryRedirect, url)
 }
 
-func (h *userHandler) LoginGoogleCallback(c echo.Context) error {
+func(h *userHandler) LoginGoogleCallback(c echo.Context) error {
 	content, err := h.getUserInfo(c.FormValue("state"), c.FormValue("code"))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, echo.Map{
@@ -53,7 +53,7 @@ func (h *userHandler) LoginGoogleCallback(c echo.Context) error {
 	return c.JSON(http.StatusOK, content)
 }
 
-func (h *userHandler) getUserInfo(state, code string) (userInfo, error) {
+func(h *userHandler) getUserInfo(state, code string) (userInfo, error) {
 
 	UserInfo := userInfo{}
 	if !oauthstatemap[state] {

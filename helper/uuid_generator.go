@@ -14,7 +14,7 @@ func NewGoogleUUID() googleUUID {
 	return googleUUID{}
 }
 
-func (g googleUUID) GenerateUUID() (string, error) {
+func(g googleUUID) GenerateUUID() (string, error) {
 	uuid, err := uuid.NewUUID()
 	if err != nil {
 		return "", err

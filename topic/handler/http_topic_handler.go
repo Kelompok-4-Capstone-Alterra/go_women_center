@@ -15,7 +15,7 @@ func NewTopicHandler() *topicHandler {
 	return &topicHandler{}
 }
 
-func (h *topicHandler) GetAll(c echo.Context) error{
+func(h *topicHandler) GetAll(c echo.Context) error{
 	var topicsRes = make([]topic.GetAllResponse, 0, len(constant.TOPICS))
 
 	for i := 1; i <= len(constant.TOPICS); i++{
