@@ -9,6 +9,7 @@ import (
 type CareerRepository interface {
 	GetAll(offset, limit int) ([]career.GetAllResponse, error)
 	GetById(id string) (career.GetByResponse, error)
+	GetBySearch(search string) ([]career.GetByResponse, error)
 	Create(career entity.Career) error
 	Update(id string, career entity.Career) error
 	Delete(id string) error
@@ -31,6 +32,15 @@ func (r *mysqlCareerRepository) GetAll(offset, limit int) ([]career.GetAllRespon
 		return nil, err
 	}
 	return career, nil
+}
+
+func (r *mysqlCareerRepository) GetBySearch(search string) ([]career.GetByResponse, error) {
+	var careers []career.GetByResponse
+	err := r.DB.Model(&entity.Career{}).Where("JobPosition LIKE ? OR CompanyName LIKE ? OR Location LIKE ? OR CAST(Salary AS CHAR) LIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").Find(&careers).Error
+	if err != nil {
+		return nil, err
+	}
+	return careers, nil
 }
 
 func (r *mysqlCareerRepository) GetById(id string) (career.GetByResponse, error) {

@@ -133,6 +133,24 @@ func (h *careerHandler) GetById(c echo.Context) error {
 
 }
 
+func (h *careerHandler) GetBySearch(c echo.Context) error {
+
+	var id career.IdRequest
+
+
+	career, err := h.CareerUsecase.GetById(id.ID)
+
+	if err != nil {
+		return c.JSON(
+			getStatusCode(err),
+			helper.ResponseData(err.Error(), getStatusCode(err), nil),
+		)
+	}
+
+	return c.JSON(getStatusCode(err), helper.ResponseData("success get career by search", getStatusCode(err), career))
+
+}
+
 func (h *careerHandler) Update(c echo.Context) error {
 
 	var careerReq career.UpdateRequest
