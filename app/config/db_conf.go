@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/domain"
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -47,8 +47,8 @@ func (dbc *DBconf) InitDB() *gorm.DB {
 	}
 
 	db.AutoMigrate(
-		&domain.User{},
-		&domain.Admin{},
+		&entity.User{},
+		&entity.Admin{},
 	)
 
 	return db

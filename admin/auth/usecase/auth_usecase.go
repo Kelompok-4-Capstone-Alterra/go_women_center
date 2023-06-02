@@ -4,11 +4,11 @@ import (
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/auth/repository"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/auth"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/constant"
-	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/domain"
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 )
 
 type AuthUsecase interface {
-	Login(reqDTO auth.LoginAdminDTO) (domain.Admin, error)
+	Login(reqDTO auth.LoginAdminDTO) (entity.Admin, error)
 }
 
 type authUseCase struct {
@@ -21,14 +21,14 @@ func NewAuthUsecase(repo repository.AdminRepo) *authUseCase {
 	}
 }
 
-func (a *authUseCase) Login(reqDTO auth.LoginAdminDTO) (domain.Admin, error) {
+func (a *authUseCase) Login(reqDTO auth.LoginAdminDTO) (entity.Admin, error) {
 	data, err := a.Repo.GetByEmail(reqDTO.Email)
 	if err != nil {
-		return domain.Admin{}, constant.ErrInvalidCredential
+		return entity.Admin{}, constant.ErrInvalidCredential
 	}
 
 	if reqDTO.Password != data.Password {
-		return domain.Admin{}, constant.ErrInvalidCredential
+		return entity.Admin{}, constant.ErrInvalidCredential
 	}
 
 	return data, nil

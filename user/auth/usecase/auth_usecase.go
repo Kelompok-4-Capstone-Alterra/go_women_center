@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/constant"
-	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/domain"
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth/repository"
@@ -13,7 +13,7 @@ import (
 type UserUsecase interface {
 	Register(userDTO user.RegisterUserDTO) error
 	VerifyEmail(email string) error
-	Login(userDTO user.LoginUserDTO) (domain.User, error)
+	Login(userDTO user.LoginUserDTO) (entity.User, error)
 }
 
 type userUsecase struct {
@@ -45,7 +45,7 @@ func (u *userUsecase) Register(userDTO user.RegisterUserDTO) error {
 
 	defer u.otpRepo.Delete(storedOtp.Email)
 
-	data := domain.User{
+	data := entity.User{
 		ID:       uuid,
 		Name:     userDTO.Name,
 		Email:    userDTO.Email,
@@ -80,14 +80,14 @@ func (u *userUsecase) VerifyEmail(email string) error {
 	return nil
 }
 
-func (u *userUsecase) Login(userDTO user.LoginUserDTO) (domain.User, error) {
+func (u *userUsecase) Login(userDTO user.LoginUserDTO) (entity.User, error) {
 	data, err := u.repo.GetByEmail(userDTO.Email)
 	if err != nil {
-		return domain.User{}, constant.ErrInvalidCredential
+		return entity.User{}, constant.ErrInvalidCredential
 	}
 
 	if userDTO.Password != data.Password {
-		return domain.User{}, constant.ErrInvalidCredential
+		return entity.User{}, constant.ErrInvalidCredential
 	}
 
 	return data, nil
