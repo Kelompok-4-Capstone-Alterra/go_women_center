@@ -19,7 +19,7 @@ var (
 
 	// bad request
 	ErrProfilePictureFormat = errors.New("profile picture must be an image and png/jpg/jpeg format")
-	ErrProfilePictureSize = errors.New("profile picture size must be less than 10MB")
+	ErrProfilePictureSize = errors.New("profile picture size must be less than 2MB")
 	ErrEmailFormat = errors.New("email must be a valid email")
 	ErrTarifFormat = errors.New("tarif must be a number")
 	ErrRatingFormat = errors.New("rating must be a number between 1-5")

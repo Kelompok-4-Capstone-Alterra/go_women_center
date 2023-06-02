@@ -42,9 +42,6 @@ func isRequestValid(m interface{}) error {
 		if _, ok := constant.TOPICS[data.Topic]; !ok {
 			return counselor.ErrInvalidTopic
 		}
-		// if !constant.TOPIC[topic] {
-		// 	return counselor.ErrInvalidTopic
-		// }
 	}
 
 	if data, ok := m.(counselor.UpdateRequest); ok {
@@ -62,7 +59,7 @@ func isImageValid(img *multipart.FileHeader) error {
 		return counselor.ErrRequired
 	}
 	
-	if img.Size > 10 * 1024 * 1024 { // 10 MB
+	if img.Size > 2 * 1024 * 1024 { // 2 MB
 		return counselor.ErrProfilePictureSize
 	}
 
@@ -71,4 +68,4 @@ func isImageValid(img *multipart.FileHeader) error {
 	}
 
 	return nil
-}
+}	
