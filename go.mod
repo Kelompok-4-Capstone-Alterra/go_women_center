@@ -3,6 +3,7 @@ module github.com/Kelompok-4-Capstone-Alterra/go_women_center
 go 1.20
 
 require (
+	github.com/joho/godotenv v1.5.1
 	golang.org/x/oauth2 v0.8.0
 	gorm.io/gorm v1.25.1
 )
@@ -12,7 +13,6 @@ require (
 	github.com/go-sql-driver/mysql v1.7.0 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
-	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/labstack/gommon v0.4.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.17 // indirect
