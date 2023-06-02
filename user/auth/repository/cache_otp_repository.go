@@ -93,11 +93,11 @@ func (lc *localCache) Read(email string) (Otp, error) {
 
 	co, ok := lc.codes[email]
 	if !ok {
-		return Otp{}, constant.ErrUserNotInCache
+		return Otp{}, constant.ErrInvalidOtp
 	}
 
 	if time.Now().Unix() >= co.expireAtTimestamp {
-		return Otp{}, constant.ErrExpiredCache
+		return Otp{}, constant.ErrExpiredOtp
 	}
 
 	return co.Otp, nil
