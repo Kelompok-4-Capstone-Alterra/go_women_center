@@ -102,7 +102,9 @@ func (h *counselorHandler) GetById(c echo.Context) error {
 	)
 	}
 
-	return c.JSON(getStatusCode(err), helper.ResponseSuccess("success get counselor by id", getStatusCode(err), counselor))
+	return c.JSON(getStatusCode(err), helper.ResponseSuccess("success get counselor by id", getStatusCode(err), echo.Map{
+		"counselor": counselor,
+	}))
 
 }
 
