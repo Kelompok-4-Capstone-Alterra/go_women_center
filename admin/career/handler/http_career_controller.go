@@ -135,10 +135,9 @@ func (h *careerHandler) GetById(c echo.Context) error {
 
 func (h *careerHandler) GetBySearch(c echo.Context) error {
 
-	var id career.IdRequest
+	search := c.QueryParam("search")
 
-
-	career, err := h.CareerUsecase.GetById(id.ID)
+	career, err := h.CareerUsecase.GetBySearch(search)
 
 	if err != nil {
 		return c.JSON(

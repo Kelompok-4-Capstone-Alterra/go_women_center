@@ -91,3 +91,20 @@ func (h *careerHandler) GetById(c echo.Context) error {
 	return c.JSON(getStatusCode(err), helper.ResponseData("success get career by id", getStatusCode(err), career))
 
 }
+
+func (h *careerHandler) GetBySearch(c echo.Context) error {
+
+	search := c.QueryParam("search")
+
+	career, err := h.CareerUsecase.GetBySearch(search)
+
+	if err != nil {
+		return c.JSON(
+			getStatusCode(err),
+			helper.ResponseData(err.Error(), getStatusCode(err), nil),
+		)
+	}
+
+	return c.JSON(getStatusCode(err), helper.ResponseData("success get career by search", getStatusCode(err), career))
+
+}

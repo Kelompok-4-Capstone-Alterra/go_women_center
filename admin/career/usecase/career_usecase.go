@@ -14,6 +14,7 @@ type CareerUsecase interface {
 	GetAll(offset, limit int) ([]career.GetAllResponse, error)
 	GetTotalPages(limit int) (int, error)
 	GetById(id string) (career.GetByResponse, error)
+	GetBySearch(search string) ([]career.GetAllResponse, error)
 	Create(inputDetail career.CreateRequest, inputImage *multipart.FileHeader) error
 	Update(inputDetail career.UpdateRequest, inputImage *multipart.FileHeader) error
 	Delete(id string) error
@@ -53,6 +54,17 @@ func (u *careerUsecase) GetTotalPages(limit int) (int, error) {
 func (u *careerUsecase) GetById(id string) (career.GetByResponse, error) {
 
 	careerData, err := u.careerRepo.GetById(id)
+
+	if err != nil {
+		return careerData, career.ErrCareerNotFound
+	}
+
+	return careerData, nil
+}
+
+func (u *careerUsecase) GetBySearch(search string) ([]career.GetAllResponse, error) {
+
+	careerData, err := u.careerRepo.GetBySearch(search)
 
 	if err != nil {
 		return careerData, career.ErrCareerNotFound

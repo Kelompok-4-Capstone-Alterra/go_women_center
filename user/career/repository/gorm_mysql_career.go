@@ -1,14 +1,15 @@
 package repository
 
 import (
-	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/career"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/career"
 	"gorm.io/gorm"
 )
 
 type CareerRepository interface {
 	GetAll(offset, limit int) ([]career.GetAllResponse, error)
 	GetById(id string) (career.GetByResponse, error)
+	GetBySearch(search string) ([]career.GetAllResponse, error)
 	Count() (int, error)
 }
 
@@ -37,6 +38,15 @@ func (r *mysqlCareerRepository) GetById(id string) (career.GetByResponse, error)
 		return career, err
 	}
 	return career, nil
+}
+
+func (r *mysqlCareerRepository) GetBySearch(search string) ([]career.GetAllResponse, error) {
+	var careers []career.GetAllResponse
+	err := r.DB.Model(&entity.Career{}).Where("JobPosition LIKE ? OR CompanyName LIKE ? OR Location LIKE ? OR CAST(Salary AS CHAR) LIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").Find(&careers).Error
+	if err != nil {
+		return nil, err
+	}
+	return careers, nil
 }
 
 func (r *mysqlCareerRepository) Count() (int, error) {
