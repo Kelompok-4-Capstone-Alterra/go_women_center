@@ -16,7 +16,6 @@ type Career struct {
 	MinExperience string  `gorm:"type:varchar(150);not null"`
 	LastEducation string  `gorm:"type:varchar(150);not null"`
 	CompanyEmail  string  `gorm:"type:varchar(150);not null"`
-	ApplyLink     string  `gorm:"type:varchar(255);not null"`
 	Description   string
 	CreatedAt     time.Time
 	UpdatedAt     time.Time

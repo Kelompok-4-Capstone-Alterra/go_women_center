@@ -80,7 +80,6 @@ func (u *careerUsecase) Create(inputDetail career.CreateRequest, inputImage *mul
 		LastEducation: inputDetail.LastEducation,
 		Description:   inputDetail.Description,
 		CompanyEmail:  inputDetail.CompanyEmail,
-		ApplyLink:     inputDetail.ApplyLink,
 		Image:         path,
 	}
 
@@ -110,7 +109,6 @@ func (u *careerUsecase) Update(inputDetail career.UpdateRequest, inputImage *mul
 		LastEducation: inputDetail.LastEducation,
 		Description:   inputDetail.Description,
 		CompanyEmail:  inputDetail.CompanyEmail,
-		ApplyLink:     inputDetail.ApplyLink,
 	}
 
 	if inputImage != nil {
