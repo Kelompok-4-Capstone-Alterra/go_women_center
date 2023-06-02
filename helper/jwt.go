@@ -10,6 +10,7 @@ import (
 type AuthJWT interface {
 	GenerateUserToken(id string, email string, authBy constant.AuthBy) (string, error)
 	GenerateAdminToken(email string) (string, error)
+	IsAdmin(token *jwt.Token) (error)
 }
 
 type authJWT struct {
@@ -72,7 +73,7 @@ type JwtCustomAdminClaims struct {
 	jwt.RegisteredClaims
 }
 
-func (aj *authJWT) CheckIfAdmin(token *jwt.Token) (error) {
+func (aj *authJWT) IsAdmin(token *jwt.Token) (error) {
 	claims := token.Claims.(jwt.MapClaims)
 	idPayload, ok := claims["is_admin"].(bool)
 	if !ok || !idPayload {
