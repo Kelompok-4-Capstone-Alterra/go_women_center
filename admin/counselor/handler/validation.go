@@ -17,10 +17,7 @@ func isRequestValid(m interface{}) error {
 			field := strings.ToLower(err.Field())
 
 			if err.Tag() == "required" {
-				if field == "profilepicture" {
-					return counselor.ErrRequired("profile_picture")
-				}
-				return counselor.ErrRequired(field)
+				return counselor.ErrRequired
 			}
 
 			switch field {
