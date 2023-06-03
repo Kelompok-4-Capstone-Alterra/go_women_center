@@ -85,8 +85,8 @@ func (h *userHandler) getUserInfo(state, code string) (user.UserOauthInfo, error
 }
 
 func (h *userHandler) VerifyEmailHandler(c echo.Context) error { // TODO: rename with suffix handler
-	emailDTO := user.VerifyEmailRequest{}
-	err := c.Bind(&emailDTO)
+	emailRequest := user.VerifyEmailRequest{}
+	err := c.Bind(&emailRequest)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
 			http.StatusInternalServerError,
@@ -95,7 +95,7 @@ func (h *userHandler) VerifyEmailHandler(c echo.Context) error { // TODO: rename
 		))
 	}
 
-	if err := isRequestValid(emailDTO); err != nil {
+	if err := isRequestValid(emailRequest); err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(
 			http.StatusBadRequest,
 			err.Error(),
@@ -103,7 +103,7 @@ func (h *userHandler) VerifyEmailHandler(c echo.Context) error { // TODO: rename
 		))
 	}
 
-	err = h.Usecase.VerifyEmail(emailDTO.Email)
+	err = h.Usecase.VerifyEmail(emailRequest.Email)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
 			http.StatusInternalServerError,
@@ -120,8 +120,8 @@ func (h *userHandler) VerifyEmailHandler(c echo.Context) error { // TODO: rename
 }
 
 func (h *userHandler) RegisterHandler(c echo.Context) error {
-	reqDTO := user.RegisterUserRequest{}
-	err := c.Bind(&reqDTO)
+	registerRequest := user.RegisterUserRequest{}
+	err := c.Bind(&registerRequest)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
 			http.StatusInternalServerError,
@@ -130,7 +130,7 @@ func (h *userHandler) RegisterHandler(c echo.Context) error {
 		))
 	}
 
-	if err := isRequestValid(reqDTO); err != nil {
+	if err := isRequestValid(registerRequest); err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(
 			http.StatusBadRequest,
 			err.Error(),
@@ -138,7 +138,7 @@ func (h *userHandler) RegisterHandler(c echo.Context) error {
 		))
 	}
 
-	err = h.Usecase.Register(reqDTO)
+	err = h.Usecase.Register(registerRequest)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
 			http.StatusInternalServerError,
@@ -156,8 +156,8 @@ func (h *userHandler) RegisterHandler(c echo.Context) error {
 }
 
 func (h *userHandler) LoginHandler(c echo.Context) error {
-	reqDTO := user.LoginUserRequest{}
-	err := c.Bind(&reqDTO)
+	loginRequest := user.LoginUserRequest{}
+	err := c.Bind(&loginRequest)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
 			http.StatusInternalServerError,
@@ -166,7 +166,7 @@ func (h *userHandler) LoginHandler(c echo.Context) error {
 		))
 	}
 
-	if err := isRequestValid(reqDTO); err != nil {
+	if err := isRequestValid(loginRequest); err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(
 			http.StatusBadRequest,
 			err.Error(),
@@ -174,7 +174,7 @@ func (h *userHandler) LoginHandler(c echo.Context) error {
 		))
 	}
 
-	data, err := h.Usecase.Login(reqDTO)
+	data, err := h.Usecase.Login(loginRequest)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
 			http.StatusInternalServerError,
@@ -195,7 +195,7 @@ func (h *userHandler) LoginHandler(c echo.Context) error {
 	return c.JSON(http.StatusOK, helper.ResponseData(
 		http.StatusOK,
 		"login success",
-		map[string]interface{}{
+		echo.Map{
 			"token": token,
 		},
 	))

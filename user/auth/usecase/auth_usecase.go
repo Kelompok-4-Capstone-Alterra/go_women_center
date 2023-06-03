@@ -11,9 +11,9 @@ import (
 )
 
 type UserUsecase interface {
-	Register(userDTO user.RegisterUserRequest) error
+	Register(registerRequest user.RegisterUserRequest) error
 	VerifyEmail(email string) error
-	Login(userDTO user.LoginUserRequest) (entity.User, error)
+	Login(loginRequest user.LoginUserRequest) (entity.User, error)
 }
 
 type userUsecase struct {
@@ -36,8 +36,8 @@ func NewUserUsecase(repo repository.UserRepo, idGenerator helper.UuidGenerator, 
 	}
 }
 
-func (u *userUsecase) Register(userDTO user.RegisterUserRequest) error {
-	storedOtp, err := u.otpRepo.Read(userDTO.Email)
+func (u *userUsecase) Register(registerRequest user.RegisterUserRequest) error {
+	storedOtp, err := u.otpRepo.Read(registerRequest.Email)
 	if err != nil {
 		return err
 	}
@@ -48,20 +48,20 @@ func (u *userUsecase) Register(userDTO user.RegisterUserRequest) error {
 	}
 
 	
-	encryptedPass, err := u.Encryptor.HashPassword(userDTO.Password)
+	encryptedPass, err := u.Encryptor.HashPassword(registerRequest.Password)
 	if err != nil {
 		return user.ErrFailedEncrpyt
 	}
-	log.Println(userDTO.Password)
+	log.Println(registerRequest.Password)
 	log.Println(encryptedPass)
 
 	defer u.otpRepo.Delete(storedOtp.Email)
 
 	data := entity.User{
 		ID:       uuid,
-		Name:     userDTO.Name,
-		Email:    userDTO.Email,
-		Username: userDTO.Username,
+		Name:     registerRequest.Name,
+		Email:    registerRequest.Email,
+		Username: registerRequest.Username,
 		Password: encryptedPass,
 	}
 
@@ -92,17 +92,17 @@ func (u *userUsecase) VerifyEmail(email string) error {
 	return nil
 }
 
-func (u *userUsecase) Login(userDTO user.LoginUserRequest) (entity.User, error) {
-	data, err := u.repo.GetByEmail(userDTO.Email)
+func (u *userUsecase) Login(loginRequest user.LoginUserRequest) (entity.User, error) {
+	data, err := u.repo.GetByEmail(loginRequest.Email)
 	if err != nil {
 		return entity.User{}, user.ErrInvalidCredential
 	}
 
-	log.Println(userDTO.Password)
-	u.Encryptor.HashPassword(userDTO.Password)
+	log.Println(loginRequest.Password)
+	u.Encryptor.HashPassword(loginRequest.Password)
 	log.Println(data.Password)
 
-	if !u.Encryptor.CheckPasswordHash(userDTO.Password, data.Password) {
+	if !u.Encryptor.CheckPasswordHash(loginRequest.Password, data.Password) {
 		return entity.User{}, user.ErrInvalidCredential
 	}
 
