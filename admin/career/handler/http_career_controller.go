@@ -103,7 +103,7 @@ func (h *careerHandler) Create(c echo.Context) error {
 		)
 	}
 
-	return c.JSON(getStatusCode(err), helper.ResponseData("success create career", getStatusCode(err), nil))
+	return c.JSON(getStatusCode(err), helper.ResponseData("success create career", getStatusCode(err), careerReq))
 
 }
 
@@ -206,6 +206,6 @@ func (h *careerHandler) Delete(c echo.Context) error {
 		)
 	}
 
-	return c.JSON(getStatusCode(err), helper.ResponseData("success delete career", getStatusCode(err), nil))
+	return c.JSON(getStatusCode(err), helper.ResponseData("success delete career", getStatusCode(err), id))
 
 }

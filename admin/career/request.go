@@ -9,7 +9,6 @@ type CreateRequest struct {
 	LastEducation string  `form:"lasteducation" validate:"required"`
 	Description   string  `form:"description" validate:"required"`
 	CompanyEmail  string  `form:"companyemail" validate:"required,email"`
-	ApplyLink     string  `form:"applylink" validate:"required"`
 }
 
 type UpdateRequest struct {
@@ -22,7 +21,6 @@ type UpdateRequest struct {
 	LastEducation string  `form:"lasteducation" validate:"omitempty"`
 	Description   string  `form:"description" validate:"omitempty"`
 	CompanyEmail  string  `form:"companyemail" validate:"omitempty,email"`
-	ApplyLink     string  `form:"applylink" validate:"omitempty"`
 }
 
 type IdRequest struct {

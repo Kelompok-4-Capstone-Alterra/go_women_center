@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -45,7 +46,7 @@ func (dbc *DBconf) InitDB() *gorm.DB {
 		os.Exit(1)
 	}
 
-	db.AutoMigrate()
+	db.AutoMigrate(&entity.Career{})
 
 	return db
 }

@@ -43,10 +43,9 @@ services:
     ports:
       - 3306:3306
     volumes:
-      - mysql-db:/root/lib/data
-
-volumes:
-  mysql-db:
+      - ./db/backup:/var/lib/mysql:rw
+    cap_add:
+      - SYS_NICE  # CAP_SYS_NICE
 
 networks:
   network_go_women_center:
