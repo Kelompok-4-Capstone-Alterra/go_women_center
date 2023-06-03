@@ -1,6 +1,6 @@
 package user
 
-type RegisterUserDTO struct {
+type RegisterUserRequest struct {
 	Name     string `json:"name" validate:"required"`
 	Email    string `json:"email" validate:"required,email"`
 	Username string `json:"username" validate:"required"`
@@ -8,11 +8,11 @@ type RegisterUserDTO struct {
 	OTP      string `json:"otp" validate:"required"`
 }
 
-type LoginUserDTO struct {
+type LoginUserRequest struct {
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required"`
 }
 
-type VerifyEmailDTO struct {
+type VerifyEmailRequest struct {
 	Email string `json:"email" validate:"required,email"`
 }

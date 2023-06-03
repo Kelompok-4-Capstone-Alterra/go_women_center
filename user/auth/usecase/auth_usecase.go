@@ -6,14 +6,14 @@ import (
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/constant"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
-	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth"
+	user "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth/repository"
 )
 
 type UserUsecase interface {
-	Register(userDTO user.RegisterUserDTO) error
+	Register(userDTO user.RegisterUserRequest) error
 	VerifyEmail(email string) error
-	Login(userDTO user.LoginUserDTO) (entity.User, error)
+	Login(userDTO user.LoginUserRequest) (entity.User, error)
 }
 
 type userUsecase struct {
@@ -32,7 +32,7 @@ func NewUserUsecase(repo repository.UserRepo, idGenerator helper.UuidGenerator, 
 	}
 }
 
-func (u *userUsecase) Register(userDTO user.RegisterUserDTO) error {
+func (u *userUsecase) Register(userDTO user.RegisterUserRequest) error {
 	storedOtp, err := u.otpRepo.Read(userDTO.Email)
 	if err != nil {
 		return err
@@ -80,7 +80,7 @@ func (u *userUsecase) VerifyEmail(email string) error {
 	return nil
 }
 
-func (u *userUsecase) Login(userDTO user.LoginUserDTO) (entity.User, error) {
+func (u *userUsecase) Login(userDTO user.LoginUserRequest) (entity.User, error) {
 	data, err := u.repo.GetByEmail(userDTO.Email)
 	if err != nil {
 		return entity.User{}, constant.ErrInvalidCredential

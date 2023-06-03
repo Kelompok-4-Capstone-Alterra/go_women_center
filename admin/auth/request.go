@@ -1,6 +1,6 @@
 package auth
 
-type LoginAdminDTO struct {
-	Email string `json:"email" validate:"required,email"`
+type LoginAdminRequest struct {
+	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required"`
 }

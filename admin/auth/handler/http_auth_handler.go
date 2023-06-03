@@ -10,22 +10,21 @@ import (
 )
 
 type authHandler struct {
-	Usecase usecase.AuthUsecase
-	JwtConf helper.AuthJWT
+	Usecase   usecase.AuthUsecase
+	JwtConf   helper.AuthJWT
 	Validator helper.Validator
-	
 }
 
 func NewAuthHandler(u usecase.AuthUsecase, jwtConf helper.AuthJWT, vld helper.Validator) *authHandler {
 	return &authHandler{
-		Usecase: u,
-		JwtConf: jwtConf,
+		Usecase:   u,
+		JwtConf:   jwtConf,
 		Validator: vld,
 	}
 }
 
 func (h *authHandler) LoginHandler(c echo.Context) error {
-	request := auth.LoginAdminDTO{}
+	request := auth.LoginAdminRequest{}
 	err := c.Bind(&request)
 	h.Validator.ValidateStruct(request)
 	if err != nil {
@@ -61,5 +60,5 @@ func (h *authHandler) LoginHandler(c echo.Context) error {
 			"token": token,
 		},
 	))
-	
+
 }

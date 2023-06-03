@@ -87,7 +87,7 @@ func (h *userHandler) getUserInfo(state, code string) (user.UserOauthInfo, error
 }
 
 func (h *userHandler) VerifyEmailHandler(c echo.Context) error { // TODO: rename with suffix handler
-	emailDTO := user.VerifyEmailDTO{}
+	emailDTO := user.VerifyEmailRequest{}
 	err := c.Bind(&emailDTO)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
@@ -123,7 +123,7 @@ func (h *userHandler) VerifyEmailHandler(c echo.Context) error { // TODO: rename
 }
 
 func (h *userHandler) RegisterHandler(c echo.Context) error {
-	reqDTO := user.RegisterUserDTO{}
+	reqDTO := user.RegisterUserRequest{}
 	err := c.Bind(&reqDTO)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
@@ -160,7 +160,7 @@ func (h *userHandler) RegisterHandler(c echo.Context) error {
 }
 
 func (h *userHandler) LoginHandler(c echo.Context) error {
-	reqDTO := user.LoginUserDTO{}
+	reqDTO := user.LoginUserRequest{}
 	err := c.Bind(&reqDTO)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
