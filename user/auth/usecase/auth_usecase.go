@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"log"
 	"time"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
@@ -46,10 +47,13 @@ func (u *userUsecase) Register(userDTO user.RegisterUserRequest) error {
 		return err
 	}
 
+	
 	encryptedPass, err := u.Encryptor.HashPassword(userDTO.Password)
 	if err != nil {
 		return user.ErrFailedEncrpyt
 	}
+	log.Println(userDTO.Password)
+	log.Println(encryptedPass)
 
 	defer u.otpRepo.Delete(storedOtp.Email)
 
@@ -94,7 +98,11 @@ func (u *userUsecase) Login(userDTO user.LoginUserRequest) (entity.User, error) 
 		return entity.User{}, user.ErrInvalidCredential
 	}
 
-	if u.Encryptor.CheckPasswordHash(userDTO.Password, data.Password) {
+	log.Println(userDTO.Password)
+	u.Encryptor.HashPassword(userDTO.Password)
+	log.Println(data.Password)
+
+	if !u.Encryptor.CheckPasswordHash(userDTO.Password, data.Password) {
 		return entity.User{}, user.ErrInvalidCredential
 	}
 
