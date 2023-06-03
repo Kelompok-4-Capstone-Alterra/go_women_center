@@ -12,7 +12,6 @@ require (
 
 require (
 	cloud.google.com/go/compute/metadata v0.2.0 // indirect
-	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-sql-driver/mysql v1.7.0 // indirect
@@ -32,10 +31,11 @@ require (
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
+	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 )
 
 require (
-	github.com/go-playground/validator/v10 v10.14.0
+	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/google/uuid v1.3.0
 	github.com/jinzhu/inflection v1.0.0 // indirect
