@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor/usecase"
@@ -18,69 +19,70 @@ func NewCounselorHandler(CUcase usecase.CounselorUsecase) *counselorHandler {
 	return &counselorHandler{CUscase: CUcase}
 }
 
-func (h *counselorHandler) GetAll(c echo.Context) error {
+func(h *counselorHandler) GetAll(c echo.Context) error {
 
-	page, _ :=  helper.StringToInt(c.QueryParam("page"))
-	limit, _ := helper.StringToInt(c.QueryParam("limit"))
+	page, _ :=  strconv.Atoi(c.QueryParam("page"))
+	limit, _ := strconv.Atoi(c.QueryParam("limit"))
 	
 	page, offset, limit := helper.GetPaginateData(page, limit)
 
 	counselors, err := h.CUscase.GetAll(offset, limit)
 	
 	if err != nil {
-		return c.JSON(getStatusCode(err), helper.ResponseData(err.Error(), getStatusCode(err), nil))
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
 	}
 
 	totalPages, err := h.CUscase.GetTotalPages(limit)
 
 	if err != nil {
-		return c.JSON(getStatusCode(err), helper.ResponseData(err.Error(), getStatusCode(err), nil))
+		return c.JSON(http.StatusInternalServerError, helper.ResponseData(err.Error(), http.StatusInternalServerError, nil))
 	}
 
-	return c.JSON(getStatusCode(err), helper.ResponseData("success get all conselor", getStatusCode(err), echo.Map{
+	return c.JSON(http.StatusOK, helper.ResponseData("success get all conselor", http.StatusOK, echo.Map{
 		"counselors": counselors,
 		"current_pages": page,
 		"total_pages": totalPages,
 	}))
 }
 
-func (h *counselorHandler) Create(c echo.Context) error {
+func(h *counselorHandler) Create(c echo.Context) error {
 
 	counselorReq := counselor.CreateRequest{}
-	
+	file, _ :=  c.FormFile("profile_picture")
+	counselorReq.ProfilePicture = file
+
 	c.Bind(&counselorReq)
 
 	if err := isRequestValid(counselorReq); err != nil {
-		
 		return c.JSON(
-			getStatusCode(err), 
-			helper.ResponseData(err.Error(), getStatusCode(err), nil),
-		)
-	}
-	
-	imgInput, _ := c.FormFile("profile_picture")
-
-	if err := isImageValid(imgInput); err != nil {
-		return c.JSON(
-			getStatusCode(err),
-			helper.ResponseData(err.Error(), getStatusCode(err), nil),
+			http.StatusBadRequest, 
+			helper.ResponseData(err.Error(), http.StatusBadRequest, nil),
 		)
 	}
 
-	err := h.CUscase.Create(counselorReq, imgInput)
+	err := h.CUscase.Create(counselorReq)
 
 	if err != nil {
+		status := http.StatusInternalServerError
+
+		switch err.Error() {
+			case counselor.ErrCounselorConflict.Error():
+				status = http.StatusConflict
+			case counselor.ErrProfilePictureFormat.Error():
+				status = http.StatusBadRequest
+		}
+		
 		return c.JSON(
-			getStatusCode(err),
-			helper.ResponseData(err.Error(), getStatusCode(err), nil),
+			status,
+			helper.ResponseData(err.Error(), status, nil),
 		)
 	}
 
-	return c.JSON(getStatusCode(err), helper.ResponseData("success create counselor", getStatusCode(err), nil))
+	return c.JSON(http.StatusOK, helper.ResponseData("success create counselor", http.StatusOK, nil))
 
 }
 
-func (h *counselorHandler) GetById(c echo.Context) error {
+func(h *counselorHandler) GetById(c echo.Context) error {
 
 	var id counselor.IdRequest
 
@@ -88,8 +90,8 @@ func (h *counselorHandler) GetById(c echo.Context) error {
 
 	if err := isRequestValid(id); err != nil {
 		return c.JSON(
-			getStatusCode(err),
-			helper.ResponseData(err.Error(), getStatusCode(err), nil),
+			http.StatusBadRequest,
+			helper.ResponseData(err.Error(), http.StatusBadRequest, nil),
 		)
 	}
 
@@ -97,52 +99,45 @@ func (h *counselorHandler) GetById(c echo.Context) error {
 
 	if err != nil {
 		return c.JSON(
-			getStatusCode(err),
-			helper.ResponseData(err.Error(), getStatusCode(err), nil),
+			http.StatusInternalServerError,
+			helper.ResponseData(err.Error(), http.StatusInternalServerError, nil),
 	)
 	}
 
-	return c.JSON(getStatusCode(err), helper.ResponseData("success get counselor by id", getStatusCode(err), echo.Map{
+	return c.JSON(http.StatusOK, helper.ResponseData("success get counselor by id", http.StatusOK, echo.Map{
 		"counselor": counselor,
 	}))
 
 }
 
-func (h *counselorHandler) Update(c echo.Context) error {
+func(h *counselorHandler) Update(c echo.Context) error {
 
-	var counselorReq counselor.UpdateRequest
+	counselorReq := counselor.UpdateRequest{}
+	file, _ :=  c.FormFile("profile_picture")
+	counselorReq.ProfilePicture = file
 
 	c.Bind(&counselorReq)
 	 
 	if err := isRequestValid(counselorReq); err != nil {	
 		return c.JSON(
-			getStatusCode(err), 
-			helper.ResponseData(err.Error(), getStatusCode(err), nil),
+			http.StatusBadRequest, 
+			helper.ResponseData(err.Error(), http.StatusBadRequest, nil),
 		)
 	}
 
-	imgInput, _ := c.FormFile("profile_picture")
-
-	if err := isImageValid(imgInput); err != nil {
-		return c.JSON(
-			getStatusCode(err),
-			helper.ResponseData(err.Error(), getStatusCode(err), nil),
-		)
-	}
-
-	err := h.CUscase.Update(counselorReq, imgInput)
+	err := h.CUscase.Update(counselorReq)
 
 	if err != nil {
 		return c.JSON(
-			getStatusCode(err),
-			helper.ResponseData(err.Error(), getStatusCode(err), nil),
+			http.StatusInternalServerError,
+			helper.ResponseData(err.Error(), http.StatusInternalServerError, nil),
 		)
 	}
 
-	return c.JSON(getStatusCode(err), helper.ResponseData("success update counselor", getStatusCode(err), nil))
+	return c.JSON(http.StatusOK, helper.ResponseData("success update counselor", http.StatusOK, nil))
 }
 
-func (h *counselorHandler) Delete(c echo.Context) error {
+func(h *counselorHandler) Delete(c echo.Context) error {
 
 	var id counselor.IdRequest
 
@@ -150,8 +145,8 @@ func (h *counselorHandler) Delete(c echo.Context) error {
 
 	if err := isRequestValid(id); err != nil {
 		return c.JSON(
-			getStatusCode(err),
-			helper.ResponseData(err.Error(), getStatusCode(err), nil),
+			http.StatusBadRequest,
+			helper.ResponseData(err.Error(), http.StatusBadRequest, nil),
 		)
 	}
 
@@ -159,47 +154,11 @@ func (h *counselorHandler) Delete(c echo.Context) error {
 
 	if err != nil {
 		return c.JSON(
-			getStatusCode(err),
-			helper.ResponseData(err.Error(), getStatusCode(err), nil),
+			http.StatusInternalServerError,
+			helper.ResponseData(err.Error(), http.StatusInternalServerError, nil),
 		)
 	}
 
-	return c.JSON(getStatusCode(err), helper.ResponseData("success delete counselor", getStatusCode(err), nil))
-
-}
-
-func getStatusCode(err error) int {
-
-	if err == nil {
-		return http.StatusOK
-	}
-
-	switch err {
-		case counselor.ErrInternalServerError:
-			return http.StatusInternalServerError
-			
-		case counselor.ErrCounselorNotFound:
-			return http.StatusNotFound
-		
-		case counselor.ErrProfilePictureSize:
-			return http.StatusRequestEntityTooLarge
-
-		case 
-			counselor.ErrCounselorConflict,
-			counselor.ErrEmailConflict:
-			return http.StatusConflict
-		
-		case 
-		 	counselor.ErrProfilePictureFormat,
-			counselor.ErrEmailFormat,
-			counselor.ErrTarifFormat,
-			counselor.ErrInvalidTopic,
-			counselor.ErrIdFormat,
-		 	counselor.ErrRequired:
-			return http.StatusBadRequest
-
-		default:
-			return http.StatusInternalServerError
-	}
+	return c.JSON(http.StatusOK, helper.ResponseData("success delete counselor", http.StatusOK, nil))
 
 }
