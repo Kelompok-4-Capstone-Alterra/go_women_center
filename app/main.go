@@ -12,7 +12,6 @@ import (
 	UserAuthHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth/handler"
 	UserAuthRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth/repository"
 	UserAuthUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth/usecase"
-	"github.com/go-playground/validator/v10"
 	_ "github.com/joho/godotenv/autoload"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
@@ -47,8 +46,6 @@ func main() {
 		"Women Center <ivanhilmideran@gmail.com>", //TODO: set email to the proper one
 	)
 
-	validator := helper.NewPlaygroundValidator(validator.New())
-
 	jwtConf := helper.NewAuthJWT(os.Getenv("JWT_SECRET"))
 
 	otpGenerator := helper.NewOtpGenerator(4, []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 0})
@@ -59,11 +56,11 @@ func main() {
 	userAuthRepo := UserAuthRepo.NewUserRepo(db)
 	otpRepo := UserAuthRepo.NewLocalCache(config.CLEANUP_INTERVAL)
 	userAuthUsecase := UserAuthUsecase.NewUserUsecase(userAuthRepo, googleUUID, &mailConf, otpRepo, otpGenerator)
-	userAuthHandler := UserAuthHandler.NewUserHandler(userAuthUsecase, googleOauthConfig, jwtConf, validator)
+	userAuthHandler := UserAuthHandler.NewUserHandler(userAuthUsecase, googleOauthConfig, jwtConf)
 
 	adminAuthRepo := AdminAuthRepo.NewAdminRepo(db)
 	adminAuthUsecase := AdminAuthUsecase.NewAuthUsecase(adminAuthRepo)
-	adminAuthHandler := AdminAuthHandler.NewAuthHandler(adminAuthUsecase, jwtConf, validator)
+	adminAuthHandler := AdminAuthHandler.NewAuthHandler(adminAuthUsecase, jwtConf)
 
 	e := echo.New()
 	e.Use(middleware.Logger())

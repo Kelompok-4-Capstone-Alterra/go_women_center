@@ -10,24 +10,29 @@ import (
 )
 
 type authHandler struct {
-	Usecase   usecase.AuthUsecase
-	JwtConf   helper.AuthJWT
-	Validator helper.Validator
+	Usecase usecase.AuthUsecase
+	JwtConf helper.AuthJWT
 }
 
-func NewAuthHandler(u usecase.AuthUsecase, jwtConf helper.AuthJWT, vld helper.Validator) *authHandler {
+func NewAuthHandler(u usecase.AuthUsecase, jwtConf helper.AuthJWT) *authHandler {
 	return &authHandler{
-		Usecase:   u,
-		JwtConf:   jwtConf,
-		Validator: vld,
+		Usecase: u,
+		JwtConf: jwtConf,
 	}
 }
 
 func (h *authHandler) LoginHandler(c echo.Context) error {
 	request := auth.LoginAdminRequest{}
 	err := c.Bind(&request)
-	h.Validator.ValidateStruct(request)
 	if err != nil {
+		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
+			http.StatusInternalServerError,
+			err.Error(),
+			nil,
+		))
+	}
+
+	if err := isRequestValid(request); err != nil {
 		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
 			http.StatusInternalServerError,
 			err.Error(),

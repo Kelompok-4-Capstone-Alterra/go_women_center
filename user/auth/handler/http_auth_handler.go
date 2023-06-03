@@ -18,15 +18,13 @@ type userHandler struct {
 	Usecase   usecase.UserUsecase
 	OauthConf *oauth2.Config
 	JwtConf   helper.AuthJWT
-	Validator helper.Validator
 }
 
-func NewUserHandler(u usecase.UserUsecase, oauthConf *oauth2.Config, jwtConf helper.AuthJWT, vld helper.Validator) *userHandler {
+func NewUserHandler(u usecase.UserUsecase, oauthConf *oauth2.Config, jwtConf helper.AuthJWT) *userHandler {
 	return &userHandler{
 		Usecase:   u,
 		OauthConf: oauthConf,
 		JwtConf:   jwtConf,
-		Validator: vld,
 	}
 }
 
@@ -97,8 +95,7 @@ func (h *userHandler) VerifyEmailHandler(c echo.Context) error { // TODO: rename
 		))
 	}
 
-	err = h.Validator.ValidateStruct(emailDTO)
-	if err != nil {
+	if err := isRequestValid(emailDTO); err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(
 			http.StatusBadRequest,
 			err.Error(),
@@ -133,8 +130,7 @@ func (h *userHandler) RegisterHandler(c echo.Context) error {
 		))
 	}
 
-	err = h.Validator.ValidateStruct(reqDTO)
-	if err != nil {
+	if err := isRequestValid(reqDTO); err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(
 			http.StatusBadRequest,
 			err.Error(),
@@ -170,8 +166,7 @@ func (h *userHandler) LoginHandler(c echo.Context) error {
 		))
 	}
 
-	err = h.Validator.ValidateStruct(reqDTO)
-	if err != nil {
+	if err := isRequestValid(reqDTO); err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(
 			http.StatusBadRequest,
 			err.Error(),
