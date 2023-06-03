@@ -61,7 +61,7 @@ func (h *authHandler) LoginHandler(c echo.Context) error {
 	return c.JSON(http.StatusOK, helper.ResponseData(
 		http.StatusOK,
 		"login success",
-		map[string]interface{}{
+		echo.Map{
 			"token": token,
 		},
 	))
