@@ -7,7 +7,7 @@ import (
 )
 
 type AuthUsecase interface {
-	Login(reqDTO auth.LoginAdminRequest) (entity.Admin, error)
+	Login(request auth.LoginAdminRequest) (entity.Admin, error)
 }
 
 type authUseCase struct {
@@ -20,13 +20,13 @@ func NewAuthUsecase(repo repository.AdminRepo) *authUseCase {
 	}
 }
 
-func (a *authUseCase) Login(reqDTO auth.LoginAdminRequest) (entity.Admin, error) {
-	data, err := a.Repo.GetByEmail(reqDTO.Email)
+func (a *authUseCase) Login(request auth.LoginAdminRequest) (entity.Admin, error) {
+	data, err := a.Repo.GetByEmail(request.Email)
 	if err != nil {
 		return entity.Admin{}, auth.ErrInvalidCredential
 	}
 
-	if reqDTO.Password != data.Password {
+	if request.Password != data.Password {
 		return entity.Admin{}, auth.ErrInvalidCredential
 	}
 
