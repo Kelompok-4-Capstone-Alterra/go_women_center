@@ -26,6 +26,30 @@ func(h *counselorHandler) GetAll(c echo.Context) error {
 	
 	page, offset, limit := helper.GetPaginateData(page, limit)
 
+	search := c.QueryParam("search")
+
+	if search != "" {
+		counselors, err := h.CUscase.Search(search, offset, limit)
+
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, helper.ResponseData(err.Error(), http.StatusInternalServerError, nil))
+		}
+
+		totalPages, err := h.CUscase.GetTotalPagesSearch(search, limit)
+
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, helper.ResponseData(err.Error(), http.StatusInternalServerError, nil))
+		}
+
+		return c.JSON(http.StatusOK, helper.ResponseData("success get all conselor", http.StatusOK, echo.Map{
+			"counselors": counselors,
+			"current_pages": page,
+			"total_pages": totalPages,
+		}))
+
+	}
+	
+
 	counselors, err := h.CUscase.GetAll(offset, limit)
 	
 	if err != nil {

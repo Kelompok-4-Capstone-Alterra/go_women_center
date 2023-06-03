@@ -12,12 +12,14 @@ import (
 )
 
 type CounselorUsecase interface {
-	GetAll(offset, limit int) ([]counselor.GetAllResponse, error)
+	GetAll(offset, limit int, topic string) ([]counselor.GetAllResponse, error)
 	GetTotalPages(limit int) (int, error)
 	GetById(id string) (counselor.GetByResponse, error)
 	GetAllReview(id string, offset, limit int) ([]counselor.ReviewResponse, error)
 	GetTotalPagesReview(id string, limit int) (int, error)
 	CreateReview(input counselor.CreateReviewRequest) error
+	GetTotalPagesSearch(search, topic string, limit int) (int, error)
+	Search(search, topic string, offset, limit int) ([]counselor.GetAllResponse, error)
 }
 
 type counselorUsecase struct {
@@ -29,9 +31,9 @@ func NewCounselorUsecase(CounselorRepo Counselor.CounselorRepository,ReviewRepo 
 	return &counselorUsecase{counselorRepo: CounselorRepo, reviewRepo: ReviewRepo}
 }
 
-func(u *counselorUsecase) GetAll(offset, limit int) ([]counselor.GetAllResponse, error) {
+func(u *counselorUsecase) GetAll(offset, limit int, topic string) ([]counselor.GetAllResponse, error) {
 
-	counselorsRes, err := u.counselorRepo.GetAll(offset, limit)
+	counselorsRes, err := u.counselorRepo.GetAll(offset, limit, topic)
 
 	if err != nil {
 		return nil, err
@@ -166,4 +168,28 @@ func(u *counselorUsecase) GetAllReview(id string, offset, limit int) ([]counselo
 	}
 
 	return reviewsRes, nil
+}
+
+func(u *counselorUsecase) GetTotalPagesSearch(search, topic string, limit int) (int, error) {
+	
+	totalData, err := u.counselorRepo.CountBySearch(search, topic)
+
+	if err != nil {
+		return 0, err
+	}
+
+	totalPages := helper.GetTotalPages(totalData, limit)
+
+	return totalPages, nil
+}
+
+func(u *counselorUsecase) Search(search, topic string, offset, limit int) ([]counselor.GetAllResponse, error) {
+	
+	counselorsRes, err := u.counselorRepo.Search(search, topic, offset, limit)
+
+	if err != nil {
+		return nil, counselor.ErrInternalServerError
+	}
+
+	return counselorsRes, nil
 }

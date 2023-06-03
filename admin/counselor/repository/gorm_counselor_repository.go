@@ -14,6 +14,8 @@ type CounselorRepository interface {
 	Create(counselor entity.Counselor) error
 	Update(id string, counselor entity.Counselor) error
 	Delete(id string) error
+	Search(search string, offset, limit int) ([]counselor.GetAllResponse, error)
+	CountBySearch(search string) (int, error)
 }
 
 type mysqlCounselorRepository struct {
@@ -24,7 +26,7 @@ func NewMysqlCounselorRepository(db *gorm.DB) CounselorRepository{
 	return &mysqlCounselorRepository{DB: db}
 }
 
-func (r *mysqlCounselorRepository) GetAll(offset, limit int) ([]counselor.GetAllResponse, error) {
+func(r *mysqlCounselorRepository) GetAll(offset, limit int) ([]counselor.GetAllResponse, error) {
 	var counselor []counselor.GetAllResponse
 	
 	err := r.DB.Model(&entity.Counselor{}).Offset(offset).Limit(limit).Find(&counselor).Error
@@ -34,7 +36,7 @@ func (r *mysqlCounselorRepository) GetAll(offset, limit int) ([]counselor.GetAll
 	return counselor, nil
 }
 
-func (r *mysqlCounselorRepository) Count() (int, error) {
+func(r *mysqlCounselorRepository) Count() (int, error) {
 	var count int64
 	err := r.DB.Model(&entity.Counselor{}).Count(&count).Error
 	if err != nil {
@@ -43,7 +45,7 @@ func (r *mysqlCounselorRepository) Count() (int, error) {
 	return int(count), nil
 }
 
-func (r *mysqlCounselorRepository) GetById(id string) (counselor.GetByResponse, error) {
+func(r *mysqlCounselorRepository) GetById(id string) (counselor.GetByResponse, error) {
 	var counselor counselor.GetByResponse
 	err := r.DB.Model(&entity.Counselor{}).First(&counselor, "id = ?", id).Error
 	if err != nil {
@@ -52,7 +54,7 @@ func (r *mysqlCounselorRepository) GetById(id string) (counselor.GetByResponse, 
 	return counselor, nil
 }
 
-func (r *mysqlCounselorRepository) GetByEmail(email string) (counselor.GetByResponse, error) {
+func(r *mysqlCounselorRepository) GetByEmail(email string) (counselor.GetByResponse, error) {
 	var counselor counselor.GetByResponse
 	err := r.DB.Model(&entity.Counselor{}).First(&counselor, "email = ?", email).Error
 	if err != nil {
@@ -61,7 +63,7 @@ func (r *mysqlCounselorRepository) GetByEmail(email string) (counselor.GetByResp
 	return counselor, nil
 }
 
-func (r *mysqlCounselorRepository) Create(counselor entity.Counselor) error {
+func(r *mysqlCounselorRepository) Create(counselor entity.Counselor) error {
 	err := r.DB.Create(&counselor).Error
 	if err != nil {
 		return err
@@ -69,7 +71,7 @@ func (r *mysqlCounselorRepository) Create(counselor entity.Counselor) error {
 	return nil
 }
 
-func (r *mysqlCounselorRepository) Update(id string, counselor entity.Counselor) error {
+func(r *mysqlCounselorRepository) Update(id string, counselor entity.Counselor) error {
 	
 	err := r.DB.Model(&entity.Counselor{}).Where("id = ?", id).Updates(counselor).Error
 	if err != nil {
@@ -78,7 +80,7 @@ func (r *mysqlCounselorRepository) Update(id string, counselor entity.Counselor)
 	return nil
 }
 
-func (r *mysqlCounselorRepository) Delete(id string) error {
+func(r *mysqlCounselorRepository) Delete(id string) error {
 
 	err := r.DB.Delete(&entity.Counselor{}, "id = ?", id).Error
 
@@ -89,3 +91,26 @@ func (r *mysqlCounselorRepository) Delete(id string) error {
 	return nil
 }
 
+func(r *mysqlCounselorRepository) CountBySearch(search string) (int, error){
+	var count int64
+	err := r.DB.Model(&entity.Counselor{}).
+		Where("name LIKE ? OR topic LIKE ? OR username LIKE ? OR email LIKE ?",
+		"%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+		Count(&count).Error
+	if err != nil {
+		return 0, err
+	}
+	return int(count), nil
+}
+
+func(r *mysqlCounselorRepository) Search(search string, offset, limit int) ([]counselor.GetAllResponse, error) {
+	var counselor []counselor.GetAllResponse
+	err := r.DB.Model(&entity.Counselor{}).
+		Where("name LIKE ? OR topic LIKE ? OR username LIKE ? OR email LIKE ?",
+		"%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+		Offset(offset).Limit(limit).Find(&counselor).Error
+	if err != nil {
+		return nil, err
+	}
+	return counselor, nil
+}

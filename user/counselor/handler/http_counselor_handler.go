@@ -3,7 +3,9 @@ package handler
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/constant"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor"
@@ -19,14 +21,45 @@ func NewCounselorHandler(CUcase usecase.CounselorUsecase) *counselorHandler {
 	return &counselorHandler{CUscase: CUcase}
 }
 
-func (h *counselorHandler) GetAll(c echo.Context) error {
+func(h *counselorHandler) GetAll(c echo.Context) error {
 
-	page, _ :=  helper.StringToInt(c.QueryParam("page"))
-	limit, _ := helper.StringToInt(c.QueryParam("limit"))
+	page, _ :=  strconv.Atoi(c.QueryParam("page"))
+	limit, _ := strconv.Atoi(c.QueryParam("limit"))
+	topic, _ := strconv.Atoi(c.QueryParam("topic"))
+	
+	if err := isTopicValid(topic); err != nil {
+		return c.JSON(getStatusCode(err), helper.ResponseData(err.Error(), getStatusCode(err), nil))
+	}
+
+	search := c.QueryParam("search")
 	
 	page, offset, limit := helper.GetPaginateData(page, limit, "mobile")
+	
+	topicStr := constant.TOPICS[topic]
+	
 
-	counselors, err := h.CUscase.GetAll(offset, limit)
+	if search != "" {
+		counselors, err := h.CUscase.Search(search, topicStr, offset, limit)
+
+		if err != nil {
+			return c.JSON(getStatusCode(err), helper.ResponseData(err.Error(), getStatusCode(err), nil))
+		}
+
+		totalPages, err := h.CUscase.GetTotalPagesSearch(search, topicStr, limit)
+
+		if err != nil {
+			return c.JSON(getStatusCode(err), helper.ResponseData(err.Error(), getStatusCode(err), nil))
+		}
+		
+		return c.JSON(getStatusCode(err), helper.ResponseData("success get all conselor", getStatusCode(err), echo.Map{
+			"counselors": counselors,
+			"current_pages": page,
+			"total_pages": totalPages,
+		}))
+
+	}
+
+	counselors, err := h.CUscase.GetAll(offset, limit, topicStr)
 	
 	if err != nil {
 		return c.JSON(getStatusCode(err), helper.ResponseData(err.Error(), getStatusCode(err), nil))
@@ -45,7 +78,7 @@ func (h *counselorHandler) GetAll(c echo.Context) error {
 	}))
 }
 
-func (h *counselorHandler) GetById(c echo.Context) error {
+func(h *counselorHandler) GetById(c echo.Context) error {
 	
 	var id counselor.IdRequest
 
@@ -66,7 +99,7 @@ func (h *counselorHandler) GetById(c echo.Context) error {
 	}))
 }
 
-func (h *counselorHandler) GetAllReview(c echo.Context) error {
+func(h *counselorHandler) GetAllReview(c echo.Context) error {
 	
 	var id counselor.IdRequest
 
@@ -76,8 +109,8 @@ func (h *counselorHandler) GetAllReview(c echo.Context) error {
 		return c.JSON(getStatusCode(err), helper.ResponseData(err.Error(), getStatusCode(err), nil))
 	}
 
-	page, _ :=  helper.StringToInt(c.QueryParam("page"))
-	limit, _ := helper.StringToInt(c.QueryParam("limit"))
+	page, _ :=  strconv.Atoi(c.QueryParam("page"))
+	limit, _ := strconv.Atoi(c.QueryParam("limit"))
 
 	page, offset, limit := helper.GetPaginateData(page, limit, "mobile")
 
@@ -100,7 +133,7 @@ func (h *counselorHandler) GetAllReview(c echo.Context) error {
 	}))
 }
 
-func (h *counselorHandler) CreateReview(c echo.Context) error {
+func(h *counselorHandler) CreateReview(c echo.Context) error {
 	
 	var reviewReq counselor.CreateReviewRequest
 
