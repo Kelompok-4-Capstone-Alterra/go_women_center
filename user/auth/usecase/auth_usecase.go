@@ -98,10 +98,6 @@ func (u *userUsecase) Login(loginRequest user.LoginUserRequest) (entity.User, er
 		return entity.User{}, user.ErrInvalidCredential
 	}
 
-	log.Println(loginRequest.Password)
-	u.Encryptor.HashPassword(loginRequest.Password)
-	log.Println(data.Password)
-
 	if !u.Encryptor.CheckPasswordHash(loginRequest.Password, data.Password) {
 		return entity.User{}, user.ErrInvalidCredential
 	}
