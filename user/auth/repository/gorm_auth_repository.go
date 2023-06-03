@@ -1,7 +1,10 @@
 package repository
 
 import (
+	"errors"
+
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
+	userError "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth"
 	"gorm.io/gorm"
 )
 
@@ -23,6 +26,9 @@ func NewUserRepo(db *gorm.DB) *userGormMysqlRepo {
 func (u *userGormMysqlRepo) Create(userData entity.User) (entity.User, error) {
 	err := u.DB.Debug().Create(&userData).Error
 	if err != nil {
+		if errors.Is(err, gorm.ErrDuplicatedKey) {
+			return entity.User{}, userError.ErrUserIsRegistered
+		}
 		return entity.User{}, err
 	}
 	return userData, nil

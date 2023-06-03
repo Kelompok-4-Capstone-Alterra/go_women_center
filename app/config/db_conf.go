@@ -40,6 +40,7 @@ func (dbc *DBconf) InitDB() *gorm.DB {
 
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
 		Logger: newLogger,
+		TranslateError: true,
 	})
 	if err != nil {
 		log.Fatal(err)
