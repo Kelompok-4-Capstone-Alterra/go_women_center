@@ -5,7 +5,6 @@ import (
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
-	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth"
 	user "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth/repository"
 )
@@ -22,15 +21,17 @@ type userUsecase struct {
 	EmailSender   helper.EmailSender
 	otpRepo       repository.LocalCache
 	otpGen        helper.OtpGenerator
+	Encryptor     helper.Encryptor
 }
 
-func NewUserUsecase(repo repository.UserRepo, idGenerator helper.UuidGenerator, emailSender helper.EmailSender, otpRepo repository.LocalCache, otpgen helper.OtpGenerator) *userUsecase {
+func NewUserUsecase(repo repository.UserRepo, idGenerator helper.UuidGenerator, emailSender helper.EmailSender, otpRepo repository.LocalCache, otpgen helper.OtpGenerator, encryptor helper.Encryptor) *userUsecase {
 	return &userUsecase{
 		repo:          repo,
 		UuidGenerator: idGenerator,
 		EmailSender:   emailSender,
 		otpRepo:       otpRepo,
 		otpGen:        otpgen,
+		Encryptor:     encryptor,
 	}
 }
 
@@ -45,6 +46,11 @@ func (u *userUsecase) Register(userDTO user.RegisterUserRequest) error {
 		return err
 	}
 
+	encryptedPass, err := u.Encryptor.HashPassword(userDTO.Password)
+	if err != nil {
+		return user.ErrFailedEncrpyt
+	}
+
 	defer u.otpRepo.Delete(storedOtp.Email)
 
 	data := entity.User{
@@ -52,7 +58,7 @@ func (u *userUsecase) Register(userDTO user.RegisterUserRequest) error {
 		Name:     userDTO.Name,
 		Email:    userDTO.Email,
 		Username: userDTO.Username,
-		Password: userDTO.Password,
+		Password: encryptedPass,
 	}
 
 	_, err = u.repo.Create(data)
@@ -85,11 +91,11 @@ func (u *userUsecase) VerifyEmail(email string) error {
 func (u *userUsecase) Login(userDTO user.LoginUserRequest) (entity.User, error) {
 	data, err := u.repo.GetByEmail(userDTO.Email)
 	if err != nil {
-		return entity.User{}, auth.ErrInvalidCredential
+		return entity.User{}, user.ErrInvalidCredential
 	}
 
-	if userDTO.Password != data.Password {
-		return entity.User{}, auth.ErrInvalidCredential
+	if u.Encryptor.CheckPasswordHash(userDTO.Password, data.Password) {
+		return entity.User{}, user.ErrInvalidCredential
 	}
 
 	return data, nil
