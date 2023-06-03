@@ -21,14 +21,16 @@ type userUsecase struct {
 	UuidGenerator helper.UuidGenerator
 	EmailSender   helper.EmailSender
 	otpRepo       repository.LocalCache
+	otpGen  helper.OtpGenerator
 }
 
-func NewUserUsecase(repo repository.UserRepo, idGenerator helper.UuidGenerator, emailSender helper.EmailSender, otpRepo repository.LocalCache) *userUsecase {
+func NewUserUsecase(repo repository.UserRepo, idGenerator helper.UuidGenerator, emailSender helper.EmailSender, otpRepo repository.LocalCache, otpgen helper.OtpGenerator) *userUsecase {
 	return &userUsecase{
 		repo:          repo,
 		UuidGenerator: idGenerator,
 		EmailSender:   emailSender,
 		otpRepo:       otpRepo,
+		otpGen: otpgen,
 	}
 }
 
@@ -62,7 +64,7 @@ func (u *userUsecase) Register(userDTO user.RegisterUserRequest) error {
 }
 
 func (u *userUsecase) VerifyEmail(email string) error {
-	otpCode, err := helper.GetOtp()
+	otpCode, err := u.otpGen.GetOtp()
 	if err != nil {
 		return err
 	}

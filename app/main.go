@@ -51,13 +51,14 @@ func main() {
 
 	jwtConf := helper.NewAuthJWT(os.Getenv("JWT_SECRET"))
 
+	otpGenerator := helper.NewOtpGenerator(4, []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 0})
 	db := dbconf.InitDB()
 	googleUUID := helper.NewGoogleUUID()
 	log.Print(db, googleUUID)
 
 	userAuthRepo := UserAuthRepo.NewUserRepo(db)
 	otpRepo := UserAuthRepo.NewLocalCache(config.CLEANUP_INTERVAL)
-	userAuthUsecase := UserAuthUsecase.NewUserUsecase(userAuthRepo, googleUUID, &mailConf, otpRepo)
+	userAuthUsecase := UserAuthUsecase.NewUserUsecase(userAuthRepo, googleUUID, &mailConf, otpRepo, otpGenerator)
 	userAuthHandler := UserAuthHandler.NewUserHandler(userAuthUsecase, googleOauthConfig, jwtConf, validator)
 
 	adminAuthRepo := AdminAuthRepo.NewAdminRepo(db)
