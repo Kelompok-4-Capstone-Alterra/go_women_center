@@ -2,7 +2,7 @@ package entity
 
 type Admin struct {
 	Id       string `gorm:"primaryKey"`
-	Email    string
+	Email    string `gorm:"unique"`
 	Password string
-	Username string
+	Username string `gorm:"unique"`
 }

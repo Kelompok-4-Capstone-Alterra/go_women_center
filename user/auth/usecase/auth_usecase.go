@@ -3,9 +3,9 @@ package usecase
 import (
 	"time"
 
-	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/constant"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth"
 	user "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth/repository"
 )
@@ -21,7 +21,7 @@ type userUsecase struct {
 	UuidGenerator helper.UuidGenerator
 	EmailSender   helper.EmailSender
 	otpRepo       repository.LocalCache
-	otpGen  helper.OtpGenerator
+	otpGen        helper.OtpGenerator
 }
 
 func NewUserUsecase(repo repository.UserRepo, idGenerator helper.UuidGenerator, emailSender helper.EmailSender, otpRepo repository.LocalCache, otpgen helper.OtpGenerator) *userUsecase {
@@ -30,7 +30,7 @@ func NewUserUsecase(repo repository.UserRepo, idGenerator helper.UuidGenerator, 
 		UuidGenerator: idGenerator,
 		EmailSender:   emailSender,
 		otpRepo:       otpRepo,
-		otpGen: otpgen,
+		otpGen:        otpgen,
 	}
 }
 
@@ -85,11 +85,11 @@ func (u *userUsecase) VerifyEmail(email string) error {
 func (u *userUsecase) Login(userDTO user.LoginUserRequest) (entity.User, error) {
 	data, err := u.repo.GetByEmail(userDTO.Email)
 	if err != nil {
-		return entity.User{}, constant.ErrInvalidCredential
+		return entity.User{}, auth.ErrInvalidCredential
 	}
 
 	if userDTO.Password != data.Password {
-		return entity.User{}, constant.ErrInvalidCredential
+		return entity.User{}, auth.ErrInvalidCredential
 	}
 
 	return data, nil

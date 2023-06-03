@@ -1,6 +1,7 @@
 package helper
 
 import (
+	"errors"
 	"time"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/constant"
@@ -77,7 +78,10 @@ func (aj *authJWT) IsAdmin(token *jwt.Token) (error) {
 	claims := token.Claims.(jwt.MapClaims)
 	idPayload, ok := claims["is_admin"].(bool)
 	if !ok || !idPayload {
-		return constant.ErrInvalidCredential
+		return ErrInvalidCredential
 	}
 	return nil
 }
+var (
+	ErrInvalidCredential = errors.New("invalid credential")
+)

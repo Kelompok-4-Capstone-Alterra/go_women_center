@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/constant"
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth"
 )
 
 type Otp struct {
@@ -93,11 +93,11 @@ func (lc *localCache) Read(email string) (Otp, error) {
 
 	co, ok := lc.codes[email]
 	if !ok {
-		return Otp{}, constant.ErrInvalidOtp
+		return Otp{}, auth.ErrInvalidOtp
 	}
 
 	if time.Now().Unix() >= co.expireAtTimestamp {
-		return Otp{}, constant.ErrExpiredOtp
+		return Otp{}, auth.ErrExpiredOtp
 	}
 
 	return co.Otp, nil

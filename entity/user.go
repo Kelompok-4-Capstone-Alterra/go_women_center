@@ -8,9 +8,9 @@ import (
 
 type User struct {
 	ID           string `gorm:"primaryKey"`
-	Username     string
+	Username     string `gorm:"unique"`
 	Name         string
-	Email        string
+	Email        string `gorm:"unique"`
 	Password     string
 	PhoneNumber  string
 	Birthdate    string

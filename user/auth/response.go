@@ -1,4 +1,4 @@
-package user
+package auth
 
 type UserOauthInfo struct {
 	ID            string `json:"id"`
