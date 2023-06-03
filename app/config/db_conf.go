@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -39,13 +40,17 @@ func (dbc *DBconf) InitDB() *gorm.DB {
 
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
 		Logger: newLogger,
+		TranslateError: true,
 	})
 	if err != nil {
 		log.Fatal(err)
 		os.Exit(1)
 	}
 
-	db.AutoMigrate()
+	db.AutoMigrate(
+		&entity.User{},
+		&entity.Admin{},
+	)
 
 	return db
 }

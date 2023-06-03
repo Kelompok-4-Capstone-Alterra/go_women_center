@@ -2,13 +2,18 @@ package main
 
 import (
 	"log"
-	"net/http"
 	"os"
 
+	AdminAuthHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/auth/handler"
+	AdminAuthRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/auth/repository"
+	AdminAuthUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/auth/usecase"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/app/config"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
-	UserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/handler"
+	UserAuthHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth/handler"
+	UserAuthRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth/repository"
+	UserAuthUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth/usecase"
 	_ "github.com/joho/godotenv/autoload"
+	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"golang.org/x/oauth2"
@@ -38,12 +43,31 @@ func main() {
 		Endpoint:     google.Endpoint,
 	}
 
+	mailConf := helper.NewEmailSender(
+		587,
+		"smtp.gmail.com",
+		os.Getenv("CONFIG_AUTH_EMAIL"),
+		os.Getenv("CONFIG_AUTH_PASSWORD"),
+		"Women Center <ivanhilmideran@gmail.com>", //TODO: set email to the proper one
+	)
+
+	jwtConf := helper.NewAuthJWT(os.Getenv("JWT_SECRET"))
+
+	encryptor := helper.NewEncryptor()
+	otpGenerator := helper.NewOtpGenerator()
 	db := dbconf.InitDB()
 	sslconf.InitSSL()
 	googleUUID := helper.NewGoogleUUID()
 	log.Print(db, googleUUID)
 
-	userHandler := UserHandler.NewUserHandler(googleOauthConfig)
+	userAuthRepo := UserAuthRepo.NewUserRepo(db)
+	otpRepo := UserAuthRepo.NewLocalCache(config.CLEANUP_INTERVAL)
+	userAuthUsecase := UserAuthUsecase.NewUserUsecase(userAuthRepo, googleUUID, &mailConf, otpRepo, otpGenerator, encryptor)
+	userAuthHandler := UserAuthHandler.NewUserHandler(userAuthUsecase, googleOauthConfig, jwtConf)
+
+	adminAuthRepo := AdminAuthRepo.NewAdminRepo(db)
+	adminAuthUsecase := AdminAuthUsecase.NewAuthUsecase(adminAuthRepo)
+	adminAuthHandler := AdminAuthHandler.NewAuthHandler(adminAuthUsecase, jwtConf)
 
 	e := echo.New()
 	e.Use(middleware.Logger())
@@ -54,8 +78,16 @@ func main() {
 		return c.JSON(http.StatusOK, "hello")
 	})
 
-	e.GET("/google/login", userHandler.LoginHandler)
-	e.GET("/google/callback", userHandler.LoginGoogleCallback)
+	restricted := e.Group("/user")
+	restricted.Use(echojwt.JWT([]byte(jwtConf.GetSecret())))
+
+	e.POST("/verify", userAuthHandler.VerifyEmailHandler)
+	e.POST("/register", userAuthHandler.RegisterHandler)
+	e.POST("/login", userAuthHandler.LoginHandler)
+	e.GET("/google/login", userAuthHandler.LoginGoogleHandler)
+	e.GET("/google/callback", userAuthHandler.LoginGoogleCallback)
+
+	e.POST("/admin/login", adminAuthHandler.LoginHandler)
 
 	// ssl
 	e.Logger.Fatal(e.StartTLS(":8080", "./ssl/certificate.crt", "./ssl/private.key"))
