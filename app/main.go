@@ -30,6 +30,11 @@ func main() {
 		DB_Name:     os.Getenv("DB_NAME"),
 	}
 
+	sslconf := config.SSLconf{
+		SSL_CERT:        os.Getenv("SSL_CERT"),
+		SSL_PRIVATE_KEY: os.Getenv("SSL_PRIVATE_KEY"),
+	}
+
 	googleOauthConfig := &oauth2.Config{
 		RedirectURL:  "http://localhost:8080/google/callback",
 		ClientID:     os.Getenv("GOOGLE_OAUTH_CLIENT_ID"),
@@ -51,6 +56,7 @@ func main() {
 	encryptor := helper.NewEncryptor()
 	otpGenerator := helper.NewOtpGenerator()
 	db := dbconf.InitDB()
+	sslconf.InitSSL()
 	googleUUID := helper.NewGoogleUUID()
 	log.Print(db, googleUUID)
 
@@ -66,6 +72,11 @@ func main() {
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+	e.Use(middleware.CORS())
+	
+	e.GET("/healthcheck", func(c echo.Context) error {
+		return c.JSON(http.StatusOK, "hello")
+	})
 
 	restricted := e.Group("/user")
 	restricted.Use(echojwt.JWT([]byte(jwtConf.GetSecret())))
@@ -78,5 +89,8 @@ func main() {
 
 	e.POST("/admin/login", adminAuthHandler.LoginHandler)
 
-	e.Logger.Fatal(e.Start(":8080"))
+	// ssl
+	e.Logger.Fatal(e.StartTLS(":8080", "./ssl/certificate.crt", "./ssl/private.key"))
+
+	// e.Logger.Fatal(e.Start(":8080"))
 }
