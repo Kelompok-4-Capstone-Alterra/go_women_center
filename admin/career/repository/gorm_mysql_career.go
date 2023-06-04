@@ -35,12 +35,13 @@ func (r *mysqlCareerRepository) GetAll(offset, limit int) ([]career.GetAllRespon
 }
 
 func (r *mysqlCareerRepository) GetBySearch(search string) ([]career.GetAllResponse, error) {
-	var careers []career.GetAllResponse
-	err := r.DB.Model(&entity.Career{}).Where("JobPosition LIKE ? OR CompanyName LIKE ? OR Location LIKE ? OR CAST(Salary AS CHAR) LIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").Find(&careers).Error
+	var career []career.GetAllResponse
+
+	err := r.DB.Model(&entity.Career{}).Where("job_position LIKE ? OR company_name LIKE ? OR Location LIKE ? OR CAST(Salary AS CHAR) LIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").Find(&career).Error
 	if err != nil {
 		return nil, err
 	}
-	return careers, nil
+	return career, nil
 }
 
 func (r *mysqlCareerRepository) GetById(id string) (career.GetByResponse, error) {

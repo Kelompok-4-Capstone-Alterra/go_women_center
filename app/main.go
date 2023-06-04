@@ -66,8 +66,8 @@ func main() {
 		{
 			groupAdmins.POST("/careers", careerHandler.Create)
 			groupAdmins.GET("/careers", careerHandler.GetAll)
+			groupAdmins.GET("/careers/search", careerHandler.GetBySearch)
 			groupAdmins.GET("/careers/:id", careerHandler.GetById)
-			groupAdmins.GET("/careers/search/:search", careerHandler.GetBySearch) //OTW
 			groupAdmins.PUT("/careers/:id", careerHandler.Update)
 			groupAdmins.DELETE("/careers/:id", careerHandler.Delete)
 		}
@@ -80,8 +80,8 @@ func main() {
 		careerHandler := CareerUserHandler.NewCareerHandler(careerUsecase)
 		{
 			groupUsers.GET("/careers", careerHandler.GetAll)
+			groupUsers.GET("/careers/search", careerHandler.GetBySearch)
 			groupUsers.GET("/careers/:id", careerHandler.GetById)
-			groupUsers.GET("/careers/search/:search", careerHandler.GetBySearch) //OTW
 		}
 	}
 

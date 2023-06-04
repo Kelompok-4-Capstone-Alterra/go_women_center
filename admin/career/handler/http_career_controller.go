@@ -18,33 +18,6 @@ func NewCareerHandler(CareerUsecase usecase.CareerUsecase) *careerHandler {
 	return &careerHandler{CareerUsecase: CareerUsecase}
 }
 
-func getStatusCode(err error) int {
-
-	if err == nil {
-		return http.StatusOK
-	}
-
-	switch err {
-	case career.ErrInternalServerError:
-		return http.StatusInternalServerError
-
-	case career.ErrCareerNotFound:
-		return http.StatusNotFound
-
-	case
-		career.ErrImageFormat,
-		career.ErrEmailFormat,
-		career.ErrImageSize,
-		career.ErrIdFormat,
-		career.ErrRequired:
-		return http.StatusBadRequest
-
-	default:
-		return http.StatusInternalServerError
-	}
-
-}
-
 func (h *careerHandler) GetAll(c echo.Context) error {
 
 	page, _ := helper.StringToInt(c.QueryParam("page"))
@@ -55,16 +28,16 @@ func (h *careerHandler) GetAll(c echo.Context) error {
 	careers, err := h.CareerUsecase.GetAll(offset, limit)
 
 	if err != nil {
-		return c.JSON(getStatusCode(err), helper.ResponseData(err.Error(), getStatusCode(err), nil))
+		return c.JSON(http.StatusNotFound, helper.ResponseData(err.Error(), http.StatusNotFound, nil))
 	}
 
 	totalPages, err := h.CareerUsecase.GetTotalPages(limit)
 
 	if err != nil {
-		return c.JSON(getStatusCode(err), helper.ResponseData(err.Error(), getStatusCode(err), nil))
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
 	}
 
-	return c.JSON(getStatusCode(err), helper.ResponseData("success get all conselor", getStatusCode(err), echo.Map{
+	return c.JSON(http.StatusAccepted, helper.ResponseData("success get all careers", http.StatusAccepted, echo.Map{
 		"careers":       careers,
 		"current_pages": page,
 		"total_pages":   totalPages,
@@ -80,8 +53,8 @@ func (h *careerHandler) Create(c echo.Context) error {
 	if err := isRequestValid(careerReq); err != nil {
 
 		return c.JSON(
-			getStatusCode(err),
-			helper.ResponseData(err.Error(), getStatusCode(err), nil),
+			http.StatusBadRequest,
+			helper.ResponseData(err.Error(), http.StatusBadRequest, nil),
 		)
 	}
 
@@ -89,8 +62,8 @@ func (h *careerHandler) Create(c echo.Context) error {
 
 	if err := isImageValid(imgInput); err != nil {
 		return c.JSON(
-			getStatusCode(err),
-			helper.ResponseData(err.Error(), getStatusCode(err), nil),
+			http.StatusBadRequest,
+			helper.ResponseData(err.Error(), http.StatusBadRequest, nil),
 		)
 	}
 
@@ -98,12 +71,12 @@ func (h *careerHandler) Create(c echo.Context) error {
 
 	if err != nil {
 		return c.JSON(
-			getStatusCode(err),
-			helper.ResponseData(err.Error(), getStatusCode(err), nil),
+			http.StatusBadRequest,
+			helper.ResponseData(err.Error(), http.StatusBadRequest, nil),
 		)
 	}
 
-	return c.JSON(getStatusCode(err), helper.ResponseData("success create career", getStatusCode(err), careerReq))
+	return c.JSON(http.StatusAccepted, helper.ResponseData("success create career", http.StatusAccepted, careerReq))
 
 }
 
@@ -115,8 +88,8 @@ func (h *careerHandler) GetById(c echo.Context) error {
 
 	if err := isRequestValid(id); err != nil {
 		return c.JSON(
-			getStatusCode(err),
-			helper.ResponseData(err.Error(), getStatusCode(err), nil),
+			http.StatusBadRequest,
+			helper.ResponseData(err.Error(), http.StatusBadRequest, nil),
 		)
 	}
 
@@ -124,30 +97,30 @@ func (h *careerHandler) GetById(c echo.Context) error {
 
 	if err != nil {
 		return c.JSON(
-			getStatusCode(err),
-			helper.ResponseData(err.Error(), getStatusCode(err), nil),
+			http.StatusBadRequest,
+			helper.ResponseData(err.Error(), http.StatusBadRequest, nil),
 		)
 	}
 
-	return c.JSON(getStatusCode(err), helper.ResponseData("success get career by id", getStatusCode(err), career))
-
+	return c.JSON(http.StatusAccepted, helper.ResponseData("success get career by id", http.StatusAccepted, career))
 }
 
 func (h *careerHandler) GetBySearch(c echo.Context) error {
 
-	search := c.QueryParam("search")
+	var search career.SearchRequest
 
-	career, err := h.CareerUsecase.GetBySearch(search)
+	c.Bind(&search)
+
+	careers, err := h.CareerUsecase.GetBySearch(search.Search)
 
 	if err != nil {
 		return c.JSON(
-			getStatusCode(err),
-			helper.ResponseData(err.Error(), getStatusCode(err), nil),
+			http.StatusBadRequest,
+			helper.ResponseData(err.Error(), http.StatusBadRequest, nil),
 		)
 	}
 
-	return c.JSON(getStatusCode(err), helper.ResponseData("success get career by search", getStatusCode(err), career))
-
+	return c.JSON(http.StatusAccepted, helper.ResponseData("success get career by search", http.StatusAccepted, careers))
 }
 
 func (h *careerHandler) Update(c echo.Context) error {
@@ -158,8 +131,8 @@ func (h *careerHandler) Update(c echo.Context) error {
 
 	if err := isRequestValid(careerReq); err != nil {
 		return c.JSON(
-			getStatusCode(err),
-			helper.ResponseData(err.Error(), getStatusCode(err), nil),
+			http.StatusBadRequest,
+			helper.ResponseData(err.Error(), http.StatusBadRequest, nil),
 		)
 	}
 
@@ -167,8 +140,8 @@ func (h *careerHandler) Update(c echo.Context) error {
 
 	if err := isImageValid(imgInput); err != nil {
 		return c.JSON(
-			getStatusCode(err),
-			helper.ResponseData(err.Error(), getStatusCode(err), nil),
+			http.StatusBadRequest,
+			helper.ResponseData(err.Error(), http.StatusBadRequest, nil),
 		)
 	}
 
@@ -176,12 +149,12 @@ func (h *careerHandler) Update(c echo.Context) error {
 
 	if err != nil {
 		return c.JSON(
-			getStatusCode(err),
-			helper.ResponseData(err.Error(), getStatusCode(err), nil),
+			http.StatusBadRequest,
+			helper.ResponseData(err.Error(), http.StatusBadRequest, nil),
 		)
 	}
 
-	return c.JSON(getStatusCode(err), helper.ResponseData("success update career", getStatusCode(err), nil))
+	return c.JSON(http.StatusAccepted, helper.ResponseData("success update career", http.StatusAccepted, nil))
 }
 
 func (h *careerHandler) Delete(c echo.Context) error {
@@ -192,8 +165,8 @@ func (h *careerHandler) Delete(c echo.Context) error {
 
 	if err := isRequestValid(id); err != nil {
 		return c.JSON(
-			getStatusCode(err),
-			helper.ResponseData(err.Error(), getStatusCode(err), nil),
+			http.StatusBadRequest,
+			helper.ResponseData(err.Error(), http.StatusBadRequest, nil),
 		)
 	}
 
@@ -201,11 +174,11 @@ func (h *careerHandler) Delete(c echo.Context) error {
 
 	if err != nil {
 		return c.JSON(
-			getStatusCode(err),
-			helper.ResponseData(err.Error(), getStatusCode(err), nil),
+			http.StatusBadRequest,
+			helper.ResponseData(err.Error(), http.StatusBadRequest, nil),
 		)
 	}
 
-	return c.JSON(getStatusCode(err), helper.ResponseData("success delete career", getStatusCode(err), id))
+	return c.JSON(http.StatusAccepted, helper.ResponseData("success delete career", http.StatusAccepted, id))
 
 }

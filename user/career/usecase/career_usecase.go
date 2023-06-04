@@ -46,13 +46,13 @@ func (u *careerUsecase) GetById(id string) (career.GetByResponse, error) {
 
 func (u *careerUsecase) GetBySearch(search string) ([]career.GetAllResponse, error) {
 
-	careerData, err := u.careerRepo.GetBySearch(search)
+	careers, err := u.careerRepo.GetBySearch(search)
 
 	if err != nil {
-		return careerData, career.ErrCareerNotFound
+		return nil, career.ErrInternalServerError
 	}
 
-	return careerData, nil
+	return careers, nil
 }
 
 func (u *careerUsecase) GetTotalPages(limit int) (int, error) {
