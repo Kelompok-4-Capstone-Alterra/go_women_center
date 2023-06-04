@@ -13,6 +13,8 @@ import (
 
 type ForumHandlerInterface interface {
 	GetAll(c echo.Context) error
+	GetByCategory(c echo.Context) error
+	GetByMyForum(c echo.Context) error
 	GetById(c echo.Context) error
 	Create(c echo.Context) error
 	Update(c echo.Context) error
@@ -36,6 +38,26 @@ func (fh ForumHandler) GetAll(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(http.StatusBadRequest, "Failed to get all forums data", nil))
 	}
 	return c.JSON(http.StatusOK, helper.ResponseData(http.StatusOK, "Success to get all forums data", forums))
+}
+
+func (fh ForumHandler) GetByCategory(c echo.Context) error {
+	id_category := c.Param("id")
+	forums, err := fh.ForumU.GetByCategory(id_category)
+
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(http.StatusBadRequest, "Failed to get all forums data by category", nil))
+	}
+	return c.JSON(http.StatusOK, helper.ResponseData(http.StatusOK, "Success to get all forums data by category", forums))
+}
+
+func (fh ForumHandler) GetByMyForum(c echo.Context) error {
+	id_user := "1"
+	forums, err := fh.ForumU.GetByMyForum(id_user)
+
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(http.StatusBadRequest, err.Error(), nil))
+	}
+	return c.JSON(http.StatusOK, helper.ResponseData(http.StatusOK, "Success to get all forums data by user", forums))
 }
 
 func (fh ForumHandler) GetById(c echo.Context) error {

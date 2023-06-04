@@ -13,6 +13,7 @@ type ResponseForum struct {
 	Link       string             `json:"link" form:"link"`
 	Topic      string             `json:"topic" form:"topic"`
 	Status     bool               `json:"status" gorm:"-:all"`
+	Member     int                `json:"member" gorm:"-:all"`
 	CreatedAt  time.Time          `json:"created_at"`
 	UpdatedAt  time.Time          `json:"updated_at"`
 	UserForums []entity.UserForum `gorm:"foreignKey:ForumId" json:"user_forums"`

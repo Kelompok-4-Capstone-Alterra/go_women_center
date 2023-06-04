@@ -60,6 +60,8 @@ func main() {
 	forumU := ForumAdminUsecase.NewForumUsecase(forumR)
 	forumH := ForumAdminHandler.NewForumHandler(forumU)
 	e.GET("/user/forums", forumH.GetAll)
+	e.GET("/user/forums/categories/:id", forumH.GetByCategory)
+	e.GET("/user/forums/my", forumH.GetByMyForum)
 	e.GET("/user/forums/:id", forumH.GetById)
 	e.POST("/user/forums", forumH.Create)
 	e.PUT("/user/forums/:id", forumH.Update)

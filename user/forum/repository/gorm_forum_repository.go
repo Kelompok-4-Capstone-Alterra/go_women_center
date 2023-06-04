@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"strconv"
+
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	response "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum"
 	"gorm.io/gorm"
@@ -8,6 +10,8 @@ import (
 
 type ForumRepository interface {
 	GetAll() ([]response.ResponseForum, error)
+	GetByCategory(category_id string) ([]response.ResponseForum, error)
+	GetByMyForum(id_user string) ([]response.ResponseForum, error)
 	GetById(id string) (*response.ResponseForumDetail, error)
 	Create(forum *entity.Forum) error
 	Update(id string, forumId *entity.Forum) error
@@ -34,6 +38,7 @@ func (fr mysqlForumRepository) GetAll() ([]response.ResponseForum, error) {
 				break
 			}
 		}
+		response[i].Member = len(response[i].UserForums)
 		response[i].UserForums = nil
 	}
 
@@ -41,6 +46,52 @@ func (fr mysqlForumRepository) GetAll() ([]response.ResponseForum, error) {
 		return nil, err
 	}
 	return response, nil
+}
+
+func (fr mysqlForumRepository) GetByCategory(category_id string) ([]response.ResponseForum, error) {
+	var response []response.ResponseForum
+	err := fr.DB.Where("category_id = ?", category_id).Model(entity.Forum{}).Preload("UserForums").Find(&response).Error
+
+	idUserJWT := 1
+	for i := 0; i < len(response); i++ {
+		for j := 0; j < len(response[i].UserForums); j++ {
+			if response[i].UserForums[j].UserId == uint(idUserJWT) {
+				response[i].Status = true
+				break
+			}
+		}
+		response[i].Member = len(response[i].UserForums)
+		response[i].UserForums = nil
+	}
+
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
+func (fr mysqlForumRepository) GetByMyForum(id_user string) ([]response.ResponseForum, error) {
+	var forum []response.ResponseForum
+	err := fr.DB.Model(entity.Forum{}).Preload("UserForums").Find(&forum).Error
+
+	id, _ := strconv.Atoi(id_user)
+	var myForum []response.ResponseForum
+	for i := 0; i < len(forum); i++ {
+		for j := 0; j < len(forum[i].UserForums); j++ {
+			if forum[i].UserForums[j].UserId == uint(id) {
+				forum[i].Status = true
+				myForum = append(myForum, forum[i])
+				myForum[len(myForum)-1].Member = len(myForum[len(myForum)-1].UserForums)
+				myForum[len(myForum)-1].UserForums = nil
+				break
+			}
+		}
+	}
+
+	if err != nil {
+		return nil, err
+	}
+	return myForum, nil
 }
 
 func (fr mysqlForumRepository) GetById(id string) (*response.ResponseForumDetail, error) {

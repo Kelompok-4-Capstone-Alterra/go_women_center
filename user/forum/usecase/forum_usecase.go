@@ -7,6 +7,8 @@ import (
 
 type ForumUsecaseInterface interface {
 	GetAll() ([]response.ResponseForum, error)
+	GetByCategory(id_category string) ([]response.ResponseForum, error)
+	GetByMyForum(id_user string) ([]response.ResponseForum, error)
 	GetById(id string) (*response.ResponseForumDetail, error)
 	Create(forum *entity.Forum) error
 	Update(id string, forumId *entity.Forum) error
@@ -25,6 +27,22 @@ func NewForumUsecase(ForumR ForumUsecaseInterface) ForumUsecaseInterface {
 
 func (fu ForumUsecase) GetAll() ([]response.ResponseForum, error) {
 	forums, err := fu.ForumR.GetAll()
+	if err != nil {
+		return nil, err
+	}
+	return forums, nil
+}
+
+func (fu ForumUsecase) GetByCategory(id_category string) ([]response.ResponseForum, error) {
+	forums, err := fu.ForumR.GetByCategory(id_category)
+	if err != nil {
+		return nil, err
+	}
+	return forums, nil
+}
+
+func (fu ForumUsecase) GetByMyForum(id_user string) ([]response.ResponseForum, error) {
+	forums, err := fu.ForumR.GetByMyForum(id_user)
 	if err != nil {
 		return nil, err
 	}
