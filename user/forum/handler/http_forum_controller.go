@@ -13,6 +13,7 @@ import (
 
 type ForumHandlerInterface interface {
 	GetAll(c echo.Context) error
+	GetAllSortBy(c echo.Context) error
 	GetByCategory(c echo.Context) error
 	GetByMyForum(c echo.Context) error
 	GetById(c echo.Context) error
@@ -32,7 +33,18 @@ func NewForumHandler(ForumU usecase.ForumUsecaseInterface) ForumHandlerInterface
 }
 
 func (fh ForumHandler) GetAll(c echo.Context) error {
-	forums, err := fh.ForumU.GetAll()
+	getTopic := c.QueryParam("topic")
+	forums, err := fh.ForumU.GetAll(getTopic)
+
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(http.StatusBadRequest, "Failed to get all forums data", nil))
+	}
+	return c.JSON(http.StatusOK, helper.ResponseData(http.StatusOK, "Success to get all forums data", forums))
+}
+
+func (fh ForumHandler) GetAllSortBy(c echo.Context) error {
+	getBy := c.QueryParam("by")
+	forums, err := fh.ForumU.GetAllSortBy(getBy)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(http.StatusBadRequest, "Failed to get all forums data", nil))

@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
@@ -9,7 +10,8 @@ import (
 )
 
 type ForumRepository interface {
-	GetAll() ([]response.ResponseForum, error)
+	GetAll(topic string) ([]response.ResponseForum, error)
+	GetAllSortBy(by string) ([]response.ResponseForum, error)
 	GetByCategory(category_id string) ([]response.ResponseForum, error)
 	GetByMyForum(id_user string) ([]response.ResponseForum, error)
 	GetById(id string) (*response.ResponseForumDetail, error)
@@ -26,9 +28,32 @@ func NewMysqlForumRepository(db *gorm.DB) ForumRepository {
 	return &mysqlForumRepository{DB: db}
 }
 
-func (fr mysqlForumRepository) GetAll() ([]response.ResponseForum, error) {
+func (fr mysqlForumRepository) GetAll(topic string) ([]response.ResponseForum, error) {
 	var response []response.ResponseForum
-	err := fr.DB.Model(entity.Forum{}).Preload("UserForums").Find(&response).Error
+	err := fr.DB.Where("topic LIKE ?", "%"+topic+"%").Model(entity.Forum{}).Preload("UserForums").Find(&response).Error
+
+	idUserJWT := 1
+	for i := 0; i < len(response); i++ {
+		for j := 0; j < len(response[i].UserForums); j++ {
+			if response[i].UserForums[j].UserId == uint(idUserJWT) {
+				response[i].Status = true
+				break
+			}
+		}
+		response[i].Member = len(response[i].UserForums)
+		response[i].UserForums = nil
+	}
+
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
+func (fr mysqlForumRepository) GetAllSortBy(by string) ([]response.ResponseForum, error) {
+	fmt.Println("topic " + by)
+	var response []response.ResponseForum
+	err := fr.DB.Model(entity.Forum{}).Preload("UserForums").Order("created_at " + by).Find(&response).Error
 
 	idUserJWT := 1
 	for i := 0; i < len(response); i++ {
