@@ -7,11 +7,8 @@ import (
 )
 
 type CounselorRepository interface {
-	GetAll(offset, limit int, topic string) ([]counselor.GetAllResponse, error)
-	Count() (int, error)
+	GetAll(search, topic, sortBy string, offset, limit int) ([]counselor.GetAllResponse, int64, error)
 	GetById(id string) (counselor.GetByResponse, error)
-	Search(search, topic string, offset, limit int) ([]counselor.GetAllResponse, error)
-	CountBySearch(search, topic string) (int, error)
 }
 
 type mysqlCounselorRepository struct {
@@ -22,30 +19,23 @@ func NewMysqlCounselorRepository(db *gorm.DB) CounselorRepository{
 	return &mysqlCounselorRepository{DB: db}
 }
 
-func(r *mysqlCounselorRepository) GetAll(offset, limit int, topic string) ([]counselor.GetAllResponse, error) {
+func(r *mysqlCounselorRepository) GetAll(search, topic, sortBy string, offset, limit int) ([]counselor.GetAllResponse, int64, error) {
 
 	var counselors []counselor.GetAllResponse
-
-	err := r.DB.Model(&entity.Counselor{}).Where("topic = ?", topic).Offset(offset).Limit(limit).Find(&counselors).Error
-
-	if err != nil {
-		return nil, err
-	}
-
-	return counselors, nil
-}
-
-func(r *mysqlCounselorRepository) Count() (int, error) {
-
 	var totalData int64
-
-	err := r.DB.Model(&entity.Counselor{}).Count(&totalData).Error
+	err := r.DB.Model(&entity.Counselor{}).
+		Where("topic = ? AND name LIKE ?", topic, "%"+search+"%").
+		Count(&totalData).
+		Order(sortBy).
+		Offset(offset).
+		Limit(limit).
+		Find(&counselors).Error
 
 	if err != nil {
-		return 0, err
+		return nil, totalData, err
 	}
 
-	return int(totalData), nil
+	return counselors, totalData, nil
 }
 
 func(r *mysqlCounselorRepository) GetById(id string) (counselor.GetByResponse, error) {
@@ -59,30 +49,4 @@ func(r *mysqlCounselorRepository) GetById(id string) (counselor.GetByResponse, e
 	}
 
 	return counselor, nil
-}
-
-func(r *mysqlCounselorRepository) CountBySearch(search, topic string) (int, error) {
-	
-	var totalData int64
-
-	err := r.DB.Model(&entity.Counselor{}).Where("name LIKE ? AND topic = ?", "%"+search+"%", topic).Count(&totalData).Error
-
-	if err != nil {
-		return 0, err
-	}
-
-	return int(totalData), nil
-}
-
-func(r *mysqlCounselorRepository) Search(search, topic string, offset, limit int) ([]counselor.GetAllResponse, error) {
-	
-	var counselors []counselor.GetAllResponse
-
-	err := r.DB.Model(&entity.Counselor{}).Where("name LIKE ? AND topic = ?", "%"+search+"%", topic).Offset(offset).Limit(limit).Find(&counselors).Error
-
-	if err != nil {
-		return nil, err
-	}
-
-	return counselors, nil
 }

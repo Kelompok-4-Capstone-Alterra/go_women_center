@@ -30,37 +30,13 @@ func(h *counselorHandler) GetAll(c echo.Context) error {
 	}
 	
 	page, offset, limit := helper.GetPaginateData(getAllReq.Page, getAllReq.Limit, "mobile")
-	
-	var counselors []counselor.GetAllResponse
-	var totalPages int
-	var err error
 
 	topicStr := constant.TOPICS[getAllReq.Topic]
 	
+	counselors, totalPages, err := h.CUscase.GetAll(getAllReq.Search, topicStr, getAllReq.SortBy, offset, limit)
 
-	if getAllReq.Search != "" {
-		counselors, err = h.CUscase.Search(getAllReq.Search, topicStr, offset, limit)
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, helper.ResponseData(err.Error(), http.StatusInternalServerError, nil))
-		}
-
-		totalPages, err = h.CUscase.GetTotalPagesSearch(getAllReq.Search, topicStr, limit)
-
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, helper.ResponseData(err.Error(), http.StatusInternalServerError, nil))
-		}
-
-	}else {
-		counselors, err = h.CUscase.GetAll(offset, limit, topicStr)
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, helper.ResponseData(err.Error(), http.StatusInternalServerError, nil))
-		}
-	
-		totalPages, err = h.CUscase.GetTotalPages(limit)
-	
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, helper.ResponseData(err.Error(), http.StatusInternalServerError, nil))
-		}
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, helper.ResponseData(err.Error(), http.StatusInternalServerError, nil))
 	}
 	
 	if page > totalPages {
@@ -107,7 +83,7 @@ func(h *counselorHandler) GetAllReview(c echo.Context) error {
 
 	page, offset, limit := helper.GetPaginateData(getAllReviewReq.Page, getAllReviewReq.Limit, "mobile")
 
-	reviews, err := h.CUscase.GetAllReview(getAllReviewReq.CounselorID, offset, limit)
+	reviews, totalData, err := h.CUscase.GetAllReview(getAllReviewReq.CounselorID, offset, limit)
 
 	if err != nil {
 		status := http.StatusInternalServerError
@@ -120,7 +96,7 @@ func(h *counselorHandler) GetAllReview(c echo.Context) error {
 		return c.JSON(status, helper.ResponseData(err.Error(), status, nil))
 	}
 
-	totalPage, err := h.CUscase.GetTotalPagesReview(getAllReviewReq.CounselorID, limit)
+	totalPages := helper.GetTotalPages(totalData, limit)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, helper.ResponseData(err.Error(), http.StatusInternalServerError, nil))
@@ -129,7 +105,7 @@ func(h *counselorHandler) GetAllReview(c echo.Context) error {
 	return c.JSON(http.StatusOK, helper.ResponseData("success get all counselor review", http.StatusOK, echo.Map{
 		"reviews": reviews,
 		"current_pages": page,
-		"total_pages": totalPage,
+		"total_pages": totalPages,
 	}))
 }
 

@@ -9,14 +9,11 @@ import (
 )
 
 type CounselorUsecase interface {
-	GetAll(offset, limit int) ([]counselor.GetAllResponse, error)
-	GetTotalPages(limit int) (int, error)
+	GetAll(search string, offset, limit int) ([]counselor.GetAllResponse, int, error)
 	GetById(id string) (counselor.GetByResponse, error)
 	Create(input counselor.CreateRequest) error
 	Update(input counselor.UpdateRequest) error
-	Delete(id string) error
-	GetTotalPagesSearch(search string, limit int) (int, error)
-	Search(search string, offset, limit int) ([]counselor.GetAllResponse, error)
+	Delete(id string) error	
 }
 
 type counselorUsecase struct {
@@ -28,27 +25,17 @@ func NewCounselorUsecase(CRepo repository.CounselorRepository, Image helper.Imag
 	return &counselorUsecase{CounselorRepo: CRepo, Image: Image}
 }
 
-func(u *counselorUsecase) GetAll(offset, limit int) ([]counselor.GetAllResponse, error) {
+func(u *counselorUsecase) GetAll(search string, offset, limit int) ([]counselor.GetAllResponse, int, error) {
 	
-	counselors, err := u.CounselorRepo.GetAll(offset, limit)
+	counselors, totalData, err := u.CounselorRepo.GetAll(search, offset, limit)
 
 	if err != nil {
-		return nil, counselor.ErrInternalServerError
+		return nil, 0, counselor.ErrInternalServerError
 	}
 
-	return counselors, nil
-}
+	totalPages := helper.GetTotalPages(int(totalData),limit)
 
-func(u *counselorUsecase) GetTotalPages(limit int) (int, error) {
-
-	totalData, err := u.CounselorRepo.Count()
-	if err != nil {
-		return 0, counselor.ErrInternalServerError
-	}
-
-	totalPages := helper.GetTotalPages(totalData, limit)
-
-	return totalPages, nil
+	return counselors, totalPages , nil
 }
 
 func(u *counselorUsecase) GetById(id string) (counselor.GetByResponse, error) {
@@ -56,7 +43,7 @@ func(u *counselorUsecase) GetById(id string) (counselor.GetByResponse, error) {
 	counselorRes, err := u.CounselorRepo.GetById(id)
 
 	if err != nil {
-		return counselorRes, counselor.ErrReviewNotFound
+		return counselorRes, counselor.ErrCounselorNotFound
 	}
 
 	return counselorRes, nil
@@ -67,8 +54,15 @@ func(u *counselorUsecase) Create(input counselor.CreateRequest) error{
 	_, err := u.CounselorRepo.GetByEmail(input.Email)
 
 	if err == nil {
-		return counselor.ErrCounselorConflict
+		return counselor.ErrEmailConflict
 	}
+
+	_, err = u.CounselorRepo.GetByUsername(input.Username)
+
+	if err == nil {
+		return counselor.ErrUsernameConflict
+	}
+
 
 	if !u.Image.IsImageValid(input.ProfilePicture) {
 		return counselor.ErrProfilePictureFormat
@@ -89,7 +83,7 @@ func(u *counselorUsecase) Create(input counselor.CreateRequest) error{
 		Username: input.Username,
 		Topic: constant.TOPICS[input.Topic],
 		Description: input.Description,
-		Tarif: input.Tarif,
+		Price: input.Price,
 		ProfilePicture: path,
 	}
 
@@ -107,7 +101,7 @@ func(u *counselorUsecase) Update(input counselor.UpdateRequest) error {
 	counselorData, err := u.CounselorRepo.GetById(input.ID)
 	
 	if err != nil {
-		return counselor.ErrReviewNotFound
+		return counselor.ErrCounselorNotFound
 	}
 
 	_, err = u.CounselorRepo.GetByEmail(input.Email)
@@ -118,13 +112,21 @@ func(u *counselorUsecase) Update(input counselor.UpdateRequest) error {
 		}
 	}
 
+	_, err = u.CounselorRepo.GetByUsername(input.Username)
+
+	if err == nil {
+		if counselorData.Username != input.Username {
+			return counselor.ErrUsernameConflict
+		}
+	}
+
 	counselorUpdate := entity.Counselor{
 		Name: input.Name,
 		Email: input.Email,
 		Username: input.Username,
 		Topic: constant.TOPICS[input.Topic],
 		Description: input.Description,
-		Tarif: input.Tarif,
+		Price: input.Price,
 	}
 
 	if input.ProfilePicture != nil {
@@ -158,7 +160,7 @@ func(u *counselorUsecase) Delete(id string) error {
 	counselorData, err := u.CounselorRepo.GetById(id)
 
 	if err != nil {
-		return counselor.ErrReviewNotFound
+		return counselor.ErrCounselorNotFound
 	}
 	
 	err = u.CounselorRepo.Delete(counselorData.ID)
@@ -169,28 +171,3 @@ func(u *counselorUsecase) Delete(id string) error {
 
 	return nil
 }
-
-func(u *counselorUsecase) GetTotalPagesSearch(search string, limit int) (int, error) {
-	
-	totalData, err := u.CounselorRepo.CountBySearch(search)
-	if err != nil {
-		return 0, counselor.ErrInternalServerError
-	}
-
-	totalPages := helper.GetTotalPages(totalData, limit)
-
-	return totalPages, nil
-}
-
-func(u *counselorUsecase) Search(search string, offset, limit int) ([]counselor.GetAllResponse, error) {
-	
-	counselors, err := u.CounselorRepo.Search(search, offset, limit)
-
-	if err != nil {
-		return nil, counselor.ErrInternalServerError
-	}
-
-	return counselors, nil
-}
-
-

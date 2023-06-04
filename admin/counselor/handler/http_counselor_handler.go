@@ -26,36 +26,11 @@ func(h *counselorHandler) GetAll(c echo.Context) error {
 	search := c.QueryParam("search")
 	
 	page, offset, limit := helper.GetPaginateData(page, limit)
-
-
-	var counselors []counselor.GetAllResponse
-	var totalPages int
-	var err error
-
-	if search != "" {
-		counselors, err = h.CUscase.Search(search, offset, limit)
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, helper.ResponseData(err.Error(), http.StatusInternalServerError, nil))
-		}
 	
-		totalPages, err = h.CUscase.GetTotalPagesSearch(search, limit)
-		
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, helper.ResponseData(err.Error(), http.StatusInternalServerError, nil))
-		}
-	}else {
+	counselors, totalPages, err := h.CUscase.GetAll(search, offset, limit)
 
-		counselors, err = h.CUscase.GetAll(offset, limit)	
-
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, helper.ResponseData(err.Error(), http.StatusInternalServerError, nil))
-		}
-		
-		totalPages, err = h.CUscase.GetTotalPages(limit)
-		
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, helper.ResponseData(err.Error(), http.StatusInternalServerError, nil))
-		}
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, helper.ResponseData(err.Error(), http.StatusInternalServerError, nil))
 	}
 
 	if page > totalPages {
@@ -90,7 +65,8 @@ func(h *counselorHandler) Create(c echo.Context) error {
 		status := http.StatusInternalServerError
 
 		switch err.Error() {
-			case counselor.ErrCounselorConflict.Error():
+			case counselor.ErrEmailConflict.Error(),
+				counselor.ErrUsernameConflict.Error():
 				status = http.StatusConflict
 			case counselor.ErrProfilePictureFormat.Error():
 				status = http.StatusBadRequest

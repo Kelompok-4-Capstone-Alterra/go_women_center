@@ -9,6 +9,7 @@ import (
 	CounselorAdminUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor/usecase"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/app/config"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
 	TopicHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/topic/handler"
 	UserAuthHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth/handler"
 	CounselorUserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor/handler"
@@ -47,10 +48,13 @@ func main() {
 
 	db := dbconf.InitDB()
 	sslconf.InitSSL()
+	// helper
 	// googleUUID := helper.NewGoogleUUID()
+	image := helper.NewImage("women-center")
 	// log.Print(db, googleUUID)
-
 	e := echo.New()
+
+	// middleware 
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORS())
@@ -58,7 +62,8 @@ func main() {
 	e.GET("/healthcheck", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, "hello")
 	})
-
+	
+	
 	// topic
 	{
 		topicHandler := TopicHandler.NewTopicHandler()
@@ -69,7 +74,7 @@ func main() {
 	groupAdmins := e.Group("/admin")
 	{
 		counselorRepo := CounselorAdminRepository.NewMysqlCounselorRepository(db)
-		counselorUsecase := CounselorAdminUsecase.NewCounselorUsecase(counselorRepo)
+		counselorUsecase := CounselorAdminUsecase.NewCounselorUsecase(counselorRepo, image)
 		counselorHandler := CounselorAdminHandler.NewCounselorHandler(counselorUsecase)
 		{
 			groupAdmins.POST("/counselors", counselorHandler.Create)
@@ -116,7 +121,7 @@ func main() {
 	}
 
 	// ssl
-	e.Logger.Fatal(e.StartTLS(":8080", "./ssl/certificate.crt", "./ssl/private.key"))
+	// e.Logger.Fatal(e.StartTLS(":8080", "./ssl/certificate.crt", "./ssl/private.key"))
 
-	// e.Logger.Fatal(e.Start(":8080"))
+	e.Logger.Fatal(e.Start(":8080"))
 }
