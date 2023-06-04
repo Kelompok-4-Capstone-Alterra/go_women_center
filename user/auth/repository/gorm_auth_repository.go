@@ -11,6 +11,7 @@ import (
 type UserRepo interface {
 	Create(userData entity.User) (entity.User, error)
 	GetByEmail(email string) (entity.User, error)
+	GetByUsername(username string) (entity.User, error)
 }
 
 type userGormMysqlRepo struct {
@@ -37,6 +38,16 @@ func (u *userGormMysqlRepo) Create(userData entity.User) (entity.User, error) {
 func (u *userGormMysqlRepo) GetByEmail(email string) (entity.User, error) {
 	savedUser := entity.User{}
 	err := u.DB.Where("email = ?", email).First(&savedUser).Error
+	if err != nil {
+		return entity.User{}, err
+	}
+
+	return savedUser, nil
+}
+
+func (u *userGormMysqlRepo) GetByUsername(username string) (entity.User, error) {
+	savedUser := entity.User{}
+	err := u.DB.Where("username = ?", username).First(&savedUser).Error
 	if err != nil {
 		return entity.User{}, err
 	}

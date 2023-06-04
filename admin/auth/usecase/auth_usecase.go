@@ -21,9 +21,9 @@ func NewAuthUsecase(repo repository.AdminRepo) *authUseCase {
 }
 
 func (a *authUseCase) Login(request auth.LoginAdminRequest) (entity.Admin, error) {
-	data, err := a.Repo.GetByEmail(request.Email)
+	data, err := a.Repo.GetByUsername(request.Username)
 	if err != nil {
-		return entity.Admin{}, auth.ErrInvalidCredential
+		return entity.Admin{}, auth.ErrInternalServerError
 	}
 
 	if request.Password != data.Password {

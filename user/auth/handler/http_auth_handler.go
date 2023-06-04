@@ -105,6 +105,7 @@ func (h *userHandler) VerifyEmailHandler(c echo.Context) error { // TODO: rename
 
 	err = h.Usecase.VerifyEmail(emailRequest.Email)
 	if err != nil {
+
 		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
 			http.StatusInternalServerError,
 			err.Error(), //TODO: write better error message
@@ -140,8 +141,18 @@ func (h *userHandler) RegisterHandler(c echo.Context) error {
 
 	err = h.Usecase.Register(registerRequest)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
-			http.StatusInternalServerError,
+		
+		status := http.StatusBadRequest
+
+		switch err {
+			case user.ErrUserIsRegistered:
+				status = http.StatusConflict
+			case user.ErrInternalServerError:
+				status = http.StatusInternalServerError
+		}
+
+		return c.JSON(status, helper.ResponseData(
+			status,
 			err.Error(),
 			nil,
 		))
@@ -176,8 +187,16 @@ func (h *userHandler) LoginHandler(c echo.Context) error {
 
 	data, err := h.Usecase.Login(loginRequest)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
-			http.StatusInternalServerError,
+
+		status := http.StatusBadRequest
+
+		switch err {
+			case user.ErrInternalServerError:
+				status = http.StatusInternalServerError
+		}
+
+		return c.JSON(status, helper.ResponseData(
+			status,
 			err.Error(),
 			nil,
 		))

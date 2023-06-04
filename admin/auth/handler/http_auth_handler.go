@@ -33,8 +33,8 @@ func (h *authHandler) LoginHandler(c echo.Context) error {
 	}
 
 	if err := isRequestValid(request); err != nil {
-		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
-			http.StatusInternalServerError,
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(
+			http.StatusBadRequest,
 			err.Error(),
 			nil,
 		))
@@ -42,21 +42,21 @@ func (h *authHandler) LoginHandler(c echo.Context) error {
 
 	data, err := h.Usecase.Login(request)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
-			http.StatusInternalServerError,
+		status := http.StatusInternalServerError
+
+		switch err {
+			case auth.ErrInvalidCredential:
+				status = http.StatusBadRequest
+		}
+
+		return c.JSON(status, helper.ResponseData(
+			status,
 			err.Error(),
 			nil,
 		))
 	}
 
-	token, err := h.JwtConf.GenerateAdminToken(data.Email)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
-			http.StatusInternalServerError,
-			err.Error(),
-			nil,
-		))
-	}
+	token, _ := h.JwtConf.GenerateAdminToken(data.Email)
 
 	return c.JSON(http.StatusOK, helper.ResponseData(
 		http.StatusOK,

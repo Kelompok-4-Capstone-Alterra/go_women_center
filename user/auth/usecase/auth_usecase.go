@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"log"
 	"time"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
@@ -48,12 +47,7 @@ func (u *userUsecase) Register(registerRequest user.RegisterUserRequest) error {
 	}
 
 	
-	encryptedPass, err := u.Encryptor.HashPassword(registerRequest.Password)
-	if err != nil {
-		return user.ErrFailedEncrpyt
-	}
-	log.Println(registerRequest.Password)
-	log.Println(encryptedPass)
+	encryptedPass, _ := u.Encryptor.HashPassword(registerRequest.Password)
 
 	defer u.otpRepo.Delete(storedOtp.Email)
 
@@ -67,7 +61,7 @@ func (u *userUsecase) Register(registerRequest user.RegisterUserRequest) error {
 
 	_, err = u.repo.Create(data)
 	if err != nil {
-		return err
+		return user.ErrInternalServerError
 	}
 
 	return nil
@@ -76,7 +70,7 @@ func (u *userUsecase) Register(registerRequest user.RegisterUserRequest) error {
 func (u *userUsecase) VerifyEmail(email string) error {
 	otpCode, err := u.otpGen.GetOtp()
 	if err != nil {
-		return err
+		return user.ErrInternalServerError
 	}
 	otp := repository.Otp{
 		Email: email,
@@ -85,7 +79,7 @@ func (u *userUsecase) VerifyEmail(email string) error {
 
 	err = u.EmailSender.SendEmail(email, "OTP verification code (valid for 1 minute)", otpCode) //TODO: write subject and body template
 	if err != nil {
-		return err
+		return user.ErrInternalServerError
 	}
 
 	u.otpRepo.Update(otp, time.Now().Add(time.Minute).Unix())
@@ -93,13 +87,14 @@ func (u *userUsecase) VerifyEmail(email string) error {
 }
 
 func (u *userUsecase) Login(loginRequest user.LoginUserRequest) (entity.User, error) {
-	data, err := u.repo.GetByEmail(loginRequest.Email)
+
+	data, err := u.repo.GetByUsername(loginRequest.Username)
 	if err != nil {
 		return entity.User{}, user.ErrInvalidCredential
 	}
 
 	if !u.Encryptor.CheckPasswordHash(loginRequest.Password, data.Password) {
-		return entity.User{}, user.ErrInvalidCredential
+		return entity.User{}, user.ErrInternalServerError
 	}
 
 	return data, nil
