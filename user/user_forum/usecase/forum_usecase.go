@@ -3,7 +3,7 @@ package usecase
 import "github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 
 type UserForumUsecaseInterface interface {
-	Create(forum *entity.UserForum) (*entity.UserForum, error)
+	Create(forum *entity.UserForum) error
 }
 
 type UserForumUsecase struct {
@@ -16,10 +16,10 @@ func NewUserForumUsecase(UserForumR UserForumUsecaseInterface) UserForumUsecaseI
 	}
 }
 
-func (fu UserForumUsecase) Create(forum *entity.UserForum) (*entity.UserForum, error) {
-	forum, err := fu.UserForumR.Create(forum)
+func (fu UserForumUsecase) Create(forum *entity.UserForum) error {
+	err := fu.UserForumR.Create(forum)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return forum, nil
+	return nil
 }

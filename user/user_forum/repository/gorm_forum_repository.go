@@ -6,7 +6,7 @@ import (
 )
 
 type UserForumRepository interface {
-	Create(user_forum *entity.UserForum) (*entity.UserForum, error)
+	Create(user_forum *entity.UserForum) error
 }
 
 type mysqlUserForumRepository struct {
@@ -17,11 +17,11 @@ func NewMysqlUserForumRepository(db *gorm.DB) UserForumRepository {
 	return &mysqlUserForumRepository{DB: db}
 }
 
-func (fr mysqlUserForumRepository) Create(user_forum *entity.UserForum) (*entity.UserForum, error) {
+func (fr mysqlUserForumRepository) Create(user_forum *entity.UserForum) error {
 	err := fr.DB.Save(user_forum).Error
 
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return user_forum, nil
+	return nil
 }

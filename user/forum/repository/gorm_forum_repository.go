@@ -1,17 +1,16 @@
 package repository
 
 import (
-	"fmt"
-
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
+	response "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum"
 	"gorm.io/gorm"
 )
 
 type ForumRepository interface {
-	GetAll() ([]entity.Forum, error)
-	GetById(id string) (*entity.Forum, error)
-	Create(forum *entity.Forum) (*entity.Forum, error)
-	Update(id string, forumId *entity.Forum) (*entity.Forum, error)
+	GetAll() ([]response.ResponseForum, error)
+	GetById(id string) (*response.ResponseForumDetail, error)
+	Create(forum *entity.Forum) error
+	Update(id string, forumId *entity.Forum) error
 	Delete(id string) error
 }
 
@@ -23,56 +22,52 @@ func NewMysqlForumRepository(db *gorm.DB) ForumRepository {
 	return &mysqlForumRepository{DB: db}
 }
 
-func (fr mysqlForumRepository) GetAll() ([]entity.Forum, error) {
-	var forums []entity.Forum
-	err := fr.DB.Preload("UserForums").Find(&forums, &entity.Category{}).Error
+func (fr mysqlForumRepository) GetAll() ([]response.ResponseForum, error) {
+	var response []response.ResponseForum
+	err := fr.DB.Model(entity.Forum{}).Preload("UserForums").Find(&response).Error
 
 	idUserJWT := 1
-
-	for i := 0; i < len(forums); i++ {
-		for j := 0; j < len(forums[i].UserForums); j++ {
-			if forums[i].UserForums[j].UserId == uint(idUserJWT) {
-				forums[i].Status = true
+	for i := 0; i < len(response); i++ {
+		for j := 0; j < len(response[i].UserForums); j++ {
+			if response[i].UserForums[j].UserId == uint(idUserJWT) {
+				response[i].Status = true
 				break
 			}
 		}
-		forums[i].UserForums = nil
+		response[i].UserForums = nil
 	}
 
 	if err != nil {
 		return nil, err
 	}
-	return forums, nil
+	return response, nil
 }
 
-func (fr mysqlForumRepository) GetById(id string) (*entity.Forum, error) {
-	var forums entity.Forum
-	err := fr.DB.First(&forums, "id = ?", id).Error
-
+func (fr mysqlForumRepository) GetById(id string) (*response.ResponseForumDetail, error) {
+	var forumdetail response.ResponseForumDetail
+	err := fr.DB.Model(entity.Forum{}).Preload("UserForums").First(&forumdetail, "id = ?", id).Error
 	if err != nil {
 		return nil, err
 	}
-	return &forums, nil
+	return &forumdetail, nil
 }
 
-func (fr mysqlForumRepository) Create(forum *entity.Forum) (*entity.Forum, error) {
+func (fr mysqlForumRepository) Create(forum *entity.Forum) error {
 	err := fr.DB.Save(forum).Error
 
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return forum, nil
+	return nil
 }
 
-func (fr mysqlForumRepository) Update(id string, forumId *entity.Forum) (*entity.Forum, error) {
+func (fr mysqlForumRepository) Update(id string, forumId *entity.Forum) error {
 	var forum entity.Forum
-	fmt.Println("id :", id)
-	fmt.Println(forumId)
 	err := fr.DB.Model(&forum).Where("id = ?", id).Updates(&forumId).Error
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return forumId, nil
+	return nil
 }
 
 func (fr mysqlForumRepository) Delete(id string) error {

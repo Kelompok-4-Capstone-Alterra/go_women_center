@@ -33,9 +33,9 @@ func (fh ForumHandler) GetAll(c echo.Context) error {
 	forums, err := fh.ForumU.GetAll()
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, helper.ResponseData(http.StatusBadRequest, "Failed get all forums", nil))
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(http.StatusBadRequest, "Failed to get all forums data", nil))
 	}
-	return c.JSON(http.StatusOK, helper.ResponseData(http.StatusOK, "success", forums))
+	return c.JSON(http.StatusOK, helper.ResponseData(http.StatusOK, "Success to get all forums data", forums))
 }
 
 func (fh ForumHandler) GetById(c echo.Context) error {
@@ -43,9 +43,9 @@ func (fh ForumHandler) GetById(c echo.Context) error {
 	forum, err := fh.ForumU.GetById(id)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, helper.ResponseData(http.StatusBadRequest, "Failed get all forums", nil))
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(http.StatusBadRequest, "Failed to get detail forums data", nil))
 	}
-	return c.JSON(http.StatusOK, helper.ResponseData(http.StatusOK, "success", forum))
+	return c.JSON(http.StatusOK, helper.ResponseData(http.StatusOK, "Success to get detail forum data", forum))
 }
 
 func (fh ForumHandler) Create(c echo.Context) error {
@@ -56,24 +56,24 @@ func (fh ForumHandler) Create(c echo.Context) error {
 	uuid := strings.Replace(uuidWithHyphen.String(), "-", "", -1)
 	forum.ID = uuid
 
-	data, err := fh.ForumU.Create(&forum)
+	err := fh.ForumU.Create(&forum)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, helper.ResponseData(http.StatusBadRequest, "Failed create forums", nil))
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(http.StatusBadRequest, err.Error(), nil))
 	}
-	return c.JSON(http.StatusOK, helper.ResponseData(http.StatusOK, "success", data))
+	return c.JSON(http.StatusOK, helper.ResponseData(http.StatusOK, "Successfully created forum data", nil))
 }
 
 func (fh ForumHandler) Update(c echo.Context) error {
 	forum := entity.Forum{}
 	id := c.Param("id")
 	c.Bind(&forum)
-	data, err := fh.ForumU.Update(id, &forum)
+	err := fh.ForumU.Update(id, &forum)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(http.StatusBadRequest, "Failed update forums", nil))
 	}
-	return c.JSON(http.StatusOK, helper.ResponseData(http.StatusOK, "success", data))
+	return c.JSON(http.StatusOK, helper.ResponseData(http.StatusOK, "Successfully updated forum data", nil))
 }
 
 func (fh ForumHandler) Delete(c echo.Context) error {
@@ -83,5 +83,5 @@ func (fh ForumHandler) Delete(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(http.StatusBadRequest, "Failed get all forums", nil))
 	}
-	return c.JSON(http.StatusOK, helper.ResponseData(http.StatusOK, "success", id))
+	return c.JSON(http.StatusOK, helper.ResponseData(http.StatusOK, "Successfully deleted forum data", nil))
 }

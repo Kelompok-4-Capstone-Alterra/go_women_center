@@ -27,9 +27,9 @@ func (fh UserForumHandler) Create(c echo.Context) error {
 	var userForum entity.UserForum
 	c.Bind(&userForum)
 
-	data, err := fh.UserForumU.Create(&userForum)
+	err := fh.UserForumU.Create(&userForum)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, helper.ResponseData(http.StatusBadRequest, "Failed create forums", nil))
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(http.StatusBadRequest, "Failed to join forum", nil))
 	}
-	return c.JSON(http.StatusOK, helper.ResponseData(http.StatusOK, "success", data))
+	return c.JSON(http.StatusOK, helper.ResponseData(http.StatusOK, "Success to join forum", nil))
 }
