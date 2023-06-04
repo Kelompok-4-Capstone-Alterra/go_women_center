@@ -91,7 +91,7 @@ func main() {
 	e.POST("/admin/login", adminAuthHandler.LoginHandler)
 
 	// ssl
-	// e.Logger.Fatal(e.StartTLS(":8080", "./ssl/certificate.crt", "./ssl/private.key"))
+	e.Logger.Fatal(e.StartTLS(":8080", "./ssl/certificate.crt", "./ssl/private.key"))
 
-	e.Logger.Fatal(e.Start(":8080"))
+	// e.Logger.Fatal(e.Start(":8080"))
 }
