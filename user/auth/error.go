@@ -3,6 +3,10 @@ package auth
 import "errors"
 
 var (
+
+	// internal server error
+	ErrInternalServerError = errors.New("internal server error")
+
 	ErrInvalidOtp        = errors.New("invalid otp")
 	ErrExpiredOtp        = errors.New("the otp is already expired")
 	ErrInvalidCredential = errors.New("invalid credential")
