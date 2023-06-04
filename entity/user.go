@@ -7,15 +7,14 @@ import (
 )
 
 type User struct {
-	ID           string `gorm:"primaryKey"`
-	Username     string `gorm:"unique"`
-	Name         string
-	Email        string `gorm:"unique"`
-	Password     string
-	PhoneNumber  string
-	Birthdate    string
-	PhotoProfile string
-	Role         string
+	ID           string  `gorm:"primaryKey;uniqueindex;not null"`
+	Username     string  `gorm:"type:varchar(150);uniqueindex;not null"`
+	Name         string  `gorm:"type:varchar(150);not null"`
+	Email        string  `gorm:"type:varchar(150);uniqueindex;not null"`
+	Password     string  `gorm:"type:varchar(64)"`
+	PhoneNumber  string  `gorm:"type:varchar(20)"`
+	ProfilePicture string  `gorm:"type:varchar(255)"`
+	BirthDate    *time.Time `gorm:"type:date"`
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 	DeletedAt    gorm.DeletedAt `gorm:"index"`

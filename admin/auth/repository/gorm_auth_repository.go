@@ -6,7 +6,7 @@ import (
 )
 
 type AdminRepo interface {
-	GetByEmail(email string) (entity.Admin, error)
+	GetByUsername(username string) (entity.Admin, error)
 }
 
 type adminGormMysqlRepo struct {
@@ -19,9 +19,9 @@ func NewAdminRepo(db *gorm.DB) *adminGormMysqlRepo {
 	}
 }
 
-func (a *adminGormMysqlRepo) GetByEmail(email string) (entity.Admin, error) {
+func (a *adminGormMysqlRepo) GetByUsername(username string) (entity.Admin, error) {
 	adminData := entity.Admin{}
-	err := a.DB.Where("email = ?", email).First(&adminData).Error
+	err := a.DB.Where("username = ?", username).First(&adminData).Error
 	if err != nil {
 		return entity.Admin{}, err
 	}
