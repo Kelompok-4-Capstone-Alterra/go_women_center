@@ -8,12 +8,7 @@ var (
 
 	// not found
 	ErrCounselorNotFound = errors.New("counselor not found")
-	ErrReviewNotFound    = errors.New("review not found")
 	ErrPageNotFound = errors.New("page not found")
-
-	// conflict
-	ErrCounselorConflict = errors.New("counselor already registered")
-	ErrEmailConflict     = errors.New("counselor email already registered")
 
 	// bad request
 	ErrProfilePictureFormat = errors.New("profile picture must be an image and png/jpg/jpeg format")
@@ -23,5 +18,5 @@ var (
 	ErrIdFormat             = errors.New("id must be a valid uuid")
 	ErrInvalidTopic         = errors.New("invalid topic")
 	ErrRequired 			= errors.New("all fields are required")
-	ErrInvalidSortBy 		= errors.New("invalid sort by")
+	ErrInvalidSort 		= errors.New("invalid sort")
 )

@@ -11,12 +11,11 @@ var (
 
 	// not found
 	ErrCounselorNotFound = errors.New("counselor not found")
-	ErrReviewNotFound = errors.New("review not found")
 	ErrPageNotFound = errors.New("page not found")
 
 	// conflict
-	ErrCounselorConflict = errors.New("counselor already registered")
 	ErrEmailConflict = errors.New("counselor email already registered")
+	ErrUsernameConflict = errors.New("counselor username already registered")
 
 	// bad request
 	ErrProfilePictureFormat = errors.New("profile picture must be an png/jpg/jpeg and less than 2MB")

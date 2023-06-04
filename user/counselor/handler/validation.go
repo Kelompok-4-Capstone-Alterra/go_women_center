@@ -32,7 +32,7 @@ func isRequestValid(m interface{}) error {
 				case "topic":
 					return counselor.ErrInvalidTopic
 				case "sort_by":
-					return counselor.ErrInvalidSortBy
+					return counselor.ErrInvalidSort
 			}
 
 		}
