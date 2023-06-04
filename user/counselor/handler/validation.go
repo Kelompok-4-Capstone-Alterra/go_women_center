@@ -25,12 +25,14 @@ func isRequestValid(m interface{}) error {
 			}
 
 			switch field {
-				case "tarif":
-					return counselor.ErrTarifFormat
+				case "price":
+					return counselor.ErrPriceFormat
 				case "rating":
 					return counselor.ErrRatingFormat
 				case "topic":
 					return counselor.ErrInvalidTopic
+				case "sort_by":
+					return counselor.ErrInvalidSortBy
 			}
 
 		}

@@ -5,7 +5,7 @@ type GetAllResponse struct {
 	ProfilePicture string  `json:"profile_picture"`
 	Name           string  `json:"name"`
 	Topic          string  `json:"topic"`
-	Tarif          float64 `json:"tarif"`
+	Price          float64 `json:"price"`
 	Rating         float32 `json:"rating"`
 }
 
@@ -30,7 +30,7 @@ type GetByResponse struct {
 	Username       string  `json:"username"`
 	Name           string  `json:"name"`
 	Topic          string  `json:"topic"`
-	Tarif          float64 `json:"tarif"`
+	Price          float64 `json:"price"`
 	Rating         float32 `json:"rating"`
 	Description    string  `json:"description"`
 }

@@ -15,6 +15,6 @@ type GetByResponse struct {
 	Name           string  `json:"name"`
 	Email          string  `json:"email"`
 	Topic          string  `json:"topic"`
-	Tarif          float64 `json:"tarif"`
+	Price          float64 `json:"price"`
 	Description    string  `json:"description"`
 }

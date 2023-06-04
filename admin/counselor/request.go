@@ -8,7 +8,7 @@ type CreateRequest struct {
 	Username       string  `form:"username" validate:"required"`
 	Topic          int     `form:"topic" validate:"required,number,oneof=1 2 3 4 5 6 7 8 9 10"`
 	Description    string  `form:"description" validate:"required"`
-	Tarif          float64 `form:"tarif" validate:"required,number"`
+	Price          float64 `form:"price" validate:"required,number"`
 	ProfilePicture *multipart.FileHeader `form:"profile_picture" validate:"required"`
 }
 
@@ -19,7 +19,7 @@ type UpdateRequest struct {
 	Username    string  `form:"username"`
 	Topic       int     `form:"topic" validate:"omitempty,number,oneof=1 2 3 4 5 6 7 8 9 10"`
 	Description string  `form:"description"`
-	Tarif       float64 `form:"tarif" validate:"omitempty,number"`
+	Price       float64 `form:"price" validate:"omitempty,number"`
 	ProfilePicture *multipart.FileHeader `form:"profile_picture"`
 }
 

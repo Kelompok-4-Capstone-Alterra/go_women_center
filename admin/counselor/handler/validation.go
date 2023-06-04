@@ -23,8 +23,8 @@ func isRequestValid(m interface{}) error {
 			switch field {
 			case "email":
 				return counselor.ErrEmailFormat
-			case "tarif":
-				return counselor.ErrTarifFormat
+			case "price":
+				return counselor.ErrPriceFormat
 			case "rating":
 				return counselor.ErrRatingFormat
 			case "id":
