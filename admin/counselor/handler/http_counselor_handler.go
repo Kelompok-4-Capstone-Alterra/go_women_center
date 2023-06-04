@@ -23,43 +23,43 @@ func(h *counselorHandler) GetAll(c echo.Context) error {
 
 	page, _ :=  strconv.Atoi(c.QueryParam("page"))
 	limit, _ := strconv.Atoi(c.QueryParam("limit"))
+	search := c.QueryParam("search")
 	
 	page, offset, limit := helper.GetPaginateData(page, limit)
 
-	search := c.QueryParam("search")
+
+	var counselors []counselor.GetAllResponse
+	var totalPages int
+	var err error
 
 	if search != "" {
-		counselors, err := h.CUscase.Search(search, offset, limit)
+		counselors, err = h.CUscase.Search(search, offset, limit)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, helper.ResponseData(err.Error(), http.StatusInternalServerError, nil))
+		}
+	
+		totalPages, err = h.CUscase.GetTotalPagesSearch(search, limit)
+		
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, helper.ResponseData(err.Error(), http.StatusInternalServerError, nil))
+		}
+	}else {
+
+		counselors, err = h.CUscase.GetAll(offset, limit)	
 
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, helper.ResponseData(err.Error(), http.StatusInternalServerError, nil))
 		}
-
-		totalPages, err := h.CUscase.GetTotalPagesSearch(search, limit)
-
+		
+		totalPages, err = h.CUscase.GetTotalPages(limit)
+		
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, helper.ResponseData(err.Error(), http.StatusInternalServerError, nil))
 		}
-
-		return c.JSON(http.StatusOK, helper.ResponseData("success get all conselor", http.StatusOK, echo.Map{
-			"counselors": counselors,
-			"current_pages": page,
-			"total_pages": totalPages,
-		}))
-
-	}
-	
-
-	counselors, err := h.CUscase.GetAll(offset, limit)
-	
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
 	}
 
-	totalPages, err := h.CUscase.GetTotalPages(limit)
-
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, helper.ResponseData(err.Error(), http.StatusInternalServerError, nil))
+	if page > totalPages {
+		return c.JSON(http.StatusNotFound, helper.ResponseData(counselor.ErrPageNotFound.Error(), http.StatusNotFound, nil))
 	}
 
 	return c.JSON(http.StatusOK, helper.ResponseData("success get all conselor", http.StatusOK, echo.Map{

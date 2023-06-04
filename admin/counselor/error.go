@@ -12,6 +12,7 @@ var (
 	// not found
 	ErrCounselorNotFound = errors.New("counselor not found")
 	ErrReviewNotFound = errors.New("review not found")
+	ErrPageNotFound = errors.New("page not found")
 
 	// conflict
 	ErrCounselorConflict = errors.New("counselor already registered")

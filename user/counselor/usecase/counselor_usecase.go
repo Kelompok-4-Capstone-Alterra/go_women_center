@@ -1,8 +1,6 @@
 package usecase
 
 import (
-	"fmt"
-
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor"
@@ -59,7 +57,6 @@ func(u *counselorUsecase) GetById(id string) (counselor.GetByResponse, error) {
 	
 	counselorRes, err := u.counselorRepo.GetById(id)
 	
-	fmt.Println(counselorRes, err)
 	if err != nil {
 		return counselorRes, counselor.ErrCounselorNotFound
 	}
@@ -115,7 +112,7 @@ func(u *counselorUsecase) GetTotalPagesReview(id string, limit int) (int, error)
 	totalData, err := u.reviewRepo.CountByCounselorId(id)
 
 	if err != nil {
-		return 0, err
+		return 0, counselor.ErrInternalServerError
 	}
 
 	totalPages := helper.GetTotalPages(totalData, limit)
@@ -135,7 +132,7 @@ func(u *counselorUsecase) GetAllReview(id string, offset, limit int) ([]counselo
 	reviews, err := u.reviewRepo.GetByCounselorId(id, offset, limit)
 
 	if err != nil {
-		return []counselor.ReviewResponse{}, err
+		return []counselor.ReviewResponse{}, counselor.ErrInternalServerError
 	}
 
 	var reviewsRes = make([]counselor.ReviewResponse, len(reviews))

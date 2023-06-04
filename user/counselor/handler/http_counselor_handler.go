@@ -1,9 +1,7 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/constant"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
@@ -23,55 +21,53 @@ func NewCounselorHandler(CUcase usecase.CounselorUsecase) *counselorHandler {
 
 func(h *counselorHandler) GetAll(c echo.Context) error {
 
-	page, _ :=  strconv.Atoi(c.QueryParam("page"))
-	limit, _ := strconv.Atoi(c.QueryParam("limit"))
-	topic, _ := strconv.Atoi(c.QueryParam("topic"))
-	
-	if err := isTopicValid(topic); err != nil {
-		return c.JSON(getStatusCode(err), helper.ResponseData(err.Error(), getStatusCode(err), nil))
+	var getAllReq counselor.GetAllRequest
+
+	c.Bind(&getAllReq)
+
+	if err := isRequestValid(&getAllReq); err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
 	}
-
-	search := c.QueryParam("search")
 	
-	page, offset, limit := helper.GetPaginateData(page, limit, "mobile")
+	page, offset, limit := helper.GetPaginateData(getAllReq.Page, getAllReq.Limit, "mobile")
 	
-	topicStr := constant.TOPICS[topic]
+	var counselors []counselor.GetAllResponse
+	var totalPages int
+	var err error
+
+	topicStr := constant.TOPICS[getAllReq.Topic]
 	
 
-	if search != "" {
-		counselors, err := h.CUscase.Search(search, topicStr, offset, limit)
-
+	if getAllReq.Search != "" {
+		counselors, err = h.CUscase.Search(getAllReq.Search, topicStr, offset, limit)
 		if err != nil {
-			return c.JSON(getStatusCode(err), helper.ResponseData(err.Error(), getStatusCode(err), nil))
+			return c.JSON(http.StatusInternalServerError, helper.ResponseData(err.Error(), http.StatusInternalServerError, nil))
 		}
 
-		totalPages, err := h.CUscase.GetTotalPagesSearch(search, topicStr, limit)
+		totalPages, err = h.CUscase.GetTotalPagesSearch(getAllReq.Search, topicStr, limit)
 
 		if err != nil {
-			return c.JSON(getStatusCode(err), helper.ResponseData(err.Error(), getStatusCode(err), nil))
+			return c.JSON(http.StatusInternalServerError, helper.ResponseData(err.Error(), http.StatusInternalServerError, nil))
 		}
-		
-		return c.JSON(getStatusCode(err), helper.ResponseData("success get all conselor", getStatusCode(err), echo.Map{
-			"counselors": counselors,
-			"current_pages": page,
-			"total_pages": totalPages,
-		}))
 
-	}
-
-	counselors, err := h.CUscase.GetAll(offset, limit, topicStr)
+	}else {
+		counselors, err = h.CUscase.GetAll(offset, limit, topicStr)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, helper.ResponseData(err.Error(), http.StatusInternalServerError, nil))
+		}
 	
-	if err != nil {
-		return c.JSON(getStatusCode(err), helper.ResponseData(err.Error(), getStatusCode(err), nil))
+		totalPages, err = h.CUscase.GetTotalPages(limit)
+	
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, helper.ResponseData(err.Error(), http.StatusInternalServerError, nil))
+		}
+	}
+	
+	if page > totalPages {
+		return c.JSON(http.StatusNotFound, helper.ResponseData(counselor.ErrPageNotFound.Error(), http.StatusNotFound, nil))
 	}
 
-	totalPages, err := h.CUscase.GetTotalPages(limit)
-
-	if err != nil {
-		return c.JSON(getStatusCode(err), helper.ResponseData(err.Error(), getStatusCode(err), nil))
-	}
-
-	return c.JSON(getStatusCode(err), helper.ResponseData("success get all conselor", getStatusCode(err), echo.Map{
+	return c.JSON(http.StatusOK, helper.ResponseData("success get all conselor", http.StatusOK, echo.Map{
 		"counselors": counselors,
 		"current_pages": page,
 		"total_pages": totalPages,
@@ -80,53 +76,57 @@ func(h *counselorHandler) GetAll(c echo.Context) error {
 
 func(h *counselorHandler) GetById(c echo.Context) error {
 	
-	var id counselor.IdRequest
+	var idReq counselor.IdRequest
 
-	c.Bind(&id)
+	c.Bind(&idReq)
 
-	if err := isRequestValid(&id); err != nil {
-		return c.JSON(getStatusCode(err), helper.ResponseData(err.Error(), getStatusCode(err), nil))
+	if err := isRequestValid(&idReq); err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
 	}
 
-	counselor, err := h.CUscase.GetById(id.ID)
-	fmt.Println(err)
+	counselor, err := h.CUscase.GetById(idReq.ID)
+	
 	if err != nil {
-		return c.JSON(getStatusCode(err), helper.ResponseData(err.Error(), getStatusCode(err), nil))
+		return c.JSON(http.StatusInternalServerError, helper.ResponseData(err.Error(), http.StatusInternalServerError, nil))
 	}
 
-	return c.JSON(getStatusCode(err), helper.ResponseData("success get counselor by id", getStatusCode(err), echo.Map{
+	return c.JSON(http.StatusOK, helper.ResponseData("success get counselor by id", http.StatusOK, echo.Map{
 		"counselor": counselor,
 	}))
 }
 
 func(h *counselorHandler) GetAllReview(c echo.Context) error {
 	
-	var id counselor.IdRequest
+	getAllReviewReq := counselor.GetAllReviewRequest{}
 
-	c.Bind(&id)
+	c.Bind(&getAllReviewReq)
 
-	if err := isRequestValid(&id); err != nil {
-		return c.JSON(getStatusCode(err), helper.ResponseData(err.Error(), getStatusCode(err), nil))
+	if err := isRequestValid(&getAllReviewReq); err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
 	}
 
-	page, _ :=  strconv.Atoi(c.QueryParam("page"))
-	limit, _ := strconv.Atoi(c.QueryParam("limit"))
+	page, offset, limit := helper.GetPaginateData(getAllReviewReq.Page, getAllReviewReq.Limit, "mobile")
 
-	page, offset, limit := helper.GetPaginateData(page, limit, "mobile")
-
-	reviews, err := h.CUscase.GetAllReview(id.ID, offset, limit)
+	reviews, err := h.CUscase.GetAllReview(getAllReviewReq.CounselorID, offset, limit)
 
 	if err != nil {
-		return c.JSON(getStatusCode(err), helper.ResponseData(err.Error(), getStatusCode(err), nil))
+		status := http.StatusInternalServerError
+
+		switch err.Error() {
+			case counselor.ErrCounselorNotFound.Error():
+				status = http.StatusNotFound
+		}
+
+		return c.JSON(status, helper.ResponseData(err.Error(), status, nil))
 	}
 
-	totalPage, err := h.CUscase.GetTotalPagesReview(id.ID, limit)
+	totalPage, err := h.CUscase.GetTotalPagesReview(getAllReviewReq.CounselorID, limit)
 
 	if err != nil {
-		return c.JSON(getStatusCode(err), helper.ResponseData(err.Error(), getStatusCode(err), nil))
+		return c.JSON(http.StatusInternalServerError, helper.ResponseData(err.Error(), http.StatusInternalServerError, nil))
 	}
 
-	return c.JSON(getStatusCode(err), helper.ResponseData("success get all counselor review", getStatusCode(err), echo.Map{
+	return c.JSON(http.StatusOK, helper.ResponseData("success get all counselor review", http.StatusOK, echo.Map{
 		"reviews": reviews,
 		"current_pages": page,
 		"total_pages": totalPage,
@@ -142,50 +142,23 @@ func(h *counselorHandler) CreateReview(c echo.Context) error {
 	c.Bind(&reviewReq)
 
 	if err := isRequestValid(&reviewReq); err != nil {
-		return c.JSON(getStatusCode(err), helper.ResponseData(err.Error(), getStatusCode(err), nil))
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
 	}
-	fmt.Println("user -> ", user)
+
 	reviewReq.UserID = user.ID
 
 	err := h.CUscase.CreateReview(reviewReq)
 
 	if err != nil {
-		return c.JSON(getStatusCode(err), helper.ResponseData(err.Error(), getStatusCode(err), nil))
+		status := http.StatusInternalServerError
+
+		switch err.Error() {
+			case counselor.ErrCounselorNotFound.Error():
+				status = http.StatusNotFound
+		}
+
+		return c.JSON(status, helper.ResponseData(err.Error(), status, nil))
 	}
 
-	return c.JSON(getStatusCode(err), helper.ResponseData("success create review", getStatusCode(err), nil))
-}
-
-
-func getStatusCode(err error) int {
-
-	if err == nil {
-		return http.StatusOK
-	}
-
-	switch err {
-		case counselor.ErrInternalServerError:
-			return http.StatusInternalServerError
-			
-		case counselor.ErrCounselorNotFound:
-			return http.StatusNotFound
-
-		case 
-			counselor.ErrCounselorConflict,
-			counselor.ErrEmailConflict:
-			return http.StatusConflict
-		
-		case 
-		 	counselor.ErrProfilePictureFormat,
-			counselor.ErrEmailFormat,
-			counselor.ErrTarifFormat,
-			counselor.ErrInvalidTopic,
-			counselor.ErrIdFormat,
-		 	counselor.ErrRequired:
-			return http.StatusBadRequest
-
-		default:
-			return http.StatusInternalServerError
-	}
-
+	return c.JSON(http.StatusOK, helper.ResponseData("success create review", http.StatusOK, nil))
 }
