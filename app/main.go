@@ -6,15 +6,16 @@ import (
 	"os"
 
 	AdminAuthHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/auth/handler"
+	adminAuthMidd "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/auth/handler/middleware"
 	AdminAuthRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/auth/repository"
 	AdminAuthUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/auth/usecase"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/app/config"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
 	UserAuthHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth/handler"
+	userAuthMidd "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth/handler/middleware"
 	UserAuthRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth/repository"
 	UserAuthUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth/usecase"
 	_ "github.com/joho/godotenv/autoload"
-	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"golang.org/x/oauth2"
@@ -52,7 +53,7 @@ func main() {
 		"Women Center <ivanhilmideran@gmail.com>", //TODO: set email to the proper one
 	)
 
-	jwtConf := helper.NewAuthJWT(os.Getenv("JWT_SECRET"))
+	jwtConf := helper.NewAuthJWT(os.Getenv("JWT_SECRET_USER"), os.Getenv("JWT_SECRET_ADMIN"))
 
 	encryptor := helper.NewEncryptor()
 	otpGenerator := helper.NewOtpGenerator()
@@ -67,7 +68,7 @@ func main() {
 	userAuthHandler := UserAuthHandler.NewUserHandler(userAuthUsecase, googleOauthConfig, jwtConf)
 
 	adminAuthRepo := AdminAuthRepo.NewAdminRepo(db)
-	adminAuthUsecase := AdminAuthUsecase.NewAuthUsecase(adminAuthRepo)
+	adminAuthUsecase := AdminAuthUsecase.NewAuthUsecase(adminAuthRepo, encryptor)
 	adminAuthHandler := AdminAuthHandler.NewAuthHandler(adminAuthUsecase, jwtConf)
 
 	e := echo.New()
@@ -79,19 +80,35 @@ func main() {
 		return c.JSON(http.StatusOK, "hello")
 	})
 
-	restricted := e.Group("/user")
-	restricted.Use(echojwt.JWT([]byte(jwtConf.GetSecret())))
-
 	e.POST("/verify", userAuthHandler.VerifyEmailHandler)
 	e.POST("/register", userAuthHandler.RegisterHandler)
 	e.POST("/login", userAuthHandler.LoginHandler)
 	e.GET("/google/login", userAuthHandler.LoginGoogleHandler)
 	e.GET("/google/callback", userAuthHandler.LoginGoogleCallback)
-
 	e.POST("/admin/login", adminAuthHandler.LoginHandler)
 
-	// ssl
-	e.Logger.Fatal(e.StartTLS(":8080", "./ssl/certificate.crt", "./ssl/private.key"))
+	groupUsers := e.Group("/users", userAuthMidd.JWTUser())
 
-	// e.Logger.Fatal(e.Start(":8080"))
+	{
+		groupUsers.GET("/profile", func(c echo.Context) error {
+			user := c.Get("user").(*helper.JwtCustomUserClaims)
+			return c.JSON(http.StatusOK, user)
+		})
+	}
+	
+	groupAdmin := e.Group("/admin", adminAuthMidd.JWTAdmin())
+
+	{
+		groupAdmin.GET("/profile", func(c echo.Context) error {
+			admin := c.Get("admin").(*helper.JwtCustomAdminClaims)
+			return c.JSON(http.StatusOK, admin)
+		})
+	}
+
+	
+
+	// ssl
+	// e.Logger.Fatal(e.StartTLS(":8080", "./ssl/certificate.crt", "./ssl/private.key"))
+
+	e.Logger.Fatal(e.Start(":8080"))
 }

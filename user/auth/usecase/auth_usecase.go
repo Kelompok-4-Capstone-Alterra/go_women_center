@@ -89,6 +89,7 @@ func (u *userUsecase) VerifyEmail(email string) error {
 func (u *userUsecase) Login(loginRequest user.LoginUserRequest) (entity.User, error) {
 
 	data, err := u.repo.GetByUsername(loginRequest.Username)
+	
 	if err != nil {
 		return entity.User{}, user.ErrInvalidCredential
 	}

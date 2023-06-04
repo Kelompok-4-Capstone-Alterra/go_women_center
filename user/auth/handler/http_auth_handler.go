@@ -201,15 +201,8 @@ func (h *userHandler) LoginHandler(c echo.Context) error {
 			nil,
 		))
 	}
-
-	token, err := h.JwtConf.GenerateUserToken(data.ID, data.Email, constant.Auth)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
-			http.StatusInternalServerError,
-			"fail to generate user token",
-			nil,
-		))
-	}
+	fmt.Println(data)
+	token, _ := h.JwtConf.GenerateUserToken(data.ID, data.Email, data.Username, constant.Auth)
 
 	return c.JSON(http.StatusOK, helper.ResponseData(
 		http.StatusOK,
