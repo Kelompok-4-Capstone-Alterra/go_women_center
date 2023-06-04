@@ -9,29 +9,36 @@ import (
 )
 
 type AuthJWT interface {
-	GenerateUserToken(id string, email string, authBy constant.AuthBy) (string, error)
+	GenerateUserToken(id string, email string, username string, authBy constant.AuthBy) (string, error)
 	GenerateAdminToken(email string) (string, error)
-	IsAdmin(token *jwt.Token) (error)
+	// IsAdmin(token *jwt.Token) (error)
 }
 
 type authJWT struct {
-	secret string
+	secretUser string
+	secretAdmin string
 }
 
-func NewAuthJWT(secret string) *authJWT {
+func NewAuthJWT(secretUser, secretAdmin string) AuthJWT {
 	return &authJWT{
-		secret: secret,
+		secretUser: secretUser,
+		secretAdmin: secretAdmin,
 	}
 }
 
-func (aj *authJWT) GetSecret() string {
-	return aj.secret
+func (aj *authJWT) GetUserSecret() string {
+	return aj.secretUser
 }
 
-func (aj *authJWT) GenerateUserToken(id string, email string, authBy constant.AuthBy) (string, error) {
+func (aj *authJWT) GetAdminSecret() string {
+	return aj.secretAdmin
+}
+
+func (aj *authJWT) GenerateUserToken(id string, email string, username string, authBy constant.AuthBy) (string, error) {
 	claims := &JwtCustomUserClaims{
 		id,
 		email,
+		username,
 		authBy,
 		jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 72)),
@@ -42,12 +49,13 @@ func (aj *authJWT) GenerateUserToken(id string, email string, authBy constant.Au
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	// Generate encoded token and send it as response.
-	return token.SignedString([]byte(aj.secret))
+	return token.SignedString([]byte(aj.secretUser))
 }
 
 type JwtCustomUserClaims struct {
-	Id     string          `json:"id"`
+	ID     string          `json:"id"`
 	Email  string          `json:"email"`
+	Username string        `json:"username"`
 	AuthBy constant.AuthBy `json:"auth_by"`
 	jwt.RegisteredClaims
 }
@@ -55,7 +63,7 @@ type JwtCustomUserClaims struct {
 func (aj *authJWT) GenerateAdminToken(email string) (string, error) {
 	claims := &JwtCustomAdminClaims{
 		email,
-		true,
+		"admin",
 		jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 72)),
 		},
@@ -65,23 +73,15 @@ func (aj *authJWT) GenerateAdminToken(email string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	// Generate encoded token and send it as response.
-	return token.SignedString([]byte(aj.secret))
+	return token.SignedString([]byte(aj.secretAdmin))
 }
 
 type JwtCustomAdminClaims struct {
 	Email   string `json:"email"`
-	IsAdmin bool   `json:"is_admin"`
+	Username string        `json:"username"`	
 	jwt.RegisteredClaims
 }
 
-func (aj *authJWT) IsAdmin(token *jwt.Token) (error) {
-	claims := token.Claims.(jwt.MapClaims)
-	idPayload, ok := claims["is_admin"].(bool)
-	if !ok || !idPayload {
-		return ErrInvalidCredential
-	}
-	return nil
-}
 var (
 	ErrInvalidCredential = errors.New("invalid credential")
 )
