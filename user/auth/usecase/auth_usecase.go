@@ -16,7 +16,7 @@ type UserUsecase interface {
 }
 
 type userUsecase struct {
-	repo          repository.UserRepo
+	repo          repository.UserRepository
 	UuidGenerator helper.UuidGenerator
 	EmailSender   helper.EmailSender
 	otpRepo       repository.LocalCache
@@ -24,7 +24,7 @@ type userUsecase struct {
 	Encryptor     helper.Encryptor
 }
 
-func NewUserUsecase(repo repository.UserRepo, idGenerator helper.UuidGenerator, emailSender helper.EmailSender, otpRepo repository.LocalCache, otpgen helper.OtpGenerator, encryptor helper.Encryptor) *userUsecase {
+func NewUserUsecase(repo repository.UserRepository, idGenerator helper.UuidGenerator, emailSender helper.EmailSender, otpRepo repository.LocalCache, otpgen helper.OtpGenerator, encryptor helper.Encryptor) *userUsecase {
 	return &userUsecase{
 		repo:          repo,
 		UuidGenerator: idGenerator,

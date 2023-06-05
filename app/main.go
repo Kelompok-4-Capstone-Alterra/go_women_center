@@ -9,12 +9,20 @@ import (
 	adminAuthMidd "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/auth/handler/middleware"
 	AdminAuthRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/auth/repository"
 	AdminAuthUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/auth/usecase"
+	CounselorAdminHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor/handler"
+	CounselorAdminRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor/repository"
+	CounselorAdminUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor/usecase"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/app/config"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
+	TopicHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/topic/handler"
 	UserAuthHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth/handler"
 	userAuthMidd "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth/handler/middleware"
 	UserAuthRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth/repository"
 	UserAuthUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth/usecase"
+	CounselorUserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor/handler"
+	CounselorUserRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor/repository"
+	CounselorUserUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor/usecase"
+	ReviewUserRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/review/repository"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -53,25 +61,42 @@ func main() {
 		"Women Center <ivanhilmideran@gmail.com>", //TODO: set email to the proper one
 	)
 
-	jwtConf := helper.NewAuthJWT(os.Getenv("JWT_SECRET_USER"), os.Getenv("JWT_SECRET_ADMIN"))
-
-	encryptor := helper.NewEncryptor()
-	otpGenerator := helper.NewOtpGenerator()
 	db := dbconf.InitDB()
 	sslconf.InitSSL()
+	
+	// helper
+	jwtConf := helper.NewAuthJWT(os.Getenv("JWT_SECRET_USER"), os.Getenv("JWT_SECRET_ADMIN"))
+	encryptor := helper.NewEncryptor()
+	otpGenerator := helper.NewOtpGenerator()
+	image := helper.NewImage("women-center")
 	googleUUID := helper.NewGoogleUUID()
 	log.Print(db, googleUUID)
 
-	userAuthRepo := UserAuthRepo.NewUserRepo(db)
+	// handler
+	userAuthRepo := UserAuthRepo.NewUserRepository(db)
 	otpRepo := UserAuthRepo.NewLocalCache(config.CLEANUP_INTERVAL)
 	userAuthUsecase := UserAuthUsecase.NewUserUsecase(userAuthRepo, googleUUID, &mailConf, otpRepo, otpGenerator, encryptor)
 	userAuthHandler := UserAuthHandler.NewUserHandler(userAuthUsecase, googleOauthConfig, jwtConf)
+
+	userCounselorRepo := CounselorUserRepository.NewMysqlCounselorRepository(db)
+	userReviewRepo := ReviewUserRepository.NewMysqlReviewRepository(db)
+	userCounselorUsecase := CounselorUserUsecase.NewCounselorUsecase(userCounselorRepo, userReviewRepo, userAuthRepo)
+	userCounselorHandler := CounselorUserHandler.NewCounselorHandler(userCounselorUsecase)
 
 	adminAuthRepo := AdminAuthRepo.NewAdminRepo(db)
 	adminAuthUsecase := AdminAuthUsecase.NewAuthUsecase(adminAuthRepo, encryptor)
 	adminAuthHandler := AdminAuthHandler.NewAuthHandler(adminAuthUsecase, jwtConf)
 
+	adminCounselorRepo := CounselorAdminRepository.NewMysqlCounselorRepository(db)
+	adminCounselorUsecase := CounselorAdminUsecase.NewCounselorUsecase(adminCounselorRepo, image)
+	adminCounselorHandler := CounselorAdminHandler.NewCounselorHandler(adminCounselorUsecase)
+
+	topicHandler := TopicHandler.NewTopicHandler()
+	
+
 	e := echo.New()
+
+	// middleware 
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORS())
@@ -79,7 +104,9 @@ func main() {
 	e.GET("/healthcheck", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, "hello")
 	})
-
+	
+	
+	e.GET("/topics", topicHandler.GetAll)
 	e.POST("/verify", userAuthHandler.VerifyEmailHandler)
 	e.POST("/register", userAuthHandler.RegisterHandler)
 	e.POST("/login", userAuthHandler.LoginHandler)
@@ -87,25 +114,39 @@ func main() {
 	e.GET("/google/callback", userAuthHandler.LoginGoogleCallback)
 	e.POST("/admin/login", adminAuthHandler.LoginHandler)
 
-	groupUsers := e.Group("/users", userAuthMidd.JWTUser())
-
+	users := e.Group("/users")
 	{
-		groupUsers.GET("/profile", func(c echo.Context) error {
+		users.GET("/counselors", userCounselorHandler.GetAll)
+	}
+
+	restrictUsers := e.Group("/users", userAuthMidd.JWTUser())
+	{	
+		restrictUsers.GET("/profile", func(c echo.Context) error {
 			user := c.Get("user").(*helper.JwtCustomUserClaims)
 			return c.JSON(http.StatusOK, user)
 		})
+
+		restrictUsers.GET("/counselors/:id", userCounselorHandler.GetById)
+		restrictUsers.POST("/counselors/:id/reviews", userCounselorHandler.CreateReview)
+		restrictUsers.GET("/counselors/:id/reviews", userCounselorHandler.GetAllReview)
 	}
 	
-	groupAdmin := e.Group("/admin", adminAuthMidd.JWTAdmin())
+
+	restrictAdmin := e.Group("/admin", adminAuthMidd.JWTAdmin())
 
 	{
-		groupAdmin.GET("/profile", func(c echo.Context) error {
+		restrictAdmin.GET("/profile", func(c echo.Context) error {
 			admin := c.Get("admin").(*helper.JwtCustomAdminClaims)
 			return c.JSON(http.StatusOK, admin)
 		})
-	}
 
-	
+		restrictAdmin.GET("/counselors", adminCounselorHandler.GetAll)
+		restrictAdmin.POST("/counselors", adminCounselorHandler.Create)
+		restrictAdmin.GET("/counselors/:id", adminCounselorHandler.GetById)
+		restrictAdmin.PUT("/counselors/:id", adminCounselorHandler.Update)
+		restrictAdmin.DELETE("/counselors/:id", adminCounselorHandler.Delete)
+		
+	}
 
 	// ssl
 	e.Logger.Fatal(e.StartTLS(":8080", "./ssl/certificate.crt", "./ssl/private.key"))

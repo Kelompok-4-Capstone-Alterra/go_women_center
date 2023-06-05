@@ -8,17 +8,18 @@ import (
 	"gorm.io/gorm"
 )
 
-type UserRepo interface {
+type UserRepository interface {
 	Create(userData entity.User) (entity.User, error)
 	GetByEmail(email string) (entity.User, error)
 	GetByUsername(username string) (entity.User, error)
+	GetById(id string) (entity.User, error)
 }
 
 type userGormMysqlRepo struct {
 	DB *gorm.DB
 }
 
-func NewUserRepo(db *gorm.DB) *userGormMysqlRepo {
+func NewUserRepository(db *gorm.DB) UserRepository {
 	return &userGormMysqlRepo{
 		DB: db,
 	}
@@ -48,6 +49,16 @@ func (u *userGormMysqlRepo) GetByEmail(email string) (entity.User, error) {
 func (u *userGormMysqlRepo) GetByUsername(username string) (entity.User, error) {
 	savedUser := entity.User{}
 	err := u.DB.Where("username = ?", username).First(&savedUser).Error
+	if err != nil {
+		return entity.User{}, err
+	}
+
+	return savedUser, nil
+}
+
+func (u *userGormMysqlRepo) GetById(id string) (entity.User, error) {
+	savedUser := entity.User{}
+	err := u.DB.Where("id = ?", id).First(&savedUser).Error
 	if err != nil {
 		return entity.User{}, err
 	}

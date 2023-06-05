@@ -26,16 +26,16 @@ func (h *authHandler) LoginHandler(c echo.Context) error {
 	err := c.Bind(&request)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
-			http.StatusInternalServerError,
 			err.Error(),
+			http.StatusInternalServerError,
 			nil,
 		))
 	}
 
 	if err := isRequestValid(request); err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(
-			http.StatusBadRequest,
 			err.Error(),
+			http.StatusBadRequest,
 			nil,
 		))
 	}
@@ -50,8 +50,8 @@ func (h *authHandler) LoginHandler(c echo.Context) error {
 		}
 
 		return c.JSON(status, helper.ResponseData(
-			status,
 			err.Error(),
+			status,
 			nil,
 		))
 	}
@@ -59,8 +59,8 @@ func (h *authHandler) LoginHandler(c echo.Context) error {
 	token, _ := h.JwtConf.GenerateAdminToken(data.Email)
 
 	return c.JSON(http.StatusOK, helper.ResponseData(
-		http.StatusOK,
 		"login success",
+		http.StatusOK,
 		echo.Map{
 			"token": token,
 		},

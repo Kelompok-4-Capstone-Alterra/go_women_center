@@ -7,7 +7,7 @@ type SSLconf struct {
 	SSL_PRIVATE_KEY string
 }
 
-func (ssl *SSLconf) InitSSL() {
+func(ssl *SSLconf) InitSSL() {
 
 	err := os.WriteFile("./ssl/certificate.crt", []byte(ssl.SSL_CERT), 0644)
 

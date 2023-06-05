@@ -7,7 +7,7 @@ import (
 )
 
 type User struct {
-	ID           string  `gorm:"primaryKey;uniqueindex;not null"`
+	ID           string  `gorm:"type:varchar(36);primaryKey;uniqueindex;not null"`
 	Username     string  `gorm:"type:varchar(150);uniqueindex;not null"`
 	Name         string  `gorm:"type:varchar(150);not null"`
 	Email        string  `gorm:"type:varchar(150);uniqueindex;not null"`
@@ -18,6 +18,7 @@ type User struct {
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 	DeletedAt    gorm.DeletedAt `gorm:"index"`
+	Reviews 	 []Review 	`gorm:"foreignKey:UserID;references:ID"`
 }
 
 type OTP struct {

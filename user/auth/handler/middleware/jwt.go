@@ -33,9 +33,9 @@ func JWTUser() echo.MiddlewareFunc {
 		ErrorHandler: func(c echo.Context, err error) error {
 			fmt.Println(err.Error())
 			if err.Error() == "token expired" {
-				return c.JSON(http.StatusUnauthorized, helper.ResponseData(http.StatusUnauthorized, err.Error(), nil))
+				return c.JSON(http.StatusUnauthorized, helper.ResponseData(err.Error(), http.StatusUnauthorized, nil))
 			}
-			return c.JSON(http.StatusUnauthorized, helper.ResponseData(http.StatusUnauthorized, "invalid token", nil))
+			return c.JSON(http.StatusUnauthorized, helper.ResponseData("invalid token", http.StatusUnauthorized, nil))
 		},
 	})
 }

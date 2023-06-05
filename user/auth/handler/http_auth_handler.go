@@ -45,8 +45,8 @@ func (h *userHandler) LoginGoogleCallback(c echo.Context) error {
 	content, err := h.getUserInfo(c.FormValue("state"), c.FormValue("code"))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
-			http.StatusInternalServerError,
 			err.Error(),
+			http.StatusInternalServerError,
 			nil,
 		))
 	}
@@ -89,16 +89,16 @@ func (h *userHandler) VerifyEmailHandler(c echo.Context) error { // TODO: rename
 	err := c.Bind(&emailRequest)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
-			http.StatusInternalServerError,
 			err.Error(),
+			http.StatusInternalServerError,
 			nil,
 		))
 	}
 
 	if err := isRequestValid(emailRequest); err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(
-			http.StatusBadRequest,
 			err.Error(),
+			http.StatusBadRequest,
 			nil,
 		))
 	}
@@ -107,15 +107,15 @@ func (h *userHandler) VerifyEmailHandler(c echo.Context) error { // TODO: rename
 	if err != nil {
 
 		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
-			http.StatusInternalServerError,
 			err.Error(), //TODO: write better error message
+			http.StatusInternalServerError,
 			nil,
 		))
 	}
 
 	return c.JSON(http.StatusOK, helper.ResponseData(
-		http.StatusOK,
 		"success sending otp, valid for 1 minute",
+		http.StatusOK,
 		nil,
 	))
 }
@@ -125,16 +125,16 @@ func (h *userHandler) RegisterHandler(c echo.Context) error {
 	err := c.Bind(&registerRequest)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
-			http.StatusInternalServerError,
 			err.Error(),
+			http.StatusInternalServerError,
 			nil,
 		))
 	}
 
 	if err := isRequestValid(registerRequest); err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(
-			http.StatusBadRequest,
 			err.Error(),
+			http.StatusBadRequest,
 			nil,
 		))
 	}
@@ -152,16 +152,16 @@ func (h *userHandler) RegisterHandler(c echo.Context) error {
 		}
 
 		return c.JSON(status, helper.ResponseData(
-			status,
 			err.Error(),
+			status,
 			nil,
 		))
 	}
 
 	//TODO: send token to response
 	return c.JSON(http.StatusOK, helper.ResponseData(
-		http.StatusOK,
 		"register success",
+		http.StatusOK,
 		nil,
 	))
 }
@@ -171,16 +171,16 @@ func (h *userHandler) LoginHandler(c echo.Context) error {
 	err := c.Bind(&loginRequest)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
-			http.StatusInternalServerError,
 			err.Error(),
+			http.StatusInternalServerError,
 			nil,
 		))
 	}
 
 	if err := isRequestValid(loginRequest); err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(
-			http.StatusBadRequest,
 			err.Error(),
+			http.StatusBadRequest,
 			nil,
 		))
 	}
@@ -196,8 +196,8 @@ func (h *userHandler) LoginHandler(c echo.Context) error {
 		}
 
 		return c.JSON(status, helper.ResponseData(
-			status,
 			err.Error(),
+			status,
 			nil,
 		))
 	}
@@ -205,8 +205,8 @@ func (h *userHandler) LoginHandler(c echo.Context) error {
 	token, _ := h.JwtConf.GenerateUserToken(data.ID, data.Email, data.Username, constant.Auth)
 
 	return c.JSON(http.StatusOK, helper.ResponseData(
-		http.StatusOK,
 		"login success",
+		http.StatusOK,
 		echo.Map{
 			"token": token,
 		},
