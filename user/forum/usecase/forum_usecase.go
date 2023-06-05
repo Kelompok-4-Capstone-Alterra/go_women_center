@@ -6,8 +6,8 @@ import (
 )
 
 type ForumUsecaseInterface interface {
-	GetAll(topic string) ([]response.ResponseForum, error)
-	GetAllSortBy(newest string) ([]response.ResponseForum, error)
+	GetAll(by, topic string) ([]response.ResponseForum, error)
+	GetAllSortByPopular() ([]response.ResponseForum, error)
 	GetByCategory(id_category string) ([]response.ResponseForum, error)
 	GetByMyForum(id_user string) ([]response.ResponseForum, error)
 	GetById(id string) (*response.ResponseForumDetail, error)
@@ -26,16 +26,16 @@ func NewForumUsecase(ForumR ForumUsecaseInterface) ForumUsecaseInterface {
 	}
 }
 
-func (fu ForumUsecase) GetAll(topic string) ([]response.ResponseForum, error) {
-	forums, err := fu.ForumR.GetAll(topic)
+func (fu ForumUsecase) GetAll(by, topic string) ([]response.ResponseForum, error) {
+	forums, err := fu.ForumR.GetAll(by, topic)
 	if err != nil {
 		return nil, err
 	}
 	return forums, nil
 }
 
-func (fu ForumUsecase) GetAllSortBy(newest string) ([]response.ResponseForum, error) {
-	forums, err := fu.ForumR.GetAllSortBy(newest)
+func (fu ForumUsecase) GetAllSortByPopular() ([]response.ResponseForum, error) {
+	forums, err := fu.ForumR.GetAllSortByPopular()
 	if err != nil {
 		return nil, err
 	}

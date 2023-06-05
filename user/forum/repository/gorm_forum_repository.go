@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"fmt"
 	"strconv"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
@@ -10,8 +9,8 @@ import (
 )
 
 type ForumRepository interface {
-	GetAll(topic string) ([]response.ResponseForum, error)
-	GetAllSortBy(by string) ([]response.ResponseForum, error)
+	GetAll(by, topic string) ([]response.ResponseForum, error)
+	GetAllSortByPopular() ([]response.ResponseForum, error)
 	GetByCategory(category_id string) ([]response.ResponseForum, error)
 	GetByMyForum(id_user string) ([]response.ResponseForum, error)
 	GetById(id string) (*response.ResponseForumDetail, error)
@@ -28,9 +27,17 @@ func NewMysqlForumRepository(db *gorm.DB) ForumRepository {
 	return &mysqlForumRepository{DB: db}
 }
 
-func (fr mysqlForumRepository) GetAll(topic string) ([]response.ResponseForum, error) {
+func (fr mysqlForumRepository) GetAll(by, topic string) ([]response.ResponseForum, error) {
 	var response []response.ResponseForum
-	err := fr.DB.Where("topic LIKE ?", "%"+topic+"%").Model(entity.Forum{}).Preload("UserForums").Find(&response).Error
+	var err error
+
+	if by == "asc" {
+		err = fr.DB.Where("topic LIKE ?", "%"+topic+"%").Model(entity.Forum{}).Order("created_at " + by).Preload("UserForums").Find(&response).Error
+	} else if by == "desc" {
+		err = fr.DB.Where("topic LIKE ?", "%"+topic+"%").Model(entity.Forum{}).Order("created_at " + by).Preload("UserForums").Find(&response).Error
+	} else if by == "" {
+		err = fr.DB.Where("topic LIKE ?", "%"+topic+"%").Model(entity.Forum{}).Preload("UserForums").Find(&response).Error
+	}
 
 	idUserJWT := 1
 	for i := 0; i < len(response); i++ {
@@ -50,22 +57,13 @@ func (fr mysqlForumRepository) GetAll(topic string) ([]response.ResponseForum, e
 	return response, nil
 }
 
-func (fr mysqlForumRepository) GetAllSortBy(by string) ([]response.ResponseForum, error) {
-	fmt.Println("topic " + by)
+func (fr mysqlForumRepository) GetAllSortByPopular() ([]response.ResponseForum, error) {
 	var response []response.ResponseForum
-	err := fr.DB.Model(entity.Forum{}).Preload("UserForums").Order("created_at " + by).Find(&response).Error
-
-	idUserJWT := 1
-	for i := 0; i < len(response); i++ {
-		for j := 0; j < len(response[i].UserForums); j++ {
-			if response[i].UserForums[j].UserId == uint(idUserJWT) {
-				response[i].Status = true
-				break
-			}
-		}
-		response[i].Member = len(response[i].UserForums)
-		response[i].UserForums = nil
-	}
+	err := fr.DB.Table("forums").
+		Select("forums.id, forums.user_id, forums.category_id, forums.link, forums.topic, COUNT(user_forums.id) AS member").
+		Joins("LEFT JOIN user_forums ON forums.id = user_forums.forum_id").Order("member desc").Preload("UserForums").
+		Group("forums.id").
+		Find(&response).Error
 
 	if err != nil {
 		return nil, err

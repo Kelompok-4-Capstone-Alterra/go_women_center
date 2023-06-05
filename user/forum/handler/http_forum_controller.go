@@ -2,7 +2,6 @@ package handler
 
 import (
 	"net/http"
-	"strings"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
@@ -13,7 +12,7 @@ import (
 
 type ForumHandlerInterface interface {
 	GetAll(c echo.Context) error
-	GetAllSortBy(c echo.Context) error
+	GetAllSortByPopular(c echo.Context) error
 	GetByCategory(c echo.Context) error
 	GetByMyForum(c echo.Context) error
 	GetById(c echo.Context) error
@@ -33,8 +32,9 @@ func NewForumHandler(ForumU usecase.ForumUsecaseInterface) ForumHandlerInterface
 }
 
 func (fh ForumHandler) GetAll(c echo.Context) error {
+	getBy := c.QueryParam("by")
 	getTopic := c.QueryParam("topic")
-	forums, err := fh.ForumU.GetAll(getTopic)
+	forums, err := fh.ForumU.GetAll(getBy, getTopic)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(http.StatusBadRequest, "Failed to get all forums data", nil))
@@ -42,14 +42,14 @@ func (fh ForumHandler) GetAll(c echo.Context) error {
 	return c.JSON(http.StatusOK, helper.ResponseData(http.StatusOK, "Success to get all forums data", forums))
 }
 
-func (fh ForumHandler) GetAllSortBy(c echo.Context) error {
-	getBy := c.QueryParam("by")
-	forums, err := fh.ForumU.GetAllSortBy(getBy)
+func (fh ForumHandler) GetAllSortByPopular(c echo.Context) error {
+	forums, err := fh.ForumU.GetAllSortByPopular()
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, helper.ResponseData(http.StatusBadRequest, "Failed to get all forums data", nil))
+		// "Failed to get all forums data by populer"
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(http.StatusBadRequest, err.Error(), nil))
 	}
-	return c.JSON(http.StatusOK, helper.ResponseData(http.StatusOK, "Success to get all forums data", forums))
+	return c.JSON(http.StatusOK, helper.ResponseData(http.StatusOK, "Success to get all forums data by populer", forums))
 }
 
 func (fh ForumHandler) GetByCategory(c echo.Context) error {
@@ -87,8 +87,7 @@ func (fh ForumHandler) Create(c echo.Context) error {
 	c.Bind(&forum)
 
 	uuidWithHyphen := uuid.New()
-	uuid := strings.Replace(uuidWithHyphen.String(), "-", "", -1)
-	forum.ID = uuid
+	forum.ID = uuidWithHyphen.String()
 
 	err := fh.ForumU.Create(&forum)
 
