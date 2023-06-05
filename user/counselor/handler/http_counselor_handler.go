@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/constant"
-	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor/usecase"
@@ -60,14 +59,14 @@ func(h *counselorHandler) GetById(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
 	}
 
-	counselor, err := h.CUscase.GetById(idReq.ID)
+	counselorRes, err := h.CUscase.GetById(idReq.ID)
 	
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, helper.ResponseData(err.Error(), http.StatusInternalServerError, nil))
+		return c.JSON(http.StatusNotFound, helper.ResponseData(err.Error(), http.StatusNotFound, nil))
 	}
 
 	return c.JSON(http.StatusOK, helper.ResponseData("success get counselor by id", http.StatusOK, echo.Map{
-		"counselor": counselor,
+		"counselor": counselorRes,
 	}))
 }
 
@@ -88,8 +87,8 @@ func(h *counselorHandler) GetAllReview(c echo.Context) error {
 	if err != nil {
 		status := http.StatusInternalServerError
 
-		switch err.Error() {
-			case counselor.ErrCounselorNotFound.Error():
+		switch err{
+			case counselor.ErrCounselorNotFound:
 				status = http.StatusNotFound
 		}
 
@@ -113,7 +112,7 @@ func(h *counselorHandler) CreateReview(c echo.Context) error {
 	
 	var reviewReq counselor.CreateReviewRequest
 
-	var user = c.Get("user").(*entity.UserDecodeJWT)
+	var user = c.Get("user").(*helper.JwtCustomUserClaims)
 
 	c.Bind(&reviewReq)
 
@@ -128,8 +127,8 @@ func(h *counselorHandler) CreateReview(c echo.Context) error {
 	if err != nil {
 		status := http.StatusInternalServerError
 
-		switch err.Error() {
-			case counselor.ErrCounselorNotFound.Error():
+		switch err	{
+			case counselor.ErrCounselorNotFound:
 				status = http.StatusNotFound
 		}
 

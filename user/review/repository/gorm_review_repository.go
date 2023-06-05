@@ -9,6 +9,7 @@ type ReviewRepository interface {
 	GetByCounselorId(counselorId string, offset, limit int) ([]entity.Review, int64, error)
 	Save(review entity.Review) error
 	GetByUserIdAndCounselorId(userId, counselorId string) (entity.Review, error)
+	GetByUserId(userId string) (entity.Review, error)
 }
 
 type mysqlReviewRepository struct {
@@ -24,6 +25,7 @@ func(r *mysqlReviewRepository) GetByCounselorId(counselorId string, offset, limi
 	var reviews []entity.Review
 	var totalData int64
 	err := r.DB.
+		Model(&entity.Review{}).
 		Where("counselor_id = ?", counselorId).
 		Count(&totalData).
 		Offset(offset).
@@ -52,6 +54,18 @@ func(r *mysqlReviewRepository) GetByUserIdAndCounselorId(userId, counselorId str
 	review := entity.Review{}
 
 	err := r.DB.Where("user_id = ? AND counselor_id = ?", userId, counselorId).First(&review).Error
+	
+	if err != nil {
+		return review, err
+	}
+
+	return review, nil
+}
+
+func(r *mysqlReviewRepository) GetByUserId(userId string) (entity.Review, error){
+	review := entity.Review{}
+
+	err := r.DB.Where("user_id = ?", userId).First(&review).Error
 	
 	if err != nil {
 		return review, err

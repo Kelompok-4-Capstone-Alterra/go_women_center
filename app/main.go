@@ -1,17 +1,24 @@
 package main
 
 import (
+	"log"
 	"net/http"
 	"os"
 
+	AdminAuthHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/auth/handler"
+	adminAuthMidd "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/auth/handler/middleware"
+	AdminAuthRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/auth/repository"
+	AdminAuthUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/auth/usecase"
 	CounselorAdminHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor/handler"
 	CounselorAdminRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor/repository"
 	CounselorAdminUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor/usecase"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/app/config"
-	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
 	TopicHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/topic/handler"
 	UserAuthHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth/handler"
+	userAuthMidd "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth/handler/middleware"
+	UserAuthRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth/repository"
+	UserAuthUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth/usecase"
 	CounselorUserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor/handler"
 	CounselorUserRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor/repository"
 	CounselorUserUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor/usecase"
@@ -46,12 +53,47 @@ func main() {
 		Endpoint:     google.Endpoint,
 	}
 
+	mailConf := helper.NewEmailSender(
+		587,
+		"smtp.gmail.com",
+		os.Getenv("CONFIG_AUTH_EMAIL"),
+		os.Getenv("CONFIG_AUTH_PASSWORD"),
+		"Women Center <ivanhilmideran@gmail.com>", //TODO: set email to the proper one
+	)
+
 	db := dbconf.InitDB()
 	sslconf.InitSSL()
+	
 	// helper
-	// googleUUID := helper.NewGoogleUUID()
+	jwtConf := helper.NewAuthJWT(os.Getenv("JWT_SECRET_USER"), os.Getenv("JWT_SECRET_ADMIN"))
+	encryptor := helper.NewEncryptor()
+	otpGenerator := helper.NewOtpGenerator()
 	image := helper.NewImage("women-center")
-	// log.Print(db, googleUUID)
+	googleUUID := helper.NewGoogleUUID()
+	log.Print(db, googleUUID)
+
+	// handler
+	userAuthRepo := UserAuthRepo.NewUserRepository(db)
+	otpRepo := UserAuthRepo.NewLocalCache(config.CLEANUP_INTERVAL)
+	userAuthUsecase := UserAuthUsecase.NewUserUsecase(userAuthRepo, googleUUID, &mailConf, otpRepo, otpGenerator, encryptor)
+	userAuthHandler := UserAuthHandler.NewUserHandler(userAuthUsecase, googleOauthConfig, jwtConf)
+
+	userCounselorRepo := CounselorUserRepository.NewMysqlCounselorRepository(db)
+	userReviewRepo := ReviewUserRepository.NewMysqlReviewRepository(db)
+	userCounselorUsecase := CounselorUserUsecase.NewCounselorUsecase(userCounselorRepo, userReviewRepo, userAuthRepo)
+	userCounselorHandler := CounselorUserHandler.NewCounselorHandler(userCounselorUsecase)
+
+	adminAuthRepo := AdminAuthRepo.NewAdminRepo(db)
+	adminAuthUsecase := AdminAuthUsecase.NewAuthUsecase(adminAuthRepo, encryptor)
+	adminAuthHandler := AdminAuthHandler.NewAuthHandler(adminAuthUsecase, jwtConf)
+
+	adminCounselorRepo := CounselorAdminRepository.NewMysqlCounselorRepository(db)
+	adminCounselorUsecase := CounselorAdminUsecase.NewCounselorUsecase(adminCounselorRepo, image)
+	adminCounselorHandler := CounselorAdminHandler.NewCounselorHandler(adminCounselorUsecase)
+
+	topicHandler := TopicHandler.NewTopicHandler()
+	
+
 	e := echo.New()
 
 	// middleware 
@@ -64,60 +106,43 @@ func main() {
 	})
 	
 	
-	// topic
-	{
-		topicHandler := TopicHandler.NewTopicHandler()
-		e.GET("/topics", topicHandler.GetAll)
+	e.GET("/topics", topicHandler.GetAll)
+	e.POST("/verify", userAuthHandler.VerifyEmailHandler)
+	e.POST("/register", userAuthHandler.RegisterHandler)
+	e.POST("/login", userAuthHandler.LoginHandler)
+	e.GET("/google/login", userAuthHandler.LoginGoogleHandler)
+	e.GET("/google/callback", userAuthHandler.LoginGoogleCallback)
+	e.POST("/admin/login", adminAuthHandler.LoginHandler)
+
+	groupUsers := e.Group("/users", userAuthMidd.JWTUser())
+	{	
+		groupUsers.GET("/profile", func(c echo.Context) error {
+			user := c.Get("user").(*helper.JwtCustomUserClaims)
+			return c.JSON(http.StatusOK, user)
+		})
+
+		
+		groupUsers.GET("/counselors", userCounselorHandler.GetAll)
+		groupUsers.GET("/counselors/:id", userCounselorHandler.GetById)
+		groupUsers.POST("/counselors/:id/reviews", userCounselorHandler.CreateReview)
+		groupUsers.GET("/counselors/:id/reviews", userCounselorHandler.GetAllReview)
 	}
 	
-	// admin
-	groupAdmins := e.Group("/admin")
-	{
-		counselorRepo := CounselorAdminRepository.NewMysqlCounselorRepository(db)
-		counselorUsecase := CounselorAdminUsecase.NewCounselorUsecase(counselorRepo, image)
-		counselorHandler := CounselorAdminHandler.NewCounselorHandler(counselorUsecase)
-		{
-			groupAdmins.POST("/counselors", counselorHandler.Create)
-			groupAdmins.GET("/counselors", counselorHandler.GetAll)
-			groupAdmins.GET("/counselors/:id", counselorHandler.GetById)
-			groupAdmins.PUT("/counselors/:id", counselorHandler.Update)
-			groupAdmins.DELETE("/counselors/:id", counselorHandler.Delete)
-		}
-	}
 
-	// users
-	groupUsers := e.Group("/users", func(next echo.HandlerFunc) echo.HandlerFunc {
-		// dummy user
-		return func(c echo.Context) error {
-			user := &entity.UserDecodeJWT{
-				ID: "05b9B469-fc5d-21ed-ad1c-5efc22537c1d",
-				Name: "dummy",
-				Email: "dummy@gmail.com",
-				Method: "basic",
-				Role: "user",
-			}
-			c.Set("user", user)
+	groupAdmin := e.Group("/admin", adminAuthMidd.JWTAdmin())
 
-			return next(c)
-		}
-	})
-	
 	{
-		userAuthHandler := UserAuthHandler.NewUserHandler(googleOauthConfig)
-		{
-			groupUsers.GET("/google/login", userAuthHandler.LoginHandler)
-			groupUsers.GET("/google/callback", userAuthHandler.LoginGoogleCallback)
-		}
-		counselorRepo := CounselorUserRepository.NewMysqlCounselorRepository(db)
-		reviewRepo := ReviewUserRepository.NewMysqlReviewRepository(db)
-		counselorUsecase := CounselorUserUsecase.NewCounselorUsecase(counselorRepo, reviewRepo)
-		counselorHandler := CounselorUserHandler.NewCounselorHandler(counselorUsecase)
-		{	
-			groupUsers.GET("/counselors", counselorHandler.GetAll)
-			groupUsers.GET("/counselors/:id", counselorHandler.GetById)
-		}
-		groupUsers.POST("/counselors/:id/reviews", counselorHandler.CreateReview)
-		groupUsers.GET("/counselors/:id/reviews", counselorHandler.GetAllReview)
+		groupAdmin.GET("/profile", func(c echo.Context) error {
+			admin := c.Get("admin").(*helper.JwtCustomAdminClaims)
+			return c.JSON(http.StatusOK, admin)
+		})
+
+		groupAdmin.POST("/counselors", adminCounselorHandler.Create)
+		groupAdmin.GET("/counselors", adminCounselorHandler.GetAll)
+		groupAdmin.GET("/counselors/:id", adminCounselorHandler.GetById)
+		groupAdmin.PUT("/counselors/:id", adminCounselorHandler.Update)
+		groupAdmin.DELETE("/counselors/:id", adminCounselorHandler.Delete)
+		
 	}
 
 	// ssl

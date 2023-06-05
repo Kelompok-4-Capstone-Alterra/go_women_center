@@ -1,8 +1,11 @@
 package usecase
 
 import (
+	"log"
+
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
+	User "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth/repository"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor"
 	Counselor "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor/repository"
 	Review "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/review/repository"
@@ -19,10 +22,11 @@ type CounselorUsecase interface {
 type counselorUsecase struct {
 	counselorRepo Counselor.CounselorRepository
 	reviewRepo Review.ReviewRepository
+	userRepo User.UserRepository
 }
 
-func NewCounselorUsecase(CounselorRepo Counselor.CounselorRepository,ReviewRepo Review.ReviewRepository) CounselorUsecase {
-	return &counselorUsecase{counselorRepo: CounselorRepo, reviewRepo: ReviewRepo}
+func NewCounselorUsecase(CounselorRepo Counselor.CounselorRepository, ReviewRepo Review.ReviewRepository, UserRepo User.UserRepository) CounselorUsecase {
+	return &counselorUsecase{counselorRepo: CounselorRepo, reviewRepo: ReviewRepo, userRepo: UserRepo}
 }
 
 func(u *counselorUsecase) GetAll(search, topic, sortBy string, offset, limit int) ([]counselor.GetAllResponse, int, error) {
@@ -111,6 +115,7 @@ func(u *counselorUsecase) GetAllReview(id string, offset, limit int) ([]counselo
 	reviews, totalData, err := u.reviewRepo.GetByCounselorId(id, offset, limit)
 
 	if err != nil {
+		log.Print(err.Error())
 		return []counselor.ReviewResponse{}, 0, counselor.ErrInternalServerError
 	}
 
@@ -121,14 +126,14 @@ func(u *counselorUsecase) GetAllReview(id string, offset, limit int) ([]counselo
 		i := i
 		review := review
 		g.Go(func () error{
-			// user, err := u.reviewRepo.GetUserById(reviews.UserID)
-			// if err != nil {
-			// 	return err
-			// }
+			user, err := u.userRepo.GetById(review.UserID)
+			if err != nil {
+				return counselor.ErrInternalServerError
+			}
 			reviewRes := counselor.ReviewResponse{
 				ID: review.ID,
-				// ProfilePicture: user.ProfilePicture,
-				// Name: user.Name,
+				ProfilePicture: user.ProfilePicture,
+				Username: user.Username,
 				Rating: review.Rating,
 				Review: review.Review,
 				CreatedAt: review.CreatedAt.Format("2006-01-02 15:04:05"),

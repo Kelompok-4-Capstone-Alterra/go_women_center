@@ -12,7 +12,7 @@ type GetAllResponse struct {
 type ReviewResponse struct {
 	ID             string  `json:"id"`
 	ProfilePicture string  `json:"profile_picture"`
-	Name           string  `json:"name"`
+	Username       string  `json:"username"`
 	Rating         float32 `json:"rating"`
 	Review         string  `json:"review"`
 	CreatedAt      string  `json:"created_at"`

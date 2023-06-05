@@ -99,8 +99,8 @@ func(h *counselorHandler) GetById(c echo.Context) error {
 
 	if err != nil {
 		return c.JSON(
-			http.StatusInternalServerError,
-			helper.ResponseData(err.Error(), http.StatusInternalServerError, nil),
+			http.StatusNotFound,
+			helper.ResponseData(err.Error(), http.StatusNotFound, nil),
 	)
 	}
 
