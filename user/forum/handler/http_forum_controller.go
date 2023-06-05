@@ -12,7 +12,6 @@ import (
 
 type ForumHandlerInterface interface {
 	GetAll(c echo.Context) error
-	GetAllSortByPopular(c echo.Context) error
 	GetByCategory(c echo.Context) error
 	GetByMyForum(c echo.Context) error
 	GetById(c echo.Context) error
@@ -32,24 +31,15 @@ func NewForumHandler(ForumU usecase.ForumUsecaseInterface) ForumHandlerInterface
 }
 
 func (fh ForumHandler) GetAll(c echo.Context) error {
-	getBy := c.QueryParam("by")
+	getCreated := c.QueryParam("created")
 	getTopic := c.QueryParam("topic")
-	forums, err := fh.ForumU.GetAll(getBy, getTopic)
+	getPopular := c.QueryParam("popular")
 
+	forums, err := fh.ForumU.GetAll(getTopic, getPopular, getCreated)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, helper.ResponseData(http.StatusBadRequest, "Failed to get all forums data", nil))
-	}
-	return c.JSON(http.StatusOK, helper.ResponseData(http.StatusOK, "Success to get all forums data", forums))
-}
-
-func (fh ForumHandler) GetAllSortByPopular(c echo.Context) error {
-	forums, err := fh.ForumU.GetAllSortByPopular()
-
-	if err != nil {
-		// "Failed to get all forums data by populer"
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(http.StatusBadRequest, err.Error(), nil))
 	}
-	return c.JSON(http.StatusOK, helper.ResponseData(http.StatusOK, "Success to get all forums data by populer", forums))
+	return c.JSON(http.StatusOK, helper.ResponseData(http.StatusOK, "Success to get all forums data", forums))
 }
 
 func (fh ForumHandler) GetByCategory(c echo.Context) error {
@@ -57,7 +47,7 @@ func (fh ForumHandler) GetByCategory(c echo.Context) error {
 	forums, err := fh.ForumU.GetByCategory(id_category)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, helper.ResponseData(http.StatusBadRequest, "Failed to get all forums data by category", nil))
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(http.StatusBadRequest, err.Error(), nil))
 	}
 	return c.JSON(http.StatusOK, helper.ResponseData(http.StatusOK, "Success to get all forums data by category", forums))
 }
@@ -77,7 +67,7 @@ func (fh ForumHandler) GetById(c echo.Context) error {
 	forum, err := fh.ForumU.GetById(id)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, helper.ResponseData(http.StatusBadRequest, "Failed to get detail forums data", nil))
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(http.StatusBadRequest, err.Error(), nil))
 	}
 	return c.JSON(http.StatusOK, helper.ResponseData(http.StatusOK, "Success to get detail forum data", forum))
 }

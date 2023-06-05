@@ -1,16 +1,19 @@
 package usecase
 
-import "github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
+import (
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/user_forum/repository"
+)
 
 type UserForumUsecaseInterface interface {
 	Create(forum *entity.UserForum) error
 }
 
 type UserForumUsecase struct {
-	UserForumR UserForumUsecaseInterface
+	UserForumR repository.UserForumRepository
 }
 
-func NewUserForumUsecase(UserForumR UserForumUsecaseInterface) UserForumUsecaseInterface {
+func NewUserForumUsecase(UserForumR repository.UserForumRepository) UserForumUsecaseInterface {
 	return &UserForumUsecase{
 		UserForumR: UserForumR,
 	}

@@ -12,8 +12,8 @@ type Forum struct {
 	CategoryId uint           `json:"category_id" form:"category_id"`
 	Link       string         `json:"link" form:"link"`
 	Topic      string         `json:"topic" form:"topic"`
-	Status     bool           `json:"status" gorm:"-:migration"`
-	Member     int            `json:"member" gorm:"-:migration"`
+	Status     bool           `json:"status" gorm:"-:all"`
+	Member     int            `json:"member" gorm:"-:all"`
 	UserForums []UserForum    `gorm:"foreignKey:ForumId" json:"user_forums"`
 	CreatedAt  time.Time      `json:"created_at"`
 	UpdatedAt  time.Time      `json:"updated_at"`
