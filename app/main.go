@@ -114,34 +114,37 @@ func main() {
 	e.GET("/google/callback", userAuthHandler.LoginGoogleCallback)
 	e.POST("/admin/login", adminAuthHandler.LoginHandler)
 
-	groupUsers := e.Group("/users", userAuthMidd.JWTUser())
+	users := e.Group("/users")
+	{
+		users.GET("/counselors", userCounselorHandler.GetAll)
+	}
+
+	restrictUsers := e.Group("/users", userAuthMidd.JWTUser())
 	{	
-		groupUsers.GET("/profile", func(c echo.Context) error {
+		restrictUsers.GET("/profile", func(c echo.Context) error {
 			user := c.Get("user").(*helper.JwtCustomUserClaims)
 			return c.JSON(http.StatusOK, user)
 		})
 
-		
-		groupUsers.GET("/counselors", userCounselorHandler.GetAll)
-		groupUsers.GET("/counselors/:id", userCounselorHandler.GetById)
-		groupUsers.POST("/counselors/:id/reviews", userCounselorHandler.CreateReview)
-		groupUsers.GET("/counselors/:id/reviews", userCounselorHandler.GetAllReview)
+		restrictUsers.GET("/counselors/:id", userCounselorHandler.GetById)
+		restrictUsers.POST("/counselors/:id/reviews", userCounselorHandler.CreateReview)
+		restrictUsers.GET("/counselors/:id/reviews", userCounselorHandler.GetAllReview)
 	}
 	
 
-	groupAdmin := e.Group("/admin", adminAuthMidd.JWTAdmin())
+	restrictAdmin := e.Group("/admin", adminAuthMidd.JWTAdmin())
 
 	{
-		groupAdmin.GET("/profile", func(c echo.Context) error {
+		restrictAdmin.GET("/profile", func(c echo.Context) error {
 			admin := c.Get("admin").(*helper.JwtCustomAdminClaims)
 			return c.JSON(http.StatusOK, admin)
 		})
 
-		groupAdmin.POST("/counselors", adminCounselorHandler.Create)
-		groupAdmin.GET("/counselors", adminCounselorHandler.GetAll)
-		groupAdmin.GET("/counselors/:id", adminCounselorHandler.GetById)
-		groupAdmin.PUT("/counselors/:id", adminCounselorHandler.Update)
-		groupAdmin.DELETE("/counselors/:id", adminCounselorHandler.Delete)
+		restrictAdmin.GET("/counselors", adminCounselorHandler.GetAll)
+		restrictAdmin.POST("/counselors", adminCounselorHandler.Create)
+		restrictAdmin.GET("/counselors/:id", adminCounselorHandler.GetById)
+		restrictAdmin.PUT("/counselors/:id", adminCounselorHandler.Update)
+		restrictAdmin.DELETE("/counselors/:id", adminCounselorHandler.Delete)
 		
 	}
 
