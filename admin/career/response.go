@@ -3,22 +3,22 @@ package career
 type GetAllResponse struct {
 	ID           string  `json:"id"`
 	Image        string  `json:"image"`
-	JobPosition  string  `form:"jobposition"`
-	CompanyName  string  `form:"companyname"`
-	Location     string  `form:"location"`
-	Salary       float64 `form:"salary"`
-	CompanyEmail string  `form:"companyemail"`
+	JobPosition  string  `json:"job_position"`
+	CompanyName  string  `json:"company_name"`
+	Location     string  `json:"location"`
+	Salary       float64 `json:"salary"`
+	CompanyEmail string  `json:"company_email"`
 }
 
 type GetByResponse struct {
 	ID            string  `json:"id"`
 	Image         string  `json:"image"`
-	JobPosition   string  `form:"jobposition"`
-	CompanyName   string  `form:"companyname"`
-	Location      string  `form:"location"`
-	Salary        float64 `form:"salary" validate:"omitempty,number"`
-	MinExperience string  `form:"minexperience"`
-	LastEducation string  `form:"lasteducation"`
-	Description   string  `form:"description"`
-	CompanyEmail  string  `form:"companyemail" validate:"required,email"`
+	JobPosition   string  `json:"job_position"`
+	CompanyName   string  `json:"company_name"`
+	Location      string  `json:"location"`
+	Salary        float64 `json:"salary" validate:"omitempty,number"`
+	MinExperience string  `json:"min_experience"`
+	LastEducation string  `json:"last_education"`
+	Description   string  `json:"description"`
+	CompanyEmail  string  `json:"company_email" validate:"required,email"`
 }

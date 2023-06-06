@@ -24,23 +24,22 @@ func (h *careerHandler) GetAll(c echo.Context) error {
 	limit, _ := helper.StringToInt(c.QueryParam("limit"))
 
 	page, offset, limit := helper.GetPaginateData(page, limit)
-
-	careers, err := h.CareerUsecase.GetAll(offset, limit)
+	search := c.QueryParam("search")
+	careers, totalPages, err := h.CareerUsecase.GetAll(search, offset, limit)
 
 	if err != nil {
 		return c.JSON(
-			http.StatusBadRequest,
-			helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
+			http.StatusInternalServerError,
+			helper.ResponseData(err.Error(), http.StatusInternalServerError, nil))
 	}
 
-	totalPages, err := h.CareerUsecase.GetTotalPages(limit)
-
-	if err != nil {
-		return c.JSON(http.StatusBadRequest,
-			helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
+	if page > totalPages {
+		return c.JSON(
+			http.StatusNotFound,
+			helper.ResponseData(career.ErrPageNotFound.Error(), http.StatusBadRequest, nil))
 	}
 
-	return c.JSON(http.StatusAccepted, helper.ResponseData("success get all conselor", http.StatusAccepted, echo.Map{
+	return c.JSON(http.StatusOK, helper.ResponseData("success get all career", http.StatusOK, echo.Map{
 		"careers":       careers,
 		"current_pages": page,
 		"total_pages":   totalPages,
@@ -60,33 +59,22 @@ func (h *careerHandler) GetById(c echo.Context) error {
 		)
 	}
 
-	career, err := h.CareerUsecase.GetById(id.ID)
+	careerRes, err := h.CareerUsecase.GetById(id.ID)
 
 	if err != nil {
+
+		status := http.StatusInternalServerError
+
+		if err == career.ErrCareerNotFound {
+			status = http.StatusNotFound
+		}
+
 		return c.JSON(
-			http.StatusBadRequest,
-			helper.ResponseData(err.Error(), http.StatusBadRequest, nil),
+			status,
+			helper.ResponseData(err.Error(), status, nil),
 		)
 	}
 
-	return c.JSON(http.StatusAccepted, helper.ResponseData("success get career by id", http.StatusAccepted, career))
+	return c.JSON(http.StatusOK, helper.ResponseData("success get career by id", http.StatusOK, careerRes))
 
-}
-
-func (h *careerHandler) GetBySearch(c echo.Context) error {
-
-	var search career.SearchRequest
-
-	c.Bind(&search)
-
-	careers, err := h.CareerUsecase.GetBySearch(search.Search)
-
-	if err != nil {
-		return c.JSON(
-			http.StatusBadRequest,
-			helper.ResponseData(err.Error(), http.StatusBadRequest, nil),
-		)
-	}
-
-	return c.JSON(http.StatusAccepted, helper.ResponseData("success get career by search", http.StatusAccepted, careers))
 }

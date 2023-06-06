@@ -37,7 +37,12 @@ func (h *careerHandler) GetAll(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
 	}
 
-	return c.JSON(http.StatusAccepted, helper.ResponseData("success get all careers", http.StatusAccepted, echo.Map{
+	if page > totalPages {
+		return c.JSON(http.StatusNotFound, helper.ResponseData(career.ErrPageNotFound.Error(), http.StatusNotFound, nil))
+	
+	}
+	
+	return c.JSON(http.StatusOK, helper.ResponseData("success get all careers", http.StatusOK, echo.Map{
 		"careers":       careers,
 		"current_pages": page,
 		"total_pages":   totalPages,
@@ -70,7 +75,7 @@ func (h *careerHandler) Create(c echo.Context) error {
 		)
 	}
 
-	return c.JSON(http.StatusAccepted, helper.ResponseData("success create career", http.StatusAccepted, careerReq))
+	return c.JSON(http.StatusOK, helper.ResponseData("success create career", http.StatusOK, nil))
 
 }
 
@@ -96,7 +101,7 @@ func (h *careerHandler) GetById(c echo.Context) error {
 		)
 	}
 
-	return c.JSON(http.StatusAccepted, helper.ResponseData("success get career by id", http.StatusAccepted, career))
+	return c.JSON(http.StatusOK, helper.ResponseData("success get career by id", http.StatusOK, career))
 }
 
 func (h *careerHandler) GetBySearch(c echo.Context) error {
@@ -114,7 +119,7 @@ func (h *careerHandler) GetBySearch(c echo.Context) error {
 		)
 	}
 
-	return c.JSON(http.StatusAccepted, helper.ResponseData("success get career by search", http.StatusAccepted, careers))
+	return c.JSON(http.StatusOK, helper.ResponseData("success get career by search", http.StatusOK, careers))
 }
 
 func (h *careerHandler) Update(c echo.Context) error {
@@ -140,7 +145,7 @@ func (h *careerHandler) Update(c echo.Context) error {
 		)
 	}
 
-	return c.JSON(http.StatusAccepted, helper.ResponseData("success update career", http.StatusAccepted, nil))
+	return c.JSON(http.StatusOK, helper.ResponseData("success update career", http.StatusOK, nil))
 }
 
 func (h *careerHandler) Delete(c echo.Context) error {
@@ -165,6 +170,6 @@ func (h *careerHandler) Delete(c echo.Context) error {
 		)
 	}
 
-	return c.JSON(http.StatusAccepted, helper.ResponseData("success delete career", http.StatusAccepted, id))
+	return c.JSON(http.StatusOK, helper.ResponseData("success delete career", http.StatusOK, nil))
 
 }

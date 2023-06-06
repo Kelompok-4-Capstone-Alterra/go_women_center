@@ -134,7 +134,6 @@ func main() {
 	{
 		users.GET("/counselors", userCounselorHandler.GetAll)
 		users.GET("/careers", userCareerHandler.GetAll)
-		users.GET("/careers/search", userCareerHandler.GetBySearch)
 	}
 
 	restrictUsers := e.Group("/users", userAuthMidd.JWTUser())
@@ -175,7 +174,7 @@ func main() {
 	}
 
 	// ssl
-	e.Logger.Fatal(e.StartTLS(":8080", "./ssl/certificate.crt", "./ssl/private.key"))
+	// e.Logger.Fatal(e.StartTLS(":8080", "./ssl/certificate.crt", "./ssl/private.key"))
 
-	// e.Logger.Fatal(e.Start(":8080"))
+	e.Logger.Fatal(e.Start(":8080"))
 }

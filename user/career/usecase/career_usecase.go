@@ -8,7 +8,7 @@ import (
 )
 
 type CareerUsecase interface {
-	GetAll(offset, limit int) ([]career.GetAllResponse, error)
+	GetAll(search string, offset, limit int) ([]career.GetAllResponse, int, error)
 	GetById(id string) (career.GetByResponse, error)
 	GetBySearch(search string) ([]career.GetAllResponse, error)
 	GetTotalPages(limit int) (int, error)
@@ -22,15 +22,15 @@ func NewCareerUsecase(CRepo repository.CareerRepository) CareerUsecase {
 	return &careerUsecase{careerRepo: CRepo}
 }
 
-func (u *careerUsecase) GetAll(offset, limit int) ([]career.GetAllResponse, error) {
+func (u *careerUsecase) GetAll(search string, offset, limit int) ([]career.GetAllResponse, int, error) {
 
-	careers, err := u.careerRepo.GetAll(offset, limit)
+	careers, totalData, err := u.careerRepo.GetAll(search, offset, limit)
 
 	if err != nil {
-		return nil, career.ErrInternalServerError
+		return nil, 0, career.ErrInternalServerError
 	}
 
-	return careers, nil
+	return careers, helper.GetTotalPages(int(totalData), limit) ,nil
 }
 
 func (u *careerUsecase) GetById(id string) (career.GetByResponse, error) {
