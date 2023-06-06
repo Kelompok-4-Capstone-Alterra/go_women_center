@@ -47,7 +47,8 @@ func (h *careerHandler) GetAll(c echo.Context) error {
 func (h *careerHandler) Create(c echo.Context) error {
 
 	careerReq := career.CreateRequest{}
-
+	imgInput, _ := c.FormFile("image")
+	careerReq.Image = imgInput
 	c.Bind(&careerReq)
 
 	if err := isRequestValid(careerReq); err != nil {
@@ -58,14 +59,7 @@ func (h *careerHandler) Create(c echo.Context) error {
 		)
 	}
 
-	imgInput, _ := c.FormFile("image")
-
-	if err := isImageValid(imgInput); err != nil {
-		return c.JSON(
-			http.StatusBadRequest,
-			helper.ResponseData(err.Error(), http.StatusBadRequest, nil),
-		)
-	}
+	
 
 	err := h.CareerUsecase.Create(careerReq, imgInput)
 
@@ -126,19 +120,11 @@ func (h *careerHandler) GetBySearch(c echo.Context) error {
 func (h *careerHandler) Update(c echo.Context) error {
 
 	var careerReq career.UpdateRequest
-
+	imgInput, _ := c.FormFile("image")
+	careerReq.Image = imgInput
 	c.Bind(&careerReq)
 
 	if err := isRequestValid(careerReq); err != nil {
-		return c.JSON(
-			http.StatusBadRequest,
-			helper.ResponseData(err.Error(), http.StatusBadRequest, nil),
-		)
-	}
-
-	imgInput, _ := c.FormFile("image")
-
-	if err := isImageValid(imgInput); err != nil {
 		return c.JSON(
 			http.StatusBadRequest,
 			helper.ResponseData(err.Error(), http.StatusBadRequest, nil),

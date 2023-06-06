@@ -1,11 +1,9 @@
 package handler
 
 import (
-	"mime/multipart"
 	"strings"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/career"
-	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
 	"github.com/go-playground/validator"
 )
 
@@ -35,19 +33,19 @@ func isRequestValid(m interface{}) error {
 	return nil
 }
 
-func isImageValid(img *multipart.FileHeader) error {
+// func isImageValid(img *multipart.FileHeader) error {
 
-	if img == nil {
-		return career.ErrRequired
-	}
+// 	if img == nil {
+// 		return career.ErrRequired
+// 	}
 	
-	if img.Size > 10 * 1024 * 1024 { // 10 MB
-		return career.ErrImageFormat
-	}
+// 	if img.Size > 10 * 1024 * 1024 { // 10 MB
+// 		return career.ErrImageFormat
+// 	}
 
-	if !helper.IsImageValid(img) {
-		return career.ErrImageSize
-	}
+// 	if !helper.IsImageValid(img) {
+// 		return career.ErrImageSize
+// 	}
 
-	return nil
-}
+// 	return nil
+// }

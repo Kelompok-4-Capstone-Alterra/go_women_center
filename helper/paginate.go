@@ -1,16 +1,23 @@
 package helper
 
-func GetPaginateData(page, limit int) (int, int, int) {
+func GetPaginateData(page, limit int, device ...string) (int, int, int) {
 
 	if page <= 0 {
 		page = 1
 	}
+	maxLimit := 100
+	minLimit := 10
+
+	if len(device) > 0 && device[0] == "mobile" {
+		maxLimit = 50
+		minLimit = 5
+	}
 
 	switch {
-	case limit > 100:
-		limit = 100
+	case limit > maxLimit:
+		limit = maxLimit
 	case limit <= 0:
-		limit = 10
+		limit = minLimit
 	}
 
 	offset := (page - 1) * limit

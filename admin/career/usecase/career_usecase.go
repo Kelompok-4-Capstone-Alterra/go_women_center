@@ -22,10 +22,11 @@ type CareerUsecase interface {
 
 type careerUsecase struct {
 	careerRepo repository.CareerRepository
+	image helper.Image
 }
 
-func NewCareerUsecase(CRepo repository.CareerRepository) CareerUsecase {
-	return &careerUsecase{careerRepo: CRepo}
+func NewCareerUsecase(CRepo repository.CareerRepository, Image helper.Image) CareerUsecase {
+	return &careerUsecase{careerRepo: CRepo, image: Image}
 }
 
 func (u *careerUsecase) GetAll(offset, limit int) ([]career.GetAllResponse, error) {
@@ -74,7 +75,7 @@ func (u *careerUsecase) GetBySearch(search string) ([]career.GetAllResponse, err
 }
 
 func (u *careerUsecase) Create(inputDetail career.CreateRequest, inputImage *multipart.FileHeader) error {
-	path, err := helper.UploadImageToS3(inputImage)
+	path, err := u.image.UploadImageToS3(inputImage)
 
 	if err != nil {
 		return career.ErrInternalServerError
@@ -124,13 +125,13 @@ func (u *careerUsecase) Update(inputDetail career.UpdateRequest, inputImage *mul
 	}
 
 	if inputImage != nil {
-		err := helper.DeleteImageFromS3(careerData.Image)
+		err := u.image.DeleteImageFromS3(careerData.Image)
 
 		if err != nil {
 			return career.ErrInternalServerError
 		}
 
-		path, err := helper.UploadImageToS3(inputImage)
+		path, err := u.image.UploadImageToS3(inputImage)
 
 		if err != nil {
 			return career.ErrInternalServerError

@@ -1,14 +1,17 @@
 package career
 
+import "mime/multipart"
+
 type CreateRequest struct {
-	JobPosition   string  `form:"jobposition" validate:"required"`
-	CompanyName   string  `form:"companyname" validate:"required"`
-	Location      string  `form:"location" validate:"required"`
-	Salary        float64 `form:"salary" validate:"required"`
-	MinExperience string  `form:"minexperience" validate:"required"`
-	LastEducation string  `form:"lasteducation" validate:"required"`
-	Description   string  `form:"description" validate:"required"`
-	CompanyEmail  string  `form:"companyemail" validate:"required,email"`
+	JobPosition    string                `form:"jobposition" validate:"required"`
+	CompanyName    string                `form:"companyname" validate:"required"`
+	Location       string                `form:"location" validate:"required"`
+	Salary         float64               `form:"salary" validate:"required"`
+	MinExperience  string                `form:"minexperience" validate:"required"`
+	LastEducation  string                `form:"lasteducation" validate:"required"`
+	Description    string                `form:"description" validate:"required"`
+	CompanyEmail   string                `form:"companyemail" validate:"required,email"`
+	Image *multipart.FileHeader 		 `form:"image" validate:"required"`
 }
 
 type UpdateRequest struct {
@@ -21,6 +24,7 @@ type UpdateRequest struct {
 	LastEducation string  `form:"lasteducation" validate:"omitempty"`
 	Description   string  `form:"description" validate:"omitempty"`
 	CompanyEmail  string  `form:"companyemail" validate:"omitempty,email"`
+	Image *multipart.FileHeader `form:"image" validate:"required"`
 }
 
 type IdRequest struct {
