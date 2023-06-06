@@ -10,8 +10,12 @@ import (
 	AdminAuthRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/auth/repository"
 	AdminAuthUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/auth/usecase"
 	CounselorAdminHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor/handler"
-	CounselorAdminRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor/repository"
+	CounselorAdminRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor/repository"
 	CounselorAdminUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor/usecase"
+	AdminDateRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/date/repository"
+	AdminScheduleHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/schedule/handler"
+	AdminScheduleUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/schedule/usecase"
+	AdminTimeRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/time/repository"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/app/config"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
 	TopicHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/topic/handler"
@@ -20,9 +24,9 @@ import (
 	UserAuthRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth/repository"
 	UserAuthUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth/usecase"
 	CounselorUserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor/handler"
-	CounselorUserRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor/repository"
+	CounselorUserRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor/repository"
 	CounselorUserUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor/usecase"
-	ReviewUserRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/review/repository"
+	ReviewUserRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/review/repository"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -78,8 +82,8 @@ func main() {
 	userAuthUsecase := UserAuthUsecase.NewUserUsecase(userAuthRepo, googleUUID, &mailConf, otpRepo, otpGenerator, encryptor)
 	userAuthHandler := UserAuthHandler.NewUserHandler(userAuthUsecase, googleOauthConfig, jwtConf)
 
-	userCounselorRepo := CounselorUserRepository.NewMysqlCounselorRepository(db)
-	userReviewRepo := ReviewUserRepository.NewMysqlReviewRepository(db)
+	userCounselorRepo := CounselorUserRepo.NewMysqlCounselorRepository(db)
+	userReviewRepo := ReviewUserRepo.NewMysqlReviewRepository(db)
 	userCounselorUsecase := CounselorUserUsecase.NewCounselorUsecase(userCounselorRepo, userReviewRepo, userAuthRepo)
 	userCounselorHandler := CounselorUserHandler.NewCounselorHandler(userCounselorUsecase)
 
@@ -87,7 +91,7 @@ func main() {
 	adminAuthUsecase := AdminAuthUsecase.NewAuthUsecase(adminAuthRepo, encryptor)
 	adminAuthHandler := AdminAuthHandler.NewAuthHandler(adminAuthUsecase, jwtConf)
 
-	adminCounselorRepo := CounselorAdminRepository.NewMysqlCounselorRepository(db)
+	adminCounselorRepo := CounselorAdminRepo.NewMysqlCounselorRepository(db)
 	adminCounselorUsecase := CounselorAdminUsecase.NewCounselorUsecase(adminCounselorRepo, image)
 	adminCounselorHandler := CounselorAdminHandler.NewCounselorHandler(adminCounselorUsecase)
 
@@ -148,8 +152,18 @@ func main() {
 		
 	}
 
-	// ssl
-	e.Logger.Fatal(e.StartTLS(":8080", "./ssl/certificate.crt", "./ssl/private.key"))
+	// testing admin schedule
+	adminDateRepo := AdminDateRepo.NewMysqlDateRepository(db)
+	adminTimeRepo := AdminTimeRepo.NewMysqlTimeRepository(db)
+	adminScheduleUsecase := AdminScheduleUsecase.NewScheduleUsecase(adminCounselorRepo, adminDateRepo, adminTimeRepo, googleUUID)
+	adminScheduleHandler := AdminScheduleHandler.NewScheduleHandler(adminScheduleUsecase)
 
-	// e.Logger.Fatal(e.Start(":8080"))
+	e.POST("/admin/counselors/:id/schedules", adminScheduleHandler.Create)
+	e.GET("/admin/counselors/:id/schedules", adminScheduleHandler.GetByCounselorId)
+	e.DELETE("/admin/counselors/:id/schedules", adminScheduleHandler.Delete)
+
+	// ssl
+	// e.Logger.Fatal(e.StartTLS(":8080", "./ssl/certificate.crt", "./ssl/private.key"))
+
+	e.Logger.Fatal(e.Start(":8080"))
 }
