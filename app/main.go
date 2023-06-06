@@ -167,7 +167,6 @@ func main() {
 		
 		restrictAdmin.GET("/careers", adminCareerHandler.GetAll)
 		restrictAdmin.POST("/careers", adminCareerHandler.Create)
-		restrictAdmin.GET("/careers/search", adminCareerHandler.GetBySearch)
 		restrictAdmin.GET("/careers/:id", adminCareerHandler.GetById)
 		restrictAdmin.PUT("/careers/:id", adminCareerHandler.Update)
 		restrictAdmin.DELETE("/careers/:id", adminCareerHandler.Delete)

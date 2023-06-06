@@ -24,25 +24,22 @@ func (h *careerHandler) GetAll(c echo.Context) error {
 	limit, _ := helper.StringToInt(c.QueryParam("limit"))
 
 	page, offset, limit := helper.GetPaginateData(page, limit)
-
-	careers, err := h.CareerUsecase.GetAll(offset, limit)
-
-	if err != nil {
-		return c.JSON(http.StatusNotFound, helper.ResponseData(err.Error(), http.StatusNotFound, nil))
-	}
-
-	totalPages, err := h.CareerUsecase.GetTotalPages(limit)
+	search := c.QueryParam("search")
+	careers, totalPages, err := h.CareerUsecase.GetAll(search, offset, limit)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
+		return c.JSON(
+			http.StatusInternalServerError,
+			helper.ResponseData(err.Error(), http.StatusInternalServerError, nil))
 	}
 
 	if page > totalPages {
-		return c.JSON(http.StatusNotFound, helper.ResponseData(career.ErrPageNotFound.Error(), http.StatusNotFound, nil))
-	
+		return c.JSON(
+			http.StatusNotFound,
+			helper.ResponseData(career.ErrPageNotFound.Error(), http.StatusBadRequest, nil))
 	}
-	
-	return c.JSON(http.StatusOK, helper.ResponseData("success get all careers", http.StatusOK, echo.Map{
+
+	return c.JSON(http.StatusOK, helper.ResponseData("success get all career", http.StatusOK, echo.Map{
 		"careers":       careers,
 		"current_pages": page,
 		"total_pages":   totalPages,
@@ -63,8 +60,6 @@ func (h *careerHandler) Create(c echo.Context) error {
 			helper.ResponseData(err.Error(), http.StatusBadRequest, nil),
 		)
 	}
-
-	
 
 	err := h.CareerUsecase.Create(careerReq, imgInput)
 
@@ -102,24 +97,6 @@ func (h *careerHandler) GetById(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, helper.ResponseData("success get career by id", http.StatusOK, career))
-}
-
-func (h *careerHandler) GetBySearch(c echo.Context) error {
-
-	var search career.SearchRequest
-
-	c.Bind(&search)
-
-	careers, err := h.CareerUsecase.GetBySearch(search.Search)
-
-	if err != nil {
-		return c.JSON(
-			http.StatusBadRequest,
-			helper.ResponseData(err.Error(), http.StatusBadRequest, nil),
-		)
-	}
-
-	return c.JSON(http.StatusOK, helper.ResponseData("success get career by search", http.StatusOK, careers))
 }
 
 func (h *careerHandler) Update(c echo.Context) error {

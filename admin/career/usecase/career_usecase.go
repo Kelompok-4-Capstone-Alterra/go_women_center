@@ -11,10 +11,10 @@ import (
 )
 
 type CareerUsecase interface {
-	GetAll(offset, limit int) ([]career.GetAllResponse, error)
+	GetAll(search string, offset, limit int) ([]career.GetAllResponse, int, error)
 	GetTotalPages(limit int) (int, error)
 	GetById(id string) (career.GetByResponse, error)
-	GetBySearch(search string) ([]career.GetAllResponse, error)
+	// GetBySearch(search string) ([]career.GetAllResponse, error)
 	Create(inputDetail career.CreateRequest, inputImage *multipart.FileHeader) error
 	Update(inputDetail career.UpdateRequest, inputImage *multipart.FileHeader) error
 	Delete(id string) error
@@ -22,22 +22,22 @@ type CareerUsecase interface {
 
 type careerUsecase struct {
 	careerRepo repository.CareerRepository
-	image helper.Image
+	image      helper.Image
 }
 
 func NewCareerUsecase(CRepo repository.CareerRepository, Image helper.Image) CareerUsecase {
 	return &careerUsecase{careerRepo: CRepo, image: Image}
 }
 
-func (u *careerUsecase) GetAll(offset, limit int) ([]career.GetAllResponse, error) {
+func (u *careerUsecase) GetAll(search string, offset, limit int) ([]career.GetAllResponse, int, error) {
 
-	careers, err := u.careerRepo.GetAll(offset, limit)
+	careers, totalData, err := u.careerRepo.GetAll(search, offset, limit)
 
 	if err != nil {
-		return nil, career.ErrInternalServerError
+		return nil, 0, career.ErrInternalServerError
 	}
 
-	return careers, nil
+	return careers, helper.GetTotalPages(int(totalData), limit), nil
 }
 
 func (u *careerUsecase) GetTotalPages(limit int) (int, error) {
@@ -61,17 +61,6 @@ func (u *careerUsecase) GetById(id string) (career.GetByResponse, error) {
 	}
 
 	return careerData, nil
-}
-
-func (u *careerUsecase) GetBySearch(search string) ([]career.GetAllResponse, error) {
-
-	careers, err := u.careerRepo.GetBySearch(search)
-
-	if err != nil {
-		return nil, career.ErrInternalServerError
-	}
-
-	return careers, nil
 }
 
 func (u *careerUsecase) Create(inputDetail career.CreateRequest, inputImage *multipart.FileHeader) error {

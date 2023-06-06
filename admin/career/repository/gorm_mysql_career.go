@@ -7,7 +7,7 @@ import (
 )
 
 type CareerRepository interface {
-	GetAll(offset, limit int) ([]career.GetAllResponse, error)
+	GetAll(search string, offset, limit int) ([]career.GetAllResponse, int64, error)
 	GetById(id string) (career.GetByResponse, error)
 	GetBySearch(search string) ([]career.GetAllResponse, error)
 	Create(career entity.Career) error
@@ -24,14 +24,21 @@ func NewMysqlCareerRepository(db *gorm.DB) CareerRepository {
 	return &mysqlCareerRepository{DB: db}
 }
 
-func (r *mysqlCareerRepository) GetAll(offset, limit int) ([]career.GetAllResponse, error) {
+func (r *mysqlCareerRepository) GetAll(search string, offset, limit int) ([]career.GetAllResponse, int64, error) {
 	var career []career.GetAllResponse
+	var count int64
+	err := r.DB.Model(&entity.Career{}).
+		Where("job_position LIKE ? OR company_name LIKE ? OR Location LIKE ? OR CAST(Salary AS CHAR) LIKE ?",
+			"%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+		Count(&count).
+		Offset(offset).
+		Limit(limit).
+		Find(&career).Error
 
-	err := r.DB.Model(&entity.Career{}).Offset(offset).Limit(limit).Find(&career).Error
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	return career, nil
+	return career, count, nil
 }
 
 func (r *mysqlCareerRepository) GetBySearch(search string) ([]career.GetAllResponse, error) {
