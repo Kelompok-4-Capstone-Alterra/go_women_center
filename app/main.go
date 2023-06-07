@@ -34,6 +34,14 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
+
+	CareerAdminHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/career/handler"
+	CareerAdminRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/career/repository"
+	CareerAdminUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/career/usecase"
+
+	CareerUserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/career/handler"
+	CareerUserRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/career/repository"
+	CareerUserUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/career/usecase"
 )
 
 func main() {
@@ -89,6 +97,10 @@ func main() {
 	userCounselorUsecase := CounselorUserUsecase.NewCounselorUsecase(userCounselorRepo, userReviewRepo, userAuthRepo)
 	userCounselorHandler := CounselorUserHandler.NewCounselorHandler(userCounselorUsecase)
 
+	userCareerRepo := CareerUserRepository.NewMysqlCareerRepository(db)
+	userCareerUsecase := CareerUserUsecase.NewCareerUsecase(userCareerRepo)
+	userCareerHandler := CareerUserHandler.NewCareerHandler(userCareerUsecase)
+
 	adminAuthRepo := AdminAuthRepo.NewAdminRepo(db)
 	adminAuthUsecase := AdminAuthUsecase.NewAuthUsecase(adminAuthRepo, encryptor)
 	adminAuthHandler := AdminAuthHandler.NewAuthHandler(adminAuthUsecase, jwtConf)
@@ -96,6 +108,10 @@ func main() {
 	adminCounselorRepo := CounselorAdminRepository.NewMysqlCounselorRepository(db)
 	adminCounselorUsecase := CounselorAdminUsecase.NewCounselorUsecase(adminCounselorRepo, image)
 	adminCounselorHandler := CounselorAdminHandler.NewCounselorHandler(adminCounselorUsecase)
+
+	adminCareerRepo := CareerAdminRepository.NewMysqlCareerRepository(db)
+	adminCareerUsecase := CareerAdminUsecase.NewCareerUsecase(adminCareerRepo, image)
+	adminCareerHandler := CareerAdminHandler.NewCareerHandler(adminCareerUsecase)
 
 	forumR := ForumAdminRepository.NewMysqlForumRepository(db)
 	forumU := ForumAdminUsecase.NewForumUsecase(forumR)
@@ -130,6 +146,7 @@ func main() {
 	users := e.Group("/users")
 	{
 		users.GET("/counselors", userCounselorHandler.GetAll)
+		users.GET("/careers", userCareerHandler.GetAll)
 	}
 
 	restrictUsers := e.Group("/users", userAuthMidd.JWTUser())
@@ -149,6 +166,7 @@ func main() {
 		restrictUsers.PUT("/forums/:id", forumH.Update)
 		restrictUsers.DELETE("/forums/:id", forumH.Delete)
 		restrictUsers.POST("/forums/joins", userForumH.Create)
+		restrictUsers.GET("/careers/:id", userCareerHandler.GetById)
 	}
 
 	restrictAdmin := e.Group("/admin", adminAuthMidd.JWTAdmin())
@@ -165,6 +183,11 @@ func main() {
 		restrictAdmin.PUT("/counselors/:id", adminCounselorHandler.Update)
 		restrictAdmin.DELETE("/counselors/:id", adminCounselorHandler.Delete)
 
+		restrictAdmin.GET("/careers", adminCareerHandler.GetAll)
+		restrictAdmin.POST("/careers", adminCareerHandler.Create)
+		restrictAdmin.GET("/careers/:id", adminCareerHandler.GetById)
+		restrictAdmin.PUT("/careers/:id", adminCareerHandler.Update)
+		restrictAdmin.DELETE("/careers/:id", adminCareerHandler.Delete)
 	}
 
 	// ssl
