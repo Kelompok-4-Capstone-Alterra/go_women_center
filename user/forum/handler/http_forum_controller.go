@@ -35,8 +35,9 @@ func (fh ForumHandler) GetAll(c echo.Context) error {
 	getCreated := c.QueryParam("created")
 	getTopic := c.QueryParam("topic")
 	getPopular := c.QueryParam("popular")
+	getCategories := c.QueryParam("categories")
 
-	forums, err := fh.ForumU.GetAll(user.ID, getTopic, getPopular, getCreated)
+	forums, err := fh.ForumU.GetAll(user.ID, getTopic, getPopular, getCreated, getCategories)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
 	}
@@ -44,8 +45,12 @@ func (fh ForumHandler) GetAll(c echo.Context) error {
 }
 
 func (fh ForumHandler) GetByCategory(c echo.Context) error {
+	// getCreated := c.QueryParam("created")
+	getTopic := c.QueryParam("topic")
+	// getPopular := c.QueryParam("popular")
+	var user = c.Get("user").(*helper.JwtCustomUserClaims)
 	id_category := c.Param("id")
-	forums, err := fh.ForumU.GetByCategory(id_category)
+	forums, err := fh.ForumU.GetByCategory(user.ID, id_category, getTopic)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
@@ -54,8 +59,8 @@ func (fh ForumHandler) GetByCategory(c echo.Context) error {
 }
 
 func (fh ForumHandler) GetByMyForum(c echo.Context) error {
-	id_user := "1"
-	forums, err := fh.ForumU.GetByMyForum(id_user)
+	var user = c.Get("user").(*helper.JwtCustomUserClaims)
+	forums, err := fh.ForumU.GetByMyForum(user.ID)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
@@ -74,11 +79,13 @@ func (fh ForumHandler) GetById(c echo.Context) error {
 }
 
 func (fh ForumHandler) Create(c echo.Context) error {
+	var user = c.Get("user").(*helper.JwtCustomUserClaims)
 	var forum entity.Forum
 	c.Bind(&forum)
 
 	uuidWithHyphen := uuid.New()
 	forum.ID = uuidWithHyphen.String()
+	forum.UserId = user.ID
 
 	err := fh.ForumU.Create(&forum)
 

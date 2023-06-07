@@ -1,18 +1,16 @@
 package repository
 
 import (
-	"strconv"
-
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	response "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum"
 	"gorm.io/gorm"
 )
 
 type ForumRepository interface {
-	GetAll(id, topic string) ([]response.ResponseForum, error)
-	GetAllByPopular(id, topic, popular string) ([]response.ResponseForum, error)
-	GetAllByCreated(id, topic, created string) ([]response.ResponseForum, error)
-	GetByCategory(category_id string) ([]response.ResponseForum, error)
+	GetAll(id_user, topic string) ([]response.ResponseForum, error)
+	GetAllByPopular(id_user, topic, popular string) ([]response.ResponseForum, error)
+	GetAllByCreated(id_user, topic, created string) ([]response.ResponseForum, error)
+	GetByCategory(id_user, category_id, topic string) ([]response.ResponseForum, error)
 	GetByMyForum(id_user string) ([]response.ResponseForum, error)
 	GetById(id string) (*response.ResponseForumDetail, error)
 	Create(forum *entity.Forum) error
@@ -36,10 +34,9 @@ func (fr mysqlForumRepository) GetAll(id, topic string) ([]response.ResponseForu
 		Group("forums.id").
 		Find(&response).Error
 
-	idUserJWT := 1
 	for i := 0; i < len(response); i++ {
 		for j := 0; j < len(response[i].UserForums); j++ {
-			if response[i].UserForums[j].UserId == uint(idUserJWT) {
+			if response[i].UserForums[j].UserId == id {
 				response[i].Status = true
 				break
 			}
@@ -53,7 +50,7 @@ func (fr mysqlForumRepository) GetAll(id, topic string) ([]response.ResponseForu
 	return response, nil
 }
 
-func (fr mysqlForumRepository) GetAllByPopular(id, topic, popular string) ([]response.ResponseForum, error) {
+func (fr mysqlForumRepository) GetAllByPopular(id_user, topic, popular string) ([]response.ResponseForum, error) {
 	var response []response.ResponseForum
 	err := fr.DB.Table("forums").
 		Select("forums.id, forums.user_id, forums.category_id, forums.link, forums.topic, COUNT(user_forums.id) AS member, forums.created_at, forums.updated_at,forums.deleted_at").
@@ -61,10 +58,9 @@ func (fr mysqlForumRepository) GetAllByPopular(id, topic, popular string) ([]res
 		Group("forums.id").Order("member " + popular).
 		Find(&response).Error
 
-	idUserJWT := 1
 	for i := 0; i < len(response); i++ {
 		for j := 0; j < len(response[i].UserForums); j++ {
-			if response[i].UserForums[j].UserId == uint(idUserJWT) {
+			if response[i].UserForums[j].UserId == id_user {
 				response[i].Status = true
 				break
 			}
@@ -78,7 +74,7 @@ func (fr mysqlForumRepository) GetAllByPopular(id, topic, popular string) ([]res
 	return response, nil
 }
 
-func (fr mysqlForumRepository) GetAllByCreated(id, topic, created string) ([]response.ResponseForum, error) {
+func (fr mysqlForumRepository) GetAllByCreated(id_user, topic, created string) ([]response.ResponseForum, error) {
 	var response []response.ResponseForum
 	err := fr.DB.Table("forums").
 		Select("forums.id, forums.user_id, forums.category_id, forums.link, forums.topic, COUNT(user_forums.id) AS member, forums.created_at, forums.updated_at,forums.deleted_at").
@@ -86,10 +82,9 @@ func (fr mysqlForumRepository) GetAllByCreated(id, topic, created string) ([]res
 		Group("forums.id").Order("forums.created_at " + created).
 		Find(&response).Error
 
-	idUserJWT := 1
 	for i := 0; i < len(response); i++ {
 		for j := 0; j < len(response[i].UserForums); j++ {
-			if response[i].UserForums[j].UserId == uint(idUserJWT) {
+			if response[i].UserForums[j].UserId == id_user {
 				response[i].Status = true
 				break
 			}
@@ -103,18 +98,17 @@ func (fr mysqlForumRepository) GetAllByCreated(id, topic, created string) ([]res
 	return response, nil
 }
 
-func (fr mysqlForumRepository) GetByCategory(category_id string) ([]response.ResponseForum, error) {
+func (fr mysqlForumRepository) GetByCategory(id_user, category_id, topic string) ([]response.ResponseForum, error) {
 	var response []response.ResponseForum
 	err := fr.DB.Table("forums").
 		Select("forums.id, forums.user_id, forums.category_id, forums.link, forums.topic, COUNT(user_forums.id) AS member, forums.created_at, forums.updated_at").
-		Joins("LEFT JOIN user_forums ON forums.id = user_forums.forum_id").Preload("UserForums").Where("category_id = ?", category_id).
+		Joins("LEFT JOIN user_forums ON forums.id = user_forums.forum_id").Preload("UserForums").Where("category_id = ? AND topic LIKE ?", category_id, "%"+topic+"%").
 		Group("forums.id").
 		Find(&response).Error
 
-	idUserJWT := 1
 	for i := 0; i < len(response); i++ {
 		for j := 0; j < len(response[i].UserForums); j++ {
-			if response[i].UserForums[j].UserId == uint(idUserJWT) {
+			if response[i].UserForums[j].UserId == id_user {
 				response[i].Status = true
 				break
 			}
@@ -136,11 +130,10 @@ func (fr mysqlForumRepository) GetByMyForum(id_user string) ([]response.Response
 		Group("forums.id").
 		Find(&forum).Error
 
-	id, _ := strconv.Atoi(id_user)
 	var myForum []response.ResponseForum
 	for i := 0; i < len(forum); i++ {
 		for j := 0; j < len(forum[i].UserForums); j++ {
-			if forum[i].UserForums[j].UserId == uint(id) {
+			if forum[i].UserForums[j].UserId == id_user {
 				forum[i].Status = true
 				myForum = append(myForum, forum[i])
 				myForum[len(myForum)-1].UserForums = nil

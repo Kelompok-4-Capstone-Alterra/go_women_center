@@ -24,8 +24,10 @@ func NewUserForumHandler(UserForumU usecase.UserForumUsecaseInterface) UserForum
 }
 
 func (fh UserForumHandler) Create(c echo.Context) error {
+	var user = c.Get("user").(*helper.JwtCustomUserClaims)
 	var userForum entity.UserForum
 	c.Bind(&userForum)
+	userForum.UserId = user.ID
 
 	err := fh.UserForumU.Create(&userForum)
 	if err != nil {

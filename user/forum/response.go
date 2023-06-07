@@ -9,7 +9,7 @@ import (
 
 type ResponseForum struct {
 	ID         string             `gorm:"primarykey" json:"id"`
-	UserId     uint               `json:"user_id" form:"user_id"`
+	UserId     string             `json:"user_id" form:"user_id"`
 	CategoryId uint               `json:"category_id" form:"category_id"`
 	Link       string             `json:"link" form:"link"`
 	Topic      string             `json:"topic" form:"topic"`
@@ -23,7 +23,7 @@ type ResponseForum struct {
 
 type ResponseForumDetail struct {
 	ID         string             `gorm:"primarykey" json:"id"`
-	UserId     uint               `json:"user_id" form:"user_id"`
+	UserId     string             `json:"user_id" form:"user_id"`
 	CategoryId uint               `json:"category_id" form:"category_id"`
 	Link       string             `json:"link" form:"link"`
 	Topic      string             `json:"topic" form:"topic"`
