@@ -12,10 +12,9 @@ import (
 	CounselorAdminHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor/handler"
 	CounselorAdminRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor/repository"
 	CounselorAdminUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor/usecase"
-	AdminDateRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/date/repository"
 	AdminScheduleHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/schedule/handler"
+	AdminScheduleRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/schedule/repository"
 	AdminScheduleUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/schedule/usecase"
-	AdminTimeRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/time/repository"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/app/config"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
 	TopicHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/topic/handler"
@@ -95,8 +94,8 @@ func main() {
 	adminCounselorUsecase := CounselorAdminUsecase.NewCounselorUsecase(adminCounselorRepo, image)
 	adminCounselorHandler := CounselorAdminHandler.NewCounselorHandler(adminCounselorUsecase)
 
-	adminDateRepo := AdminDateRepo.NewMysqlDateRepository(db)
-	adminTimeRepo := AdminTimeRepo.NewMysqlTimeRepository(db)
+	adminDateRepo := AdminScheduleRepo.NewMysqlDateRepository(db)
+	adminTimeRepo := AdminScheduleRepo.NewMysqlTimeRepository(db)
 	adminScheduleUsecase := AdminScheduleUsecase.NewScheduleUsecase(adminCounselorRepo, adminDateRepo, adminTimeRepo, googleUUID)
 	adminScheduleHandler := AdminScheduleHandler.NewScheduleHandler(adminScheduleUsecase)
 

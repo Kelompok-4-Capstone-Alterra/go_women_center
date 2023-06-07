@@ -5,9 +5,8 @@ import (
 	"time"
 
 	Counselor "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor/repository"
-	Date "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/date/repository"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/schedule"
-	Time "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/time/repository"
+	repo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/schedule/repository"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
 	"golang.org/x/sync/errgroup"
@@ -22,15 +21,15 @@ type ScheduleUsecase interface {
 
 type scheduleUsecase struct {
 	counselorRepo Counselor.CounselorRepository
-	dateRepo Date.DateRepository
-	timeRepo Time.TimeRepository
+	dateRepo repo.DateRepository
+	timeRepo repo.TimeRepository
 	UuidGenerator helper.UuidGenerator
 }
 
 func NewScheduleUsecase(
 		counselorRepo Counselor.CounselorRepository,
-		dateRepo Date.DateRepository,
-		timeRepo Time.TimeRepository,
+		dateRepo repo.DateRepository,
+		timeRepo repo.TimeRepository,
 		uidGenerator helper.UuidGenerator,
 	) ScheduleUsecase {
 
