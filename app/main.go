@@ -46,10 +46,10 @@ func main() {
 		DB_Name:     os.Getenv("DB_NAME"),
 	}
 
-	// sslconf := config.SSLconf{
-	// 	SSL_CERT:        os.Getenv("SSL_CERT"),
-	// 	SSL_PRIVATE_KEY: os.Getenv("SSL_PRIVATE_KEY"),
-	// }
+	sslconf := config.SSLconf{
+		SSL_CERT:        os.Getenv("SSL_CERT"),
+		SSL_PRIVATE_KEY: os.Getenv("SSL_PRIVATE_KEY"),
+	}
 
 	googleOauthConfig := &oauth2.Config{
 		RedirectURL:  "http://localhost:8080/google/callback",
@@ -68,7 +68,7 @@ func main() {
 	)
 
 	db := dbconf.InitDB()
-	// sslconf.InitSSL()
+	sslconf.InitSSL()
 
 	// helper
 	jwtConf := helper.NewAuthJWT(os.Getenv("JWT_SECRET_USER"), os.Getenv("JWT_SECRET_ADMIN"))
@@ -132,15 +132,6 @@ func main() {
 		users.GET("/counselors", userCounselorHandler.GetAll)
 	}
 
-	// e.GET("/user/forums", forumH.GetAll)
-	// e.GET("/user/forums/categories/:id", forumH.GetByCategory)
-	// e.GET("/user/forums/my", forumH.GetByMyForum)
-	// e.GET("/user/forums/:id", forumH.GetById)
-	// e.POST("/user/forums", forumH.Create)
-	// e.PUT("/user/forums/:id", forumH.Update)
-	// e.DELETE("/user/forums/:id", forumH.Delete)
-	// e.POST("/user/forums/joins", userForumH.Create)
-
 	restrictUsers := e.Group("/users", userAuthMidd.JWTUser())
 	{
 		restrictUsers.GET("/profile", func(c echo.Context) error {
@@ -175,9 +166,9 @@ func main() {
 		restrictAdmin.DELETE("/counselors/:id", adminCounselorHandler.Delete)
 
 	}
-	e.Logger.Fatal(e.Start(":8080"))
+
 	// ssl
 	// e.Logger.Fatal(e.StartTLS(":8080", "./ssl/certificate.crt", "./ssl/private.key"))
 
-	// e.Logger.Fatal(e.Start(":8080"))
+	e.Logger.Fatal(e.Start(":8080"))
 }
