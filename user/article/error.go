@@ -8,7 +8,8 @@ var (
 	ErrInternalServerError = errors.New("internal server error")
 
 	// not found
-	ErrCareerNotFound = errors.New("article not found")
+	ErrArticleNotFound = errors.New("article not found")
+	ErrCommentNotFound = errors.New("comment not found")
 	ErrPageNotFound = errors.New("page not found")
 	
 	// bad request
