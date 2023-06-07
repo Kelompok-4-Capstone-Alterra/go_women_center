@@ -23,7 +23,7 @@ func (h *careerHandler) GetAll(c echo.Context) error {
 	page, _ := helper.StringToInt(c.QueryParam("page"))
 	limit, _ := helper.StringToInt(c.QueryParam("limit"))
 
-	page, offset, limit := helper.GetPaginateData(page, limit)
+	page, offset, limit := helper.GetPaginateData(page, limit, "mobile")
 	search := c.QueryParam("search")
 	careers, totalPages, err := h.CareerUsecase.GetAll(search, offset, limit)
 
