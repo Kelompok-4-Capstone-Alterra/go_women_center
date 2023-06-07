@@ -17,6 +17,7 @@ type ScheduleUsecase interface {
 	GetByCounselorId(counselorId string) (schedule.GetAllResponse, error)
 	Create(input schedule.CreateRequest) error
 	Delete(counselorId string) error
+	Update(input schedule.UpdateRequest) error
 }
 
 type scheduleUsecase struct {
@@ -171,6 +172,38 @@ func(u *scheduleUsecase) Delete(counselorId string) error {
 
 	g.Go(func() error {
 		return u.timeRepo.DeleteByCounselorId(counselorId)
+	})
+
+	if err := g.Wait(); err != nil {
+		log.Println(err.Error())
+		return schedule.ErrInternalServerError
+	}
+
+	return nil
+	
+}
+
+func(u *scheduleUsecase) Update(input schedule.UpdateRequest) error {
+
+	_, err := u.counselorRepo.GetById(input.CounselorId)
+
+	if err != nil {
+		log.Println(err.Error())
+		return schedule.ErrCounselorNotFound
+	}
+
+	g := errgroup.Group{}
+
+	g.Go(func() error {
+		return u.dateRepo.DeleteByCounselorId(input.CounselorId)
+	})
+
+	g.Go(func() error {
+		return u.timeRepo.DeleteByCounselorId(input.CounselorId)
+	})
+
+	g.Go(func() error {
+		return u.Create(schedule.CreateRequest(input))
 	})
 
 	if err := g.Wait(); err != nil {

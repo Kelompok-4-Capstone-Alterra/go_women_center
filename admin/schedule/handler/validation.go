@@ -15,12 +15,22 @@ func isRequestValid(m interface{}) error {
 	if err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
 			field := strings.ToLower(err.Field())
-
-			switch field {
-			case "id":
-				return schedule.ErrIdFormat
-
+			
+			if err.Tag() == "required" {
+				switch field {
+				case "counselorid":
+					return schedule.ErrIdRequired
+				}
 			}
+			switch field {
+			case "counselorid":
+				return schedule.ErrIdFormat
+			case "dates":
+				return schedule.ErrDatesRequired
+			case "times":
+				return schedule.ErrTimesRequired
+			}
+
 		}
 	}
 

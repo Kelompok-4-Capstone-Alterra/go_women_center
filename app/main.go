@@ -95,6 +95,11 @@ func main() {
 	adminCounselorUsecase := CounselorAdminUsecase.NewCounselorUsecase(adminCounselorRepo, image)
 	adminCounselorHandler := CounselorAdminHandler.NewCounselorHandler(adminCounselorUsecase)
 
+	adminDateRepo := AdminDateRepo.NewMysqlDateRepository(db)
+	adminTimeRepo := AdminTimeRepo.NewMysqlTimeRepository(db)
+	adminScheduleUsecase := AdminScheduleUsecase.NewScheduleUsecase(adminCounselorRepo, adminDateRepo, adminTimeRepo, googleUUID)
+	adminScheduleHandler := AdminScheduleHandler.NewScheduleHandler(adminScheduleUsecase)
+
 	topicHandler := TopicHandler.NewTopicHandler()
 	
 
@@ -149,18 +154,13 @@ func main() {
 		restrictAdmin.GET("/counselors/:id", adminCounselorHandler.GetById)
 		restrictAdmin.PUT("/counselors/:id", adminCounselorHandler.Update)
 		restrictAdmin.DELETE("/counselors/:id", adminCounselorHandler.Delete)
-		
+
+		restrictAdmin.POST("/counselors/:id/schedules", adminScheduleHandler.Create)
+		restrictAdmin.GET("/counselors/:id/schedules", adminScheduleHandler.GetByCounselorId)
+		restrictAdmin.DELETE("/counselors/:id/schedules", adminScheduleHandler.Delete)
+		restrictAdmin.PUT("/counselors/:id/schedules", adminScheduleHandler.Update)
 	}
 
-	// testing admin schedule
-	adminDateRepo := AdminDateRepo.NewMysqlDateRepository(db)
-	adminTimeRepo := AdminTimeRepo.NewMysqlTimeRepository(db)
-	adminScheduleUsecase := AdminScheduleUsecase.NewScheduleUsecase(adminCounselorRepo, adminDateRepo, adminTimeRepo, googleUUID)
-	adminScheduleHandler := AdminScheduleHandler.NewScheduleHandler(adminScheduleUsecase)
-
-	e.POST("/admin/counselors/:id/schedules", adminScheduleHandler.Create)
-	e.GET("/admin/counselors/:id/schedules", adminScheduleHandler.GetByCounselorId)
-	e.DELETE("/admin/counselors/:id/schedules", adminScheduleHandler.Delete)
 
 	// ssl
 	// e.Logger.Fatal(e.StartTLS(":8080", "./ssl/certificate.crt", "./ssl/private.key"))

@@ -73,6 +73,33 @@ func (h *scheduleHandler) Create(c echo.Context) error {
 	return c.JSON(http.StatusOK, helper.ResponseData("success create schedule", http.StatusOK, nil))
 }
 
+func(h *scheduleHandler) Update(c echo.Context) error {
+
+	req := schedule.UpdateRequest{}
+
+	c.Bind(&req)
+	
+	if err := isRequestValid(req); err != nil {
+		return c.JSON(http.StatusBadRequest,
+			helper.ResponseData(err.Error(), http.StatusBadRequest, nil),
+		)
+	}
+
+	err := h.Usecase.Update(req)
+
+	if err != nil {
+		status := http.StatusInternalServerError
+		if err == schedule.ErrCounselorNotFound{
+			status = http.StatusNotFound
+		}
+		return c.JSON(status,
+			helper.ResponseData(err.Error(), status, nil),
+		)
+	}
+
+	return c.JSON(http.StatusOK, helper.ResponseData("success update schedule", http.StatusOK, nil))
+}
+
 func(h *scheduleHandler) Delete(c echo.Context) error {
 
 	var req schedule.CounselorIdRequest
