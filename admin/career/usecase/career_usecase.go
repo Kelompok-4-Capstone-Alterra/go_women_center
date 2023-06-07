@@ -14,7 +14,6 @@ type CareerUsecase interface {
 	GetAll(search string, offset, limit int) ([]career.GetAllResponse, int, error)
 	GetTotalPages(limit int) (int, error)
 	GetById(id string) (career.GetByResponse, error)
-	// GetBySearch(search string) ([]career.GetAllResponse, error)
 	Create(inputDetail career.CreateRequest, inputImage *multipart.FileHeader) error
 	Update(inputDetail career.UpdateRequest, inputImage *multipart.FileHeader) error
 	Delete(id string) error
