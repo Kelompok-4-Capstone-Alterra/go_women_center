@@ -1,1 +1,6 @@
 .env
+db/backup
+ssl
+dev.env
+dev.Dockerfile
+docker-compose.dev.yml

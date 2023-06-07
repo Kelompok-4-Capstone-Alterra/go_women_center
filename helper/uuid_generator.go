@@ -8,13 +8,13 @@ type UuidGenerator interface {
 	GenerateUUID() (string, error)
 }
 
-type googleUUID struct {}
+type googleUUID struct{}
 
 func NewGoogleUUID() googleUUID {
 	return googleUUID{}
 }
 
-func (g googleUUID) GenerateUUID() (string, error) {
+func(g googleUUID) GenerateUUID() (string, error) {
 	uuid, err := uuid.NewUUID()
 	if err != nil {
 		return "", err

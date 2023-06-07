@@ -10,7 +10,7 @@ type response struct {
 	Data interface{}  `json:"data"`
 }
 
-func ResponseData(status int, message string, data interface{}) response {
+func ResponseData(message string, status int, data interface{}) response {
 	return response{
 		Meta: responseMeta{
 			Message: message,

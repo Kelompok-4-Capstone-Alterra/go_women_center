@@ -31,15 +31,16 @@ func NewForumHandler(ForumU usecase.ForumUsecaseInterface) ForumHandlerInterface
 }
 
 func (fh ForumHandler) GetAll(c echo.Context) error {
+	var user = c.Get("user").(*helper.JwtCustomUserClaims)
 	getCreated := c.QueryParam("created")
 	getTopic := c.QueryParam("topic")
 	getPopular := c.QueryParam("popular")
 
-	forums, err := fh.ForumU.GetAll(getTopic, getPopular, getCreated)
+	forums, err := fh.ForumU.GetAll(user.ID, getTopic, getPopular, getCreated)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, helper.ResponseData(http.StatusBadRequest, err.Error(), nil))
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
 	}
-	return c.JSON(http.StatusOK, helper.ResponseData(http.StatusOK, "Success to get all forums data", forums))
+	return c.JSON(http.StatusOK, helper.ResponseData("Success to get all forums data", http.StatusOK, forums))
 }
 
 func (fh ForumHandler) GetByCategory(c echo.Context) error {
@@ -47,9 +48,9 @@ func (fh ForumHandler) GetByCategory(c echo.Context) error {
 	forums, err := fh.ForumU.GetByCategory(id_category)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, helper.ResponseData(http.StatusBadRequest, err.Error(), nil))
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
 	}
-	return c.JSON(http.StatusOK, helper.ResponseData(http.StatusOK, "Success to get all forums data by category", forums))
+	return c.JSON(http.StatusOK, helper.ResponseData("Success to get all forums data by category", http.StatusOK, forums))
 }
 
 func (fh ForumHandler) GetByMyForum(c echo.Context) error {
@@ -57,9 +58,9 @@ func (fh ForumHandler) GetByMyForum(c echo.Context) error {
 	forums, err := fh.ForumU.GetByMyForum(id_user)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, helper.ResponseData(http.StatusBadRequest, err.Error(), nil))
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
 	}
-	return c.JSON(http.StatusOK, helper.ResponseData(http.StatusOK, "Success to get all forums data by user", forums))
+	return c.JSON(http.StatusOK, helper.ResponseData("Success to get all forums data by user", http.StatusOK, forums))
 }
 
 func (fh ForumHandler) GetById(c echo.Context) error {
@@ -67,9 +68,9 @@ func (fh ForumHandler) GetById(c echo.Context) error {
 	forum, err := fh.ForumU.GetById(id)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, helper.ResponseData(http.StatusBadRequest, err.Error(), nil))
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
 	}
-	return c.JSON(http.StatusOK, helper.ResponseData(http.StatusOK, "Success to get detail forum data", forum))
+	return c.JSON(http.StatusOK, helper.ResponseData("Success to get detail forum data", http.StatusOK, forum))
 }
 
 func (fh ForumHandler) Create(c echo.Context) error {
@@ -82,9 +83,9 @@ func (fh ForumHandler) Create(c echo.Context) error {
 	err := fh.ForumU.Create(&forum)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, helper.ResponseData(http.StatusBadRequest, err.Error(), nil))
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
 	}
-	return c.JSON(http.StatusOK, helper.ResponseData(http.StatusOK, "Successfully created forum data", nil))
+	return c.JSON(http.StatusOK, helper.ResponseData("Successfully created forum data", http.StatusOK, nil))
 }
 
 func (fh ForumHandler) Update(c echo.Context) error {
@@ -94,9 +95,9 @@ func (fh ForumHandler) Update(c echo.Context) error {
 	err := fh.ForumU.Update(id, &forum)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, helper.ResponseData(http.StatusBadRequest, "Failed update forums", nil))
+		return c.JSON(http.StatusBadRequest, helper.ResponseData("Failed update forums", http.StatusBadRequest, nil))
 	}
-	return c.JSON(http.StatusOK, helper.ResponseData(http.StatusOK, "Successfully updated forum data", nil))
+	return c.JSON(http.StatusOK, helper.ResponseData("Successfully updated forum data", http.StatusOK, nil))
 }
 
 func (fh ForumHandler) Delete(c echo.Context) error {
@@ -104,7 +105,7 @@ func (fh ForumHandler) Delete(c echo.Context) error {
 	err := fh.ForumU.Delete(id)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, helper.ResponseData(http.StatusBadRequest, "Failed get all forums", nil))
+		return c.JSON(http.StatusBadRequest, helper.ResponseData("Failed get all forums", http.StatusBadRequest, nil))
 	}
-	return c.JSON(http.StatusOK, helper.ResponseData(http.StatusOK, "Successfully deleted forum data", nil))
+	return c.JSON(http.StatusOK, helper.ResponseData("Successfully deleted forum data", http.StatusOK, nil))
 }

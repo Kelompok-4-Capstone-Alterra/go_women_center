@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"fmt"
 	"strconv"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
@@ -10,9 +9,9 @@ import (
 )
 
 type ForumRepository interface {
-	GetAll(topic string) ([]response.ResponseForum, error)
-	GetAllByPopular(topic, popular string) ([]response.ResponseForum, error)
-	GetAllByCreated(topic, created string) ([]response.ResponseForum, error)
+	GetAll(id, topic string) ([]response.ResponseForum, error)
+	GetAllByPopular(id, topic, popular string) ([]response.ResponseForum, error)
+	GetAllByCreated(id, topic, created string) ([]response.ResponseForum, error)
 	GetByCategory(category_id string) ([]response.ResponseForum, error)
 	GetByMyForum(id_user string) ([]response.ResponseForum, error)
 	GetById(id string) (*response.ResponseForumDetail, error)
@@ -29,7 +28,7 @@ func NewMysqlForumRepository(db *gorm.DB) ForumRepository {
 	return &mysqlForumRepository{DB: db}
 }
 
-func (fr mysqlForumRepository) GetAll(topic string) ([]response.ResponseForum, error) {
+func (fr mysqlForumRepository) GetAll(id, topic string) ([]response.ResponseForum, error) {
 	var response []response.ResponseForum
 	err := fr.DB.Table("forums").
 		Select("forums.id, forums.user_id, forums.category_id, forums.link, forums.topic, COUNT(user_forums.id) AS member, forums.created_at, forums.updated_at,forums.deleted_at").
@@ -54,7 +53,7 @@ func (fr mysqlForumRepository) GetAll(topic string) ([]response.ResponseForum, e
 	return response, nil
 }
 
-func (fr mysqlForumRepository) GetAllByPopular(topic, popular string) ([]response.ResponseForum, error) {
+func (fr mysqlForumRepository) GetAllByPopular(id, topic, popular string) ([]response.ResponseForum, error) {
 	var response []response.ResponseForum
 	err := fr.DB.Table("forums").
 		Select("forums.id, forums.user_id, forums.category_id, forums.link, forums.topic, COUNT(user_forums.id) AS member, forums.created_at, forums.updated_at,forums.deleted_at").
@@ -79,8 +78,7 @@ func (fr mysqlForumRepository) GetAllByPopular(topic, popular string) ([]respons
 	return response, nil
 }
 
-func (fr mysqlForumRepository) GetAllByCreated(topic, created string) ([]response.ResponseForum, error) {
-	fmt.Println("GetAllByCreated :", created)
+func (fr mysqlForumRepository) GetAllByCreated(id, topic, created string) ([]response.ResponseForum, error) {
 	var response []response.ResponseForum
 	err := fr.DB.Table("forums").
 		Select("forums.id, forums.user_id, forums.category_id, forums.link, forums.topic, COUNT(user_forums.id) AS member, forums.created_at, forums.updated_at,forums.deleted_at").
