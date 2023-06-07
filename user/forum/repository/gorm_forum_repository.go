@@ -68,17 +68,27 @@ func (fr mysqlForumRepository) GetAll(id, topic, categories, myforum string) ([]
 }
 
 func (fr mysqlForumRepository) GetAllByPopular(id_user, topic, popular, categories, myforum string) ([]response.ResponseForum, error) {
-	var clause string
+	var logicOperationCategory string
+	var logicOperationUser string
+
 	if categories == "" {
-		clause = "!="
+		logicOperationCategory = "!="
 	} else {
-		clause = "="
+		logicOperationCategory = "="
 	}
+
+	if myforum == "" {
+		logicOperationUser = "!="
+	} else {
+		logicOperationUser = "="
+	}
+
 	var response []response.ResponseForum
 	err := fr.DB.Table("forums").
 		Select("forums.id, forums.user_id, forums.category_id, forums.link, forums.topic, COUNT(user_forums.id) AS member, forums.created_at, forums.updated_at,forums.deleted_at").
-		Joins("LEFT JOIN user_forums ON forums.id = user_forums.forum_id").Preload("UserForums").Where("category_id "+clause+" ? AND topic LIKE ?", categories, "%"+topic+"%").
-		Group("forums.id").Order("member " + popular).
+		Joins("LEFT JOIN user_forums ON forums.id = user_forums.forum_id").Preload("UserForums").Where("category_id "+logicOperationCategory+" ? AND topic LIKE ?", categories, "%"+topic+"%").
+		Group("forums.id").Having("forums.user_id "+logicOperationUser+" ?", myforum).
+		Order("member " + popular).
 		Find(&response).Error
 
 	for i := 0; i < len(response); i++ {
@@ -98,18 +108,27 @@ func (fr mysqlForumRepository) GetAllByPopular(id_user, topic, popular, categori
 }
 
 func (fr mysqlForumRepository) GetAllByCreated(id_user, topic, created, categories, myforum string) ([]response.ResponseForum, error) {
-	var clause string
+	var logicOperationCategory string
+	var logicOperationUser string
+
 	if categories == "" {
-		clause = "!="
+		logicOperationCategory = "!="
 	} else {
-		clause = "="
+		logicOperationCategory = "="
+	}
+
+	if myforum == "" {
+		logicOperationUser = "!="
+	} else {
+		logicOperationUser = "="
 	}
 
 	var response []response.ResponseForum
 	err := fr.DB.Table("forums").
 		Select("forums.id, forums.user_id, forums.category_id, forums.link, forums.topic, COUNT(user_forums.id) AS member, forums.created_at, forums.updated_at,forums.deleted_at").
-		Joins("LEFT JOIN user_forums ON forums.id = user_forums.forum_id").Preload("UserForums").Where("category_id "+clause+" ? AND topic LIKE ?", categories, "%"+topic+"%").
-		Group("forums.id").Order("forums.created_at " + created).
+		Joins("LEFT JOIN user_forums ON forums.id = user_forums.forum_id").Preload("UserForums").Where("category_id "+logicOperationCategory+" ? AND topic LIKE ?", categories, "%"+topic+"%").
+		Group("forums.id").Having("forums.user_id "+logicOperationUser+" ?", myforum).
+		Order("forums.created_at " + created).
 		Find(&response).Error
 
 	for i := 0; i < len(response); i++ {
