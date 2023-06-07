@@ -36,8 +36,9 @@ func (fh ForumHandler) GetAll(c echo.Context) error {
 	getTopic := c.QueryParam("topic")
 	getPopular := c.QueryParam("popular")
 	getCategories := c.QueryParam("categories")
+	getMyForum := c.QueryParam("myforum")
 
-	forums, err := fh.ForumU.GetAll(user.ID, getTopic, getPopular, getCreated, getCategories)
+	forums, err := fh.ForumU.GetAll(user.ID, getTopic, getPopular, getCreated, getCategories, getMyForum)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
 	}

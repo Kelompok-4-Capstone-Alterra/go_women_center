@@ -1,15 +1,17 @@
 package repository
 
 import (
+	"fmt"
+
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	response "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum"
 	"gorm.io/gorm"
 )
 
 type ForumRepository interface {
-	GetAll(id_user, topic string) ([]response.ResponseForum, error)
-	GetAllByPopular(id_user, topic, popular string) ([]response.ResponseForum, error)
-	GetAllByCreated(id_user, topic, created string) ([]response.ResponseForum, error)
+	GetAll(id_user, topic, categories, myforum string) ([]response.ResponseForum, error)
+	GetAllByPopular(id_user, topic, popular, categories, myforum string) ([]response.ResponseForum, error)
+	GetAllByCreated(id_user, topic, created, categories, myforum string) ([]response.ResponseForum, error)
 	GetByCategory(id_user, category_id, topic string) ([]response.ResponseForum, error)
 	GetByMyForum(id_user string) ([]response.ResponseForum, error)
 	GetById(id string) (*response.ResponseForumDetail, error)
@@ -26,12 +28,27 @@ func NewMysqlForumRepository(db *gorm.DB) ForumRepository {
 	return &mysqlForumRepository{DB: db}
 }
 
-func (fr mysqlForumRepository) GetAll(id, topic string) ([]response.ResponseForum, error) {
+func (fr mysqlForumRepository) GetAll(id, topic, categories, myforum string) ([]response.ResponseForum, error) {
+	var logicOperationCategory string
+	var logicOperationUser string
+
+	if categories == "" {
+		logicOperationCategory = "!="
+	} else {
+		logicOperationCategory = "="
+	}
+
+	if myforum == "" {
+		logicOperationUser = "!="
+	} else {
+		logicOperationUser = "="
+	}
+
 	var response []response.ResponseForum
 	err := fr.DB.Table("forums").
 		Select("forums.id, forums.user_id, forums.category_id, forums.link, forums.topic, COUNT(user_forums.id) AS member, forums.created_at, forums.updated_at,forums.deleted_at").
-		Joins("LEFT JOIN user_forums ON forums.id = user_forums.forum_id").Preload("UserForums").Where("topic LIKE ?", "%"+topic+"%").
-		Group("forums.id").
+		Joins("LEFT JOIN user_forums ON forums.id = user_forums.forum_id").Preload("UserForums").Where("category_id "+logicOperationCategory+" ? AND topic LIKE ?", categories, "%"+topic+"%").
+		Group("forums.id").Having("forums.user_id "+logicOperationUser+" ?", myforum).
 		Find(&response).Error
 
 	for i := 0; i < len(response); i++ {
@@ -50,11 +67,17 @@ func (fr mysqlForumRepository) GetAll(id, topic string) ([]response.ResponseForu
 	return response, nil
 }
 
-func (fr mysqlForumRepository) GetAllByPopular(id_user, topic, popular string) ([]response.ResponseForum, error) {
+func (fr mysqlForumRepository) GetAllByPopular(id_user, topic, popular, categories, myforum string) ([]response.ResponseForum, error) {
+	var clause string
+	if categories == "" {
+		clause = "!="
+	} else {
+		clause = "="
+	}
 	var response []response.ResponseForum
 	err := fr.DB.Table("forums").
 		Select("forums.id, forums.user_id, forums.category_id, forums.link, forums.topic, COUNT(user_forums.id) AS member, forums.created_at, forums.updated_at,forums.deleted_at").
-		Joins("LEFT JOIN user_forums ON forums.id = user_forums.forum_id").Preload("UserForums").Where("topic LIKE ?", "%"+topic+"%").
+		Joins("LEFT JOIN user_forums ON forums.id = user_forums.forum_id").Preload("UserForums").Where("category_id "+clause+" ? AND topic LIKE ?", categories, "%"+topic+"%").
 		Group("forums.id").Order("member " + popular).
 		Find(&response).Error
 
@@ -74,11 +97,18 @@ func (fr mysqlForumRepository) GetAllByPopular(id_user, topic, popular string) (
 	return response, nil
 }
 
-func (fr mysqlForumRepository) GetAllByCreated(id_user, topic, created string) ([]response.ResponseForum, error) {
+func (fr mysqlForumRepository) GetAllByCreated(id_user, topic, created, categories, myforum string) ([]response.ResponseForum, error) {
+	var clause string
+	if categories == "" {
+		clause = "!="
+	} else {
+		clause = "="
+	}
+
 	var response []response.ResponseForum
 	err := fr.DB.Table("forums").
 		Select("forums.id, forums.user_id, forums.category_id, forums.link, forums.topic, COUNT(user_forums.id) AS member, forums.created_at, forums.updated_at,forums.deleted_at").
-		Joins("LEFT JOIN user_forums ON forums.id = user_forums.forum_id").Preload("UserForums").Where("topic LIKE ?", "%"+topic+"%").
+		Joins("LEFT JOIN user_forums ON forums.id = user_forums.forum_id").Preload("UserForums").Where("category_id "+clause+" ? AND topic LIKE ?", categories, "%"+topic+"%").
 		Group("forums.id").Order("forums.created_at " + created).
 		Find(&response).Error
 
@@ -127,25 +157,23 @@ func (fr mysqlForumRepository) GetByMyForum(id_user string) ([]response.Response
 	err := fr.DB.Table("forums").
 		Select("forums.id, forums.user_id, forums.category_id, forums.link, forums.topic, COUNT(user_forums.id) AS member, forums.created_at, forums.updated_at").
 		Joins("LEFT JOIN user_forums ON forums.id = user_forums.forum_id").Preload("UserForums").
-		Group("forums.id").
+		Group("forums.id").Having("forums.user_id = ?", id_user).
 		Find(&forum).Error
 
-	var myForum []response.ResponseForum
 	for i := 0; i < len(forum); i++ {
 		for j := 0; j < len(forum[i].UserForums); j++ {
 			if forum[i].UserForums[j].UserId == id_user {
 				forum[i].Status = true
-				myForum = append(myForum, forum[i])
-				myForum[len(myForum)-1].UserForums = nil
 				break
 			}
 		}
+		forum[i].UserForums = nil
 	}
 
 	if err != nil {
 		return nil, err
 	}
-	return myForum, nil
+	return forum, nil
 }
 
 func (fr mysqlForumRepository) GetById(id string) (*response.ResponseForumDetail, error) {
@@ -174,6 +202,7 @@ func (fr mysqlForumRepository) Update(id string, forumId *entity.Forum) error {
 	if err != nil {
 		return err
 	}
+	fmt.Println(forum)
 	return nil
 }
 

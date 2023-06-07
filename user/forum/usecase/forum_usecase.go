@@ -7,7 +7,7 @@ import (
 )
 
 type ForumUsecaseInterface interface {
-	GetAll(id_user, topic, popular, created, categories string) ([]response.ResponseForum, error)
+	GetAll(id_user, topic, popular, created, categories, getMyForum string) ([]response.ResponseForum, error)
 	GetByCategory(id_user, id_category, topic string) ([]response.ResponseForum, error)
 	GetByMyForum(id_user string) ([]response.ResponseForum, error)
 	GetById(id string) (*response.ResponseForumDetail, error)
@@ -26,15 +26,16 @@ func NewForumUsecase(ForumR repository.ForumRepository) ForumUsecaseInterface {
 	}
 }
 
-func (fu ForumUsecase) GetAll(id, topic, popular, created, categories string) ([]response.ResponseForum, error) {
+func (fu ForumUsecase) GetAll(id_user, topic, popular, created, categories, myforum string) ([]response.ResponseForum, error) {
 	var forums []response.ResponseForum
 	var err error
+
 	if created == "asc" || created == "desc" {
-		forums, err = fu.ForumR.GetAllByCreated(id, topic, created, categories)
+		forums, err = fu.ForumR.GetAllByCreated(id_user, topic, created, categories, myforum)
 	} else if popular == "desc" {
-		forums, err = fu.ForumR.GetAllByPopular(id, topic, popular, categories)
+		forums, err = fu.ForumR.GetAllByPopular(id_user, topic, popular, categories, myforum)
 	} else {
-		forums, err = fu.ForumR.GetAll(id, topic, categories)
+		forums, err = fu.ForumR.GetAll(id_user, topic, categories, myforum)
 	}
 
 	if err != nil {
