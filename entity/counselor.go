@@ -15,6 +15,7 @@ type Counselor struct {
 	Reviews        []Review `gorm:"foreignkey:CounselorID"`
 	Dates          []Date `gorm:"foreignkey:CounselorID"`
 	Times 		   []Time `gorm:"foreignkey:CounselorID"`
+	DeletedAt 	   gorm.DeletedAt
 }
 
 func(c *Counselor) BeforeDelete(tx *gorm.DB) error {
