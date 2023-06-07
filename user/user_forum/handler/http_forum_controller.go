@@ -6,6 +6,7 @@ import (
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/user_forum/usecase"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
@@ -27,6 +28,8 @@ func (fh UserForumHandler) Create(c echo.Context) error {
 	var user = c.Get("user").(*helper.JwtCustomUserClaims)
 	var userForum entity.UserForum
 	c.Bind(&userForum)
+	uuidWithHyphen := uuid.New()
+	userForum.ID = uuidWithHyphen.String()
 	userForum.UserId = user.ID
 
 	err := fh.UserForumU.Create(&userForum)

@@ -8,9 +8,7 @@ import (
 
 type ForumUsecaseInterface interface {
 	GetAll(id_user, topic, popular, created, categories, getMyForum string) ([]response.ResponseForum, error)
-	GetByCategory(id_user, id_category, topic string) ([]response.ResponseForum, error)
-	GetByMyForum(id_user string) ([]response.ResponseForum, error)
-	GetById(id string) (*response.ResponseForumDetail, error)
+	GetById(id, user_id string) (*response.ResponseForum, error)
 	Create(forum *entity.Forum) error
 	Update(id string, forumId *entity.Forum) error
 	Delete(id string) error
@@ -44,24 +42,8 @@ func (fu ForumUsecase) GetAll(id_user, topic, popular, created, categories, myfo
 	return forums, nil
 }
 
-func (fu ForumUsecase) GetByCategory(id_user, id_category, topic string) ([]response.ResponseForum, error) {
-	forums, err := fu.ForumR.GetByCategory(id_user, id_category, topic)
-	if err != nil {
-		return nil, err
-	}
-	return forums, nil
-}
-
-func (fu ForumUsecase) GetByMyForum(id_user string) ([]response.ResponseForum, error) {
-	forums, err := fu.ForumR.GetByMyForum(id_user)
-	if err != nil {
-		return nil, err
-	}
-	return forums, nil
-}
-
-func (fu ForumUsecase) GetById(id string) (*response.ResponseForumDetail, error) {
-	forum, err := fu.ForumR.GetById(id)
+func (fu ForumUsecase) GetById(id, user_id string) (*response.ResponseForum, error) {
+	forum, err := fu.ForumR.GetById(id, user_id)
 
 	if err != nil {
 		return nil, err

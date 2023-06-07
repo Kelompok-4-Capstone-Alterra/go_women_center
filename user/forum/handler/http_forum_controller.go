@@ -12,8 +12,6 @@ import (
 
 type ForumHandlerInterface interface {
 	GetAll(c echo.Context) error
-	GetByCategory(c echo.Context) error
-	GetByMyForum(c echo.Context) error
 	GetById(c echo.Context) error
 	Create(c echo.Context) error
 	Update(c echo.Context) error
@@ -45,33 +43,10 @@ func (fh ForumHandler) GetAll(c echo.Context) error {
 	return c.JSON(http.StatusOK, helper.ResponseData("Success to get all forums data", http.StatusOK, forums))
 }
 
-func (fh ForumHandler) GetByCategory(c echo.Context) error {
-	// getCreated := c.QueryParam("created")
-	getTopic := c.QueryParam("topic")
-	// getPopular := c.QueryParam("popular")
-	var user = c.Get("user").(*helper.JwtCustomUserClaims)
-	id_category := c.Param("id")
-	forums, err := fh.ForumU.GetByCategory(user.ID, id_category, getTopic)
-
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
-	}
-	return c.JSON(http.StatusOK, helper.ResponseData("Success to get all forums data by category", http.StatusOK, forums))
-}
-
-func (fh ForumHandler) GetByMyForum(c echo.Context) error {
-	var user = c.Get("user").(*helper.JwtCustomUserClaims)
-	forums, err := fh.ForumU.GetByMyForum(user.ID)
-
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
-	}
-	return c.JSON(http.StatusOK, helper.ResponseData("Success to get all forums data by user", http.StatusOK, forums))
-}
-
 func (fh ForumHandler) GetById(c echo.Context) error {
+	var user = c.Get("user").(*helper.JwtCustomUserClaims)
 	id := c.Param("id")
-	forum, err := fh.ForumU.GetById(id)
+	forum, err := fh.ForumU.GetById(id, user.ID)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))

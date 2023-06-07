@@ -153,8 +153,6 @@ func main() {
 		restrictUsers.GET("/counselors/:id/reviews", userCounselorHandler.GetAllReview)
 
 		restrictUsers.GET("/forums", forumH.GetAll)
-		restrictUsers.GET("/forums/categories/:id", forumH.GetByCategory)
-		restrictUsers.GET("/forums/my", forumH.GetByMyForum)
 		restrictUsers.GET("/forums/:id", forumH.GetById)
 		restrictUsers.POST("/forums", forumH.Create)
 		restrictUsers.PUT("/forums/:id", forumH.Update)
