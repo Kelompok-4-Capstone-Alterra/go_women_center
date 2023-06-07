@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
@@ -35,12 +36,20 @@ func (fh ForumHandler) GetAll(c echo.Context) error {
 	getPopular := c.QueryParam("popular")
 	getCategories := c.QueryParam("categories")
 	getMyForum := c.QueryParam("myforum")
+	page, _ := strconv.Atoi(c.QueryParam("page"))
+	limit, _ := strconv.Atoi(c.QueryParam("limit"))
 
-	forums, err := fh.ForumU.GetAll(user.ID, getTopic, getPopular, getCreated, getCategories, getMyForum)
+	page, offset, limit := helper.GetPaginateData(page, limit)
+
+	forums, totalPages, err := fh.ForumU.GetAll(user.ID, getTopic, getPopular, getCreated, getCategories, getMyForum, offset, limit)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
 	}
-	return c.JSON(http.StatusOK, helper.ResponseData("Success to get all forums data", http.StatusOK, forums))
+	return c.JSON(http.StatusOK, helper.ResponseData("Success to get all forums data", http.StatusOK, echo.Map{
+		"forums":        forums,
+		"current_pages": page,
+		"total_pages":   totalPages,
+	}))
 }
 
 func (fh ForumHandler) GetById(c echo.Context) error {

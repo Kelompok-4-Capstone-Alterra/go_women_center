@@ -2,12 +2,13 @@ package usecase
 
 import (
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
 	response "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum/repository"
 )
 
 type ForumUsecaseInterface interface {
-	GetAll(id_user, topic, popular, created, categories, getMyForum string) ([]response.ResponseForum, error)
+	GetAll(id_user, topic, popular, created, categories, getMyForum string, offset, limit int) ([]response.ResponseForum, int, error)
 	GetById(id, user_id string) (*response.ResponseForum, error)
 	Create(forum *entity.Forum) error
 	Update(id string, forumId *entity.Forum) error
@@ -24,22 +25,26 @@ func NewForumUsecase(ForumR repository.ForumRepository) ForumUsecaseInterface {
 	}
 }
 
-func (fu ForumUsecase) GetAll(id_user, topic, popular, created, categories, myforum string) ([]response.ResponseForum, error) {
+func (fu ForumUsecase) GetAll(id_user, topic, popular, created, categories, myforum string, offset, limit int) ([]response.ResponseForum, int, error) {
 	var forums []response.ResponseForum
 	var err error
+	var totalData int64
 
 	if created == "asc" || created == "desc" {
-		forums, err = fu.ForumR.GetAllByCreated(id_user, topic, created, categories, myforum)
-	} else if popular == "desc" {
-		forums, err = fu.ForumR.GetAllByPopular(id_user, topic, popular, categories, myforum)
+		forums, totalData, err = fu.ForumR.GetAllByCreated(id_user, topic, created, categories, myforum, offset, limit)
+	} else if popular == "asc" || popular == "desc" {
+		forums, totalData, err = fu.ForumR.GetAllByPopular(id_user, topic, popular, categories, myforum, offset, limit)
 	} else {
-		forums, err = fu.ForumR.GetAll(id_user, topic, categories, myforum)
+		forums, totalData, err = fu.ForumR.GetAll(id_user, topic, categories, myforum, offset, limit)
 	}
 
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	return forums, nil
+
+	totalPages := helper.GetTotalPages(int(totalData), limit)
+
+	return forums, totalPages, nil
 }
 
 func (fu ForumUsecase) GetById(id, user_id string) (*response.ResponseForum, error) {
