@@ -36,6 +36,15 @@ import (
 	CareerUserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/career/handler"
 	CareerUserRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/career/repository"
 	CareerUserUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/career/usecase"
+
+	ArticleAdminHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/article/handler"
+	ArticleAdminRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/article/repository"
+	ArticleAdminUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/article/usecase"
+
+	ArticleUserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/article/handler"
+	ArticleUserRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/article/repository"
+	ArticleUserUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/article/usecase"
+	CommentUserRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/comment/repository"
 )
 
 func main() {
@@ -71,7 +80,7 @@ func main() {
 
 	db := dbconf.InitDB()
 	sslconf.InitSSL()
-	
+
 	// helper
 	jwtConf := helper.NewAuthJWT(os.Getenv("JWT_SECRET_USER"), os.Getenv("JWT_SECRET_ADMIN"))
 	encryptor := helper.NewEncryptor()
@@ -95,6 +104,11 @@ func main() {
 	userCareerUsecase := CareerUserUsecase.NewCareerUsecase(userCareerRepo)
 	userCareerHandler := CareerUserHandler.NewCareerHandler(userCareerUsecase)
 
+	userArticleRepo := ArticleUserRepository.NewMysqlArticleRepository(db)
+	userCommentRepo := CommentUserRepository.NewMysqlArticleRepository(db)
+	userArticleUsecase := ArticleUserUsecase.NewArticleUsecase(userArticleRepo, userCommentRepo, userAuthRepo)
+	userArticleHandler := ArticleUserHandler.NewArticleHandler(userArticleUsecase)
+
 	adminAuthRepo := AdminAuthRepo.NewAdminRepo(db)
 	adminAuthUsecase := AdminAuthUsecase.NewAuthUsecase(adminAuthRepo, encryptor)
 	adminAuthHandler := AdminAuthHandler.NewAuthHandler(adminAuthUsecase, jwtConf)
@@ -102,26 +116,28 @@ func main() {
 	adminCounselorRepo := CounselorAdminRepository.NewMysqlCounselorRepository(db)
 	adminCounselorUsecase := CounselorAdminUsecase.NewCounselorUsecase(adminCounselorRepo, image)
 	adminCounselorHandler := CounselorAdminHandler.NewCounselorHandler(adminCounselorUsecase)
-	
+
 	adminCareerRepo := CareerAdminRepository.NewMysqlCareerRepository(db)
 	adminCareerUsecase := CareerAdminUsecase.NewCareerUsecase(adminCareerRepo, image)
 	adminCareerHandler := CareerAdminHandler.NewCareerHandler(adminCareerUsecase)
 
+	adminArticleRepo := ArticleAdminRepository.NewMysqlArticleRepository(db)
+	adminArticleUsecase := ArticleAdminUsecase.NewArticleUsecase(adminArticleRepo, image)
+	adminArticleHandler := ArticleAdminHandler.NewArticleHandler(adminArticleUsecase)
+
 	topicHandler := TopicHandler.NewTopicHandler()
-	
 
 	e := echo.New()
 
-	// middleware 
+	// middleware
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORS())
-	
+
 	e.GET("/healthcheck", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, "hello")
 	})
-	
-	
+
 	e.GET("/topics", topicHandler.GetAll)
 	e.POST("/verify", userAuthHandler.VerifyEmailHandler)
 	e.POST("/register", userAuthHandler.RegisterHandler)
@@ -134,10 +150,11 @@ func main() {
 	{
 		users.GET("/counselors", userCounselorHandler.GetAll)
 		users.GET("/careers", userCareerHandler.GetAll)
+		users.GET("/articles", userArticleHandler.GetAll)
 	}
 
 	restrictUsers := e.Group("/users", userAuthMidd.JWTUser())
-	{	
+	{
 		restrictUsers.GET("/profile", func(c echo.Context) error {
 			user := c.Get("user").(*helper.JwtCustomUserClaims)
 			return c.JSON(http.StatusOK, user)
@@ -148,8 +165,12 @@ func main() {
 		restrictUsers.GET("/counselors/:id/reviews", userCounselorHandler.GetAllReview)
 
 		restrictUsers.GET("/careers/:id", userCareerHandler.GetById)
+
+		restrictUsers.GET("/articles/:id", userArticleHandler.GetById)
+		restrictUsers.POST("/articles/:id/comments", userArticleHandler.CreateComment)
+		restrictUsers.GET("/articles/:id/comments", userArticleHandler.GetAllComment)
+		restrictUsers.DELETE("/articles/:id/comments", userArticleHandler.DeleteComment)
 	}
-	
 
 	restrictAdmin := e.Group("/admin", adminAuthMidd.JWTAdmin())
 
@@ -164,16 +185,23 @@ func main() {
 		restrictAdmin.GET("/counselors/:id", adminCounselorHandler.GetById)
 		restrictAdmin.PUT("/counselors/:id", adminCounselorHandler.Update)
 		restrictAdmin.DELETE("/counselors/:id", adminCounselorHandler.Delete)
-		
+
 		restrictAdmin.GET("/careers", adminCareerHandler.GetAll)
 		restrictAdmin.POST("/careers", adminCareerHandler.Create)
 		restrictAdmin.GET("/careers/:id", adminCareerHandler.GetById)
 		restrictAdmin.PUT("/careers/:id", adminCareerHandler.Update)
 		restrictAdmin.DELETE("/careers/:id", adminCareerHandler.Delete)
+
+		restrictAdmin.GET("/articles", adminArticleHandler.GetAll)
+		restrictAdmin.POST("/articles", adminArticleHandler.Create)
+		restrictAdmin.GET("/articles/:id", adminArticleHandler.GetById)
+		restrictAdmin.PUT("/articles/:id", adminArticleHandler.Update)
+		restrictAdmin.DELETE("/articles/:id", adminArticleHandler.Delete)
+
 	}
 
 	// ssl
-	// e.Logger.Fatal(e.StartTLS(":8080", "./ssl/certificate.crt", "./ssl/private.key"))
+	e.Logger.Fatal(e.StartTLS(":8080", "./ssl/certificate.crt", "./ssl/private.key"))
 
-	e.Logger.Fatal(e.Start(":8080"))
+	// e.Logger.Fatal(e.Start(":8080"))
 }
