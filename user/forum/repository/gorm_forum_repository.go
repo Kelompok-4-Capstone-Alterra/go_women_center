@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"errors"
+
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	response "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum"
 	"gorm.io/gorm"
@@ -12,8 +14,8 @@ type ForumRepository interface {
 	GetAllByCreated(id_user, topic, created, categories, myforum string, offset, limit int) ([]response.ResponseForum, int64, error)
 	GetById(id, user_id string) (*response.ResponseForum, error)
 	Create(forum *entity.Forum) error
-	Update(id string, forumId *entity.Forum) error
-	Delete(id string) error
+	Update(id, user_id string, forumId *entity.Forum) error
+	Delete(id, user_id string) error
 }
 
 type mysqlForumRepository struct {
@@ -182,26 +184,32 @@ func (fr mysqlForumRepository) Create(forum *entity.Forum) error {
 	return nil
 }
 
-func (fr mysqlForumRepository) Update(id string, forumId *entity.Forum) error {
+func (fr mysqlForumRepository) Update(id, user_id string, forumId *entity.Forum) error {
 	var forum entity.Forum
-	err := fr.DB.Model(&forum).Where("id = ?", id).Updates(&forumId).Error
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (fr mysqlForumRepository) Delete(id string) error {
 	err := fr.DB.Where("id = ?", id).Take(&entity.Forum{}).Error
 
 	if err != nil {
 		return err
 	}
 
-	err2 := fr.DB.Delete(&entity.Forum{}, &id).Error
+	err2 := fr.DB.Model(&forum).Where("id = ? AND user_id = ? ", id, user_id).Updates(&forumId).RowsAffected
+	if err2 != 1 {
+		return errors.New("errors")
+	}
+
+	return nil
+}
+
+func (fr mysqlForumRepository) Delete(id, user_id string) error {
+	err := fr.DB.Where("id = ?", id).Take(&entity.Forum{}).Error
+
 	if err != nil {
-		return err2
+		return err
+	}
+
+	err2 := fr.DB.Where("id = ? AND user_id = ? ", id, user_id).Delete(&entity.Forum{}).RowsAffected
+	if err2 != 1 {
+		return errors.New("errors")
 	}
 	return nil
 }

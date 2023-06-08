@@ -81,10 +81,11 @@ func (fh ForumHandler) Create(c echo.Context) error {
 }
 
 func (fh ForumHandler) Update(c echo.Context) error {
+	var user = c.Get("user").(*helper.JwtCustomUserClaims)
 	forum := entity.Forum{}
 	id := c.Param("id")
 	c.Bind(&forum)
-	err := fh.ForumU.Update(id, &forum)
+	err := fh.ForumU.Update(id, user.ID, &forum)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData("Failed to change forum data", http.StatusBadRequest, nil))
@@ -93,8 +94,9 @@ func (fh ForumHandler) Update(c echo.Context) error {
 }
 
 func (fh ForumHandler) Delete(c echo.Context) error {
+	var user = c.Get("user").(*helper.JwtCustomUserClaims)
 	id := c.Param("id")
-	err := fh.ForumU.Delete(id)
+	err := fh.ForumU.Delete(id, user.ID)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData("Failed to delete forum data", http.StatusBadRequest, nil))

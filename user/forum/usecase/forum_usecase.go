@@ -11,8 +11,8 @@ type ForumUsecaseInterface interface {
 	GetAll(id_user, topic, popular, created, categories, getMyForum string, offset, limit int) ([]response.ResponseForum, int, error)
 	GetById(id, user_id string) (*response.ResponseForum, error)
 	Create(forum *entity.Forum) error
-	Update(id string, forumId *entity.Forum) error
-	Delete(id string) error
+	Update(id, user_id string, forumId *entity.Forum) error
+	Delete(id, user_id string) error
 }
 
 type ForumUsecase struct {
@@ -64,8 +64,8 @@ func (fu ForumUsecase) Create(forum *entity.Forum) error {
 	return nil
 }
 
-func (fu ForumUsecase) Update(id string, forumId *entity.Forum) error {
-	err := fu.ForumR.Update(id, forumId)
+func (fu ForumUsecase) Update(id, user_id string, forumId *entity.Forum) error {
+	err := fu.ForumR.Update(id, user_id, forumId)
 
 	if err != nil {
 		return err
@@ -73,8 +73,8 @@ func (fu ForumUsecase) Update(id string, forumId *entity.Forum) error {
 	return nil
 }
 
-func (fu ForumUsecase) Delete(id string) error {
-	err := fu.ForumR.Delete(id)
+func (fu ForumUsecase) Delete(id, user_id string) error {
+	err := fu.ForumR.Delete(id, user_id)
 
 	if err != nil {
 		return err

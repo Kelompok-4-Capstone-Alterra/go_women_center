@@ -54,10 +54,10 @@ func main() {
 		DB_Name:     os.Getenv("DB_NAME"),
 	}
 
-	sslconf := config.SSLconf{
-		SSL_CERT:        os.Getenv("SSL_CERT"),
-		SSL_PRIVATE_KEY: os.Getenv("SSL_PRIVATE_KEY"),
-	}
+	// sslconf := config.SSLconf{
+	// 	SSL_CERT:        os.Getenv("SSL_CERT"),
+	// 	SSL_PRIVATE_KEY: os.Getenv("SSL_PRIVATE_KEY"),
+	// }
 
 	googleOauthConfig := &oauth2.Config{
 		RedirectURL:  "http://localhost:8080/google/callback",
@@ -76,7 +76,7 @@ func main() {
 	)
 
 	db := dbconf.InitDB()
-	sslconf.InitSSL()
+	// sslconf.InitSSL()
 
 	// helper
 	jwtConf := helper.NewAuthJWT(os.Getenv("JWT_SECRET_USER"), os.Getenv("JWT_SECRET_ADMIN"))
