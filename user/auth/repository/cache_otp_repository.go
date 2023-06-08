@@ -9,8 +9,9 @@ import (
 )
 
 type Otp struct {
-	Email string `json:"email"`
-	Code  string `json:"code"`
+	Email string
+	Code  string
+	Attempt int
 }
 
 type cachedOtp struct {
@@ -93,10 +94,7 @@ func (lc *localCache) Read(email string) (Otp, error) {
 
 	co, ok := lc.codes[email]
 	if !ok {
-		return Otp{
-			Email: co.Email,
-			Code: co.Code,
-		}, auth.ErrInvalidOtp
+		return Otp{}, auth.ErrInvalidOtp
 	}
 
 	if time.Now().Unix() >= co.expireAtTimestamp {
