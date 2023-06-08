@@ -27,7 +27,7 @@ func (fh ForumHandler) Delete(c echo.Context) error {
 	err := fh.ForumU.Delete(id)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, helper.ResponseData("Failed to delete forum data", http.StatusBadRequest, nil))
+		return c.JSON(http.StatusBadRequest, helper.ResponseData("failed to delete forum data", http.StatusBadRequest, nil))
 	}
-	return c.JSON(http.StatusOK, helper.ResponseData("Successfully deleted forum data", http.StatusOK, nil))
+	return c.JSON(http.StatusOK, helper.ResponseData("successfully deleted forum data", http.StatusOK, nil))
 }
