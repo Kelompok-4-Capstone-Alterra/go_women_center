@@ -41,11 +41,15 @@ func (u *userUsecase) Register(registerRequest user.RegisterUserRequest) error {
 		return err
 	}
 
+	if storedOtp.Code != registerRequest.OTP {
+		return user.ErrInvalidOtp
+	}
+
+
 	uuid, err := u.UuidGenerator.GenerateUUID()
 	if err != nil {
 		return err
 	}
-
 	
 	encryptedPass, _ := u.Encryptor.HashPassword(registerRequest.Password)
 
