@@ -12,6 +12,9 @@ import (
 	CounselorAdminHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor/handler"
 	CounselorAdminRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor/repository"
 	CounselorAdminUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor/usecase"
+	ForumAdminHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/forum/handler"
+	ForumAdminRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/forum/repository"
+	ForumAdminUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/forum/usecase"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/app/config"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
 	TopicHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/topic/handler"
@@ -22,9 +25,9 @@ import (
 	CounselorUserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor/handler"
 	CounselorUserRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor/repository"
 	CounselorUserUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor/usecase"
-	ForumAdminHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum/handler"
-	ForumAdminRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum/repository"
-	ForumAdminUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum/usecase"
+	ForumUserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum/handler"
+	ForumUserRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum/repository"
+	ForumUserUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum/usecase"
 	ReviewUserRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/review/repository"
 	UserForumAdminHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/user_forum/handler"
 	UserForumAdminRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/user_forum/repository"
@@ -54,10 +57,10 @@ func main() {
 		DB_Name:     os.Getenv("DB_NAME"),
 	}
 
-	// sslconf := config.SSLconf{
-	// 	SSL_CERT:        os.Getenv("SSL_CERT"),
-	// 	SSL_PRIVATE_KEY: os.Getenv("SSL_PRIVATE_KEY"),
-	// }
+	sslconf := config.SSLconf{
+		SSL_CERT:        os.Getenv("SSL_CERT"),
+		SSL_PRIVATE_KEY: os.Getenv("SSL_PRIVATE_KEY"),
+	}
 
 	googleOauthConfig := &oauth2.Config{
 		RedirectURL:  "http://localhost:8080/google/callback",
@@ -76,7 +79,7 @@ func main() {
 	)
 
 	db := dbconf.InitDB()
-	// sslconf.InitSSL()
+	sslconf.InitSSL()
 
 	// helper
 	jwtConf := helper.NewAuthJWT(os.Getenv("JWT_SECRET_USER"), os.Getenv("JWT_SECRET_ADMIN"))
@@ -113,9 +116,13 @@ func main() {
 	adminCareerUsecase := CareerAdminUsecase.NewCareerUsecase(adminCareerRepo, image)
 	adminCareerHandler := CareerAdminHandler.NewCareerHandler(adminCareerUsecase)
 
-	forumR := ForumAdminRepository.NewMysqlForumRepository(db)
-	forumU := ForumAdminUsecase.NewForumUsecase(forumR)
-	forumH := ForumAdminHandler.NewForumHandler(forumU)
+	forumR := ForumUserRepository.NewMysqlForumRepository(db)
+	forumU := ForumUserUsecase.NewForumUsecase(forumR)
+	forumH := ForumUserHandler.NewForumHandler(forumU)
+
+	forumAdminR := ForumAdminRepository.NewMysqlForumRepository(db)
+	forumAdminU := ForumAdminUsecase.NewForumUsecase(forumAdminR)
+	forumAdminH := ForumAdminHandler.NewForumHandler(forumAdminU)
 
 	userForumR := UserForumAdminRepository.NewMysqlUserForumRepository(db)
 	userForumU := UserForumAdminUsecase.NewUserForumUsecase(userForumR)
@@ -188,10 +195,12 @@ func main() {
 		restrictAdmin.GET("/careers/:id", adminCareerHandler.GetById)
 		restrictAdmin.PUT("/careers/:id", adminCareerHandler.Update)
 		restrictAdmin.DELETE("/careers/:id", adminCareerHandler.Delete)
+
+		restrictAdmin.DELETE("/forums/:id", forumAdminH.Delete)
 	}
 
 	// ssl
-	// e.Logger.Fatal(e.StartTLS(":8080", "./ssl/certificate.crt", "./ssl/private.key"))
+	e.Logger.Fatal(e.StartTLS(":8080", "./ssl/certificate.crt", "./ssl/private.key"))
 
 	e.Logger.Fatal(e.Start(":8080"))
 }

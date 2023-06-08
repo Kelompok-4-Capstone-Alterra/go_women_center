@@ -1,6 +1,9 @@
 package usecase
 
 import (
+	"strconv"
+
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/constant"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
 	response "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum"
@@ -30,6 +33,9 @@ func (fu ForumUsecase) GetAll(id_user, topic, popular, created, categories, myfo
 	var err error
 	var totalData int64
 
+	idCategories, _ := strconv.Atoi(categories)
+	categories = constant.TOPICS[idCategories]
+
 	if created == "asc" || created == "desc" {
 		forums, totalData, err = fu.ForumR.GetAllByCreated(id_user, topic, created, categories, myforum, offset, limit)
 	} else if popular == "asc" || popular == "desc" {
@@ -57,6 +63,9 @@ func (fu ForumUsecase) GetById(id, user_id string) (*response.ResponseForum, err
 }
 
 func (fu ForumUsecase) Create(forum *entity.Forum) error {
+	topic, _ := strconv.Atoi(forum.Category)
+	forum.Category = constant.TOPICS[topic]
+
 	err := fu.ForumR.Create(forum)
 	if err != nil {
 		return err

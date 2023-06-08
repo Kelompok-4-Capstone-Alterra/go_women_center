@@ -9,7 +9,7 @@ import (
 type Forum struct {
 	ID         string         `gorm:"primarykey" json:"id"`
 	UserId     string         `json:"user_id" form:"user_id"`
-	CategoryId uint           `json:"category_id" form:"category_id"`
+	Category   string         `json:"category" form:"category"`
 	Link       string         `json:"link" form:"link"`
 	Topic      string         `json:"topic" form:"topic"`
 	Status     bool           `json:"status" gorm:"-:all"`
