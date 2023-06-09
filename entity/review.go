@@ -16,16 +16,3 @@ type Review struct {
 	UpdatedAt   time.Time
 	DeletedAt 	gorm.DeletedAt `gorm:"index"`
 }
-
-func(r *Review) AfterCreate(tx *gorm.DB) error {
-	// Update counselor rating
-	var avgRating float32
-	err := tx.Model(&Review{}).Where("counselor_id = ?", r.CounselorID).Select("AVG(rating)").Scan(&avgRating).Error
-	
-	if err != nil {
-		return err
-	}
-
-	tx.Model(&Counselor{}).Where("id = ?", r.CounselorID).Update("rating", avgRating)
-	return nil
-}

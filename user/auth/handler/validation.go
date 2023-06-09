@@ -3,7 +3,7 @@ package handler
 import (
 	"strings"
 
-	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/auth"
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth"
 	"github.com/go-playground/validator"
 )
 
@@ -25,6 +25,8 @@ func isRequestValid(m interface{}) error {
 					return auth.ErrEmailFormat
 				case "id":
 					return auth.ErrIdFormat
+				case "password":
+					return auth.ErrPasswordLength
 			}
 
 		}

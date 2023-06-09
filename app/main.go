@@ -25,6 +25,7 @@ import (
 	CounselorUserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor/handler"
 	CounselorUserRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor/repository"
 	CounselorUserUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor/usecase"
+
 	ForumUserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum/handler"
 	ForumUserRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum/repository"
 	ForumUserUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum/usecase"
@@ -32,6 +33,7 @@ import (
 	UserForumAdminHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/user_forum/handler"
 	UserForumAdminRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/user_forum/repository"
 	UserForumAdminUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/user_forum/usecase"
+
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -96,7 +98,7 @@ func main() {
 	userAuthHandler := UserAuthHandler.NewUserHandler(userAuthUsecase, googleOauthConfig, jwtConf)
 
 	userCounselorRepo := CounselorUserRepository.NewMysqlCounselorRepository(db)
-	userReviewRepo := ReviewUserRepository.NewMysqlReviewRepository(db)
+	userReviewRepo := CounselorUserRepository.NewMysqlReviewRepository(db)
 	userCounselorUsecase := CounselorUserUsecase.NewCounselorUsecase(userCounselorRepo, userReviewRepo, userAuthRepo)
 	userCounselorHandler := CounselorUserHandler.NewCounselorHandler(userCounselorUsecase)
 
@@ -182,7 +184,7 @@ func main() {
 		restrictAdmin.GET("/profile", func(c echo.Context) error {
 			admin := c.Get("admin").(*helper.JwtCustomAdminClaims)
 			return c.JSON(http.StatusOK, admin)
-		})
+    })
 
 		restrictAdmin.GET("/counselors", adminCounselorHandler.GetAll)
 		restrictAdmin.POST("/counselors", adminCounselorHandler.Create)
@@ -202,5 +204,5 @@ func main() {
 	// ssl
 	e.Logger.Fatal(e.StartTLS(":8080", "./ssl/certificate.crt", "./ssl/private.key"))
 
-	e.Logger.Fatal(e.Start(":8080"))
+	// e.Logger.Fatal(e.Start(":8080"))
 }
