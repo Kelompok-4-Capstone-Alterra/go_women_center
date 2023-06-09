@@ -88,7 +88,33 @@ func(r *mysqlCounselorRepository) Update(id string, counselor entity.Counselor) 
 
 func(r *mysqlCounselorRepository) Delete(id string) error {
 
-	err := r.DB.Delete(&entity.Counselor{}, "id = ?", id).Error
+	err := r.DB.Transaction(func(tx *gorm.DB) error {
+		err := tx.Model(&entity.Review{}).Where("counselor_id = ?", id).Delete(&entity.Review{}).Error
+		
+		if err != nil {
+			return err
+		}
+
+		err = tx.Model(&entity.Date{}).Where("counselor_id = ?", id).Delete(&entity.Date{}).Error
+
+		if err != nil {
+			return err
+		}
+
+		err = tx.Model(&entity.Time{}).Where("counselor_id = ?", id).Delete(&entity.Time{}).Error
+
+		if err != nil {
+			return err
+		}
+
+		err = tx.Model(&entity.Counselor{}).Unscoped().Where("id = ?", id).Delete(&entity.Counselor{}).Error
+
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
 
 	if err != nil {
 		return err
