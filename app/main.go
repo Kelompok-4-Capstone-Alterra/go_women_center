@@ -29,6 +29,10 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 
+	UsersAdminHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/users/handler"
+	UsersAdminRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/users/repository"
+	UsersAdminUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/users/usecase"
+
 	CareerAdminHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/career/handler"
 	CareerAdminRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/career/repository"
 	CareerAdminUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/career/usecase"
@@ -106,6 +110,10 @@ func main() {
 	adminCareerRepo := CareerAdminRepository.NewMysqlCareerRepository(db)
 	adminCareerUsecase := CareerAdminUsecase.NewCareerUsecase(adminCareerRepo, image)
 	adminCareerHandler := CareerAdminHandler.NewCareerHandler(adminCareerUsecase)
+	
+	adminUsersRepo := UsersAdminRepository.NewMysqlUserRepository(db)
+	adminUsersUsecase := UsersAdminUsecase.NewUserUsecase(adminUsersRepo)
+	adminUsersHandler := UsersAdminHandler.NewUserHandler(adminUsersUsecase)
 
 	topicHandler := TopicHandler.NewTopicHandler()
 	
@@ -170,6 +178,10 @@ func main() {
 		restrictAdmin.GET("/careers/:id", adminCareerHandler.GetById)
 		restrictAdmin.PUT("/careers/:id", adminCareerHandler.Update)
 		restrictAdmin.DELETE("/careers/:id", adminCareerHandler.Delete)
+
+		restrictAdmin.GET("/users", adminUsersHandler.GetAll)
+		restrictAdmin.GET("/users/:id", adminUsersHandler.GetById)
+		restrictAdmin.DELETE("/users/:id", adminUsersHandler.Delete)
 	}
 
 	// ssl
