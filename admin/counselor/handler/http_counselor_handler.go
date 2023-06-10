@@ -11,7 +11,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type counselorHandler struct{
+type counselorHandler struct {
 	CUscase usecase.CounselorUsecase
 }
 
@@ -19,14 +19,14 @@ func NewCounselorHandler(CUcase usecase.CounselorUsecase) *counselorHandler {
 	return &counselorHandler{CUscase: CUcase}
 }
 
-func(h *counselorHandler) GetAll(c echo.Context) error {
+func (h *counselorHandler) GetAll(c echo.Context) error {
 
-	page, _ :=  strconv.Atoi(c.QueryParam("page"))
+	page, _ := strconv.Atoi(c.QueryParam("page"))
 	limit, _ := strconv.Atoi(c.QueryParam("limit"))
 	search := c.QueryParam("search")
-	
+
 	page, offset, limit := helper.GetPaginateData(page, limit)
-	
+
 	counselors, totalPages, err := h.CUscase.GetAll(search, offset, limit)
 
 	if err != nil {
@@ -38,23 +38,23 @@ func(h *counselorHandler) GetAll(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, helper.ResponseData("success get all conselor", http.StatusOK, echo.Map{
-		"counselors": counselors,
+		"counselors":    counselors,
 		"current_pages": page,
-		"total_pages": totalPages,
+		"total_pages":   totalPages,
 	}))
 }
 
-func(h *counselorHandler) Create(c echo.Context) error {
+func (h *counselorHandler) Create(c echo.Context) error {
 
 	counselorReq := counselor.CreateRequest{}
-	file, _ :=  c.FormFile("profile_picture")
+	file, _ := c.FormFile("profile_picture")
 	counselorReq.ProfilePicture = file
 
 	c.Bind(&counselorReq)
 
 	if err := isRequestValid(counselorReq); err != nil {
 		return c.JSON(
-			http.StatusBadRequest, 
+			http.StatusBadRequest,
 			helper.ResponseData(err.Error(), http.StatusBadRequest, nil),
 		)
 	}
@@ -65,13 +65,13 @@ func(h *counselorHandler) Create(c echo.Context) error {
 		status := http.StatusInternalServerError
 
 		switch err.Error() {
-			case counselor.ErrEmailConflict.Error(),
-				counselor.ErrUsernameConflict.Error():
-				status = http.StatusConflict
-			case counselor.ErrProfilePictureFormat.Error():
-				status = http.StatusBadRequest
+		case counselor.ErrEmailConflict.Error(),
+			counselor.ErrUsernameConflict.Error():
+			status = http.StatusConflict
+		case counselor.ErrProfilePictureFormat.Error():
+			status = http.StatusBadRequest
 		}
-		
+
 		return c.JSON(
 			status,
 			helper.ResponseData(err.Error(), status, nil),
@@ -82,7 +82,7 @@ func(h *counselorHandler) Create(c echo.Context) error {
 
 }
 
-func(h *counselorHandler) GetById(c echo.Context) error {
+func (h *counselorHandler) GetById(c echo.Context) error {
 
 	var id counselor.IdRequest
 
@@ -101,7 +101,7 @@ func(h *counselorHandler) GetById(c echo.Context) error {
 		return c.JSON(
 			http.StatusNotFound,
 			helper.ResponseData(err.Error(), http.StatusNotFound, nil),
-	)
+		)
 	}
 
 	return c.JSON(http.StatusOK, helper.ResponseData("success get counselor by id", http.StatusOK, echo.Map{
@@ -110,17 +110,17 @@ func(h *counselorHandler) GetById(c echo.Context) error {
 
 }
 
-func(h *counselorHandler) Update(c echo.Context) error {
+func (h *counselorHandler) Update(c echo.Context) error {
 
 	counselorReq := counselor.UpdateRequest{}
-	file, _ :=  c.FormFile("profile_picture")
+	file, _ := c.FormFile("profile_picture")
 	counselorReq.ProfilePicture = file
 
 	c.Bind(&counselorReq)
-	 
-	if err := isRequestValid(counselorReq); err != nil {	
+
+	if err := isRequestValid(counselorReq); err != nil {
 		return c.JSON(
-			http.StatusBadRequest, 
+			http.StatusBadRequest,
 			helper.ResponseData(err.Error(), http.StatusBadRequest, nil),
 		)
 	}
@@ -137,7 +137,7 @@ func(h *counselorHandler) Update(c echo.Context) error {
 	return c.JSON(http.StatusOK, helper.ResponseData("success update counselor", http.StatusOK, nil))
 }
 
-func(h *counselorHandler) Delete(c echo.Context) error {
+func (h *counselorHandler) Delete(c echo.Context) error {
 
 	var id counselor.IdRequest
 
