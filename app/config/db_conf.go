@@ -55,6 +55,7 @@ func (dbc *DBconf) InitDB() *gorm.DB {
 	db.AutoMigrate(&entity.Time{})
 	db.AutoMigrate(&entity.Forum{})
 	db.AutoMigrate(&entity.UserForum{})
+	db.AutoMigrate(&entity.ReadingList{})
 
 	db.AutoMigrate(&entity.Career{})
 
