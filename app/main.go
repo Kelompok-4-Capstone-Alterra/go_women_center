@@ -10,8 +10,11 @@ import (
 	AdminAuthRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/auth/repository"
 	AdminAuthUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/auth/usecase"
 	CounselorAdminHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor/handler"
-	CounselorAdminRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor/repository"
+	CounselorAdminRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor/repository"
 	CounselorAdminUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor/usecase"
+	AdminScheduleHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/schedule/handler"
+	AdminScheduleRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/schedule/repository"
+	AdminScheduleUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/schedule/usecase"
 	ForumAdminHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/forum/handler"
 	ForumAdminRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/forum/repository"
 	ForumAdminUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/forum/usecase"
@@ -23,7 +26,7 @@ import (
 	UserAuthRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth/repository"
 	UserAuthUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth/usecase"
 	CounselorUserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor/handler"
-	CounselorUserRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor/repository"
+	CounselorUserRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor/repository"
 	CounselorUserUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor/usecase"
 
 	ForumUserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum/handler"
@@ -99,6 +102,7 @@ func main() {
 
 	userCounselorRepo := CounselorUserRepository.NewMysqlCounselorRepository(db)
 	userReviewRepo := CounselorUserRepository.NewMysqlReviewRepository(db)
+
 	userCounselorUsecase := CounselorUserUsecase.NewCounselorUsecase(userCounselorRepo, userReviewRepo, userAuthRepo)
 	userCounselorHandler := CounselorUserHandler.NewCounselorHandler(userCounselorUsecase)
 
@@ -110,13 +114,18 @@ func main() {
 	adminAuthUsecase := AdminAuthUsecase.NewAuthUsecase(adminAuthRepo, encryptor)
 	adminAuthHandler := AdminAuthHandler.NewAuthHandler(adminAuthUsecase, jwtConf)
 
-	adminCounselorRepo := CounselorAdminRepository.NewMysqlCounselorRepository(db)
+	adminCounselorRepo := CounselorAdminRepo.NewMysqlCounselorRepository(db)
 	adminCounselorUsecase := CounselorAdminUsecase.NewCounselorUsecase(adminCounselorRepo, image)
 	adminCounselorHandler := CounselorAdminHandler.NewCounselorHandler(adminCounselorUsecase)
 
 	adminCareerRepo := CareerAdminRepository.NewMysqlCareerRepository(db)
 	adminCareerUsecase := CareerAdminUsecase.NewCareerUsecase(adminCareerRepo, image)
 	adminCareerHandler := CareerAdminHandler.NewCareerHandler(adminCareerUsecase)
+
+
+	adminScheduleRepo := AdminScheduleRepo.NewMysqlScheduleRepository(db)
+	adminScheduleUsecase := AdminScheduleUsecase.NewScheduleUsecase(adminCounselorRepo, adminScheduleRepo, googleUUID)
+	adminScheduleHandler := AdminScheduleHandler.NewScheduleHandler(adminScheduleUsecase)
 
 	forumR := ForumUserRepository.NewMysqlForumRepository(db)
 	forumU := ForumUserUsecase.NewForumUsecase(forumR)
@@ -192,6 +201,11 @@ func main() {
 		restrictAdmin.PUT("/counselors/:id", adminCounselorHandler.Update)
 		restrictAdmin.DELETE("/counselors/:id", adminCounselorHandler.Delete)
 
+		restrictAdmin.POST("/counselors/:id/schedules", adminScheduleHandler.Create)
+		restrictAdmin.GET("/counselors/:id/schedules", adminScheduleHandler.GetByCounselorId)
+		restrictAdmin.DELETE("/counselors/:id/schedules", adminScheduleHandler.Delete)
+		restrictAdmin.PUT("/counselors/:id/schedules", adminScheduleHandler.Update)
+
 		restrictAdmin.GET("/careers", adminCareerHandler.GetAll)
 		restrictAdmin.POST("/careers", adminCareerHandler.Create)
 		restrictAdmin.GET("/careers/:id", adminCareerHandler.GetById)
@@ -200,6 +214,7 @@ func main() {
 
 		restrictAdmin.DELETE("/forums/:id", forumAdminH.Delete)
 	}
+
 
 	// ssl
 	e.Logger.Fatal(e.StartTLS(":8080", "./ssl/certificate.crt", "./ssl/private.key"))

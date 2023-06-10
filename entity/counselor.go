@@ -16,4 +16,5 @@ type Counselor struct {
 	Dates          []Date `gorm:"foreignkey:CounselorID"`
 	Times 		   []Time `gorm:"foreignkey:CounselorID"`
 	DeletedAt 	   gorm.DeletedAt
+  
 }
