@@ -8,24 +8,23 @@ import (
 	User "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth/repository"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor"
 	Counselor "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor/repository"
-	Review "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/review/repository"
 	"golang.org/x/sync/errgroup"
 )
 
 type CounselorUsecase interface {
 	GetAll(search, topic, sortBy string, offset, limit int) ([]counselor.GetAllResponse, int, error)
 	GetById(id string) (counselor.GetByResponse, error)
-	GetAllReview(id string, offset, limit int) ([]counselor.ReviewResponse, int, error)
+	GetAllReview(id string, offset, limit int) ([]counselor.GetAllReviewResponse, int, error)
 	CreateReview(input counselor.CreateReviewRequest) error
 }
 
 type counselorUsecase struct {
 	counselorRepo Counselor.CounselorRepository
-	reviewRepo Review.ReviewRepository
+	reviewRepo Counselor.ReviewRepository
 	userRepo User.UserRepository
 }
 
-func NewCounselorUsecase(CounselorRepo Counselor.CounselorRepository, ReviewRepo Review.ReviewRepository, UserRepo User.UserRepository) CounselorUsecase {
+func NewCounselorUsecase(CounselorRepo Counselor.CounselorRepository, ReviewRepo Counselor.ReviewRepository, UserRepo User.UserRepository) CounselorUsecase {
 	return &counselorUsecase{counselorRepo: CounselorRepo, reviewRepo: ReviewRepo, userRepo: UserRepo}
 }
 
@@ -103,23 +102,23 @@ func(u *counselorUsecase) CreateReview(inputReview counselor.CreateReviewRequest
 	return nil	
 }
 
-func(u *counselorUsecase) GetAllReview(id string, offset, limit int) ([]counselor.ReviewResponse, int, error) {
+func(u *counselorUsecase) GetAllReview(id string, offset, limit int) ([]counselor.GetAllReviewResponse, int, error) {
 
 	// Check if counselor exist
 	_, err := u.counselorRepo.GetById(id)
 
 	if err != nil {
-		return []counselor.ReviewResponse{}, 0, counselor.ErrCounselorNotFound
+		return []counselor.GetAllReviewResponse{}, 0, counselor.ErrCounselorNotFound
 	}
 	
 	reviews, totalData, err := u.reviewRepo.GetByCounselorId(id, offset, limit)
 
 	if err != nil {
 		log.Print(err.Error())
-		return []counselor.ReviewResponse{}, 0, counselor.ErrInternalServerError
+		return []counselor.GetAllReviewResponse{}, 0, counselor.ErrInternalServerError
 	}
 
-	var reviewsRes = make([]counselor.ReviewResponse, len(reviews))
+	var reviewsRes = make([]counselor.GetAllReviewResponse, len(reviews))
 	var g errgroup.Group
 
 	for i, review := range reviews {
@@ -130,7 +129,7 @@ func(u *counselorUsecase) GetAllReview(id string, offset, limit int) ([]counselo
 			if err != nil {
 				return counselor.ErrInternalServerError
 			}
-			reviewRes := counselor.ReviewResponse{
+			reviewRes := counselor.GetAllReviewResponse{
 				ID: review.ID,
 				ProfilePicture: user.ProfilePicture,
 				Username: user.Username,
@@ -145,7 +144,7 @@ func(u *counselorUsecase) GetAllReview(id string, offset, limit int) ([]counselo
 	}	
 
 	if err := g.Wait(); err != nil {
-		return []counselor.ReviewResponse{}, 0, err
+		return []counselor.GetAllReviewResponse{}, 0, err
 	}
 
 	totalPages := helper.GetTotalPages(int(totalData), limit)

@@ -3,12 +3,12 @@ package handler
 import (
 	"strings"
 
-	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth"
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/career"
 	"github.com/go-playground/validator"
 )
 
 func isRequestValid(m interface{}) error {
-	
+
 	validate := validator.New()
 	err := validate.Struct(m)
 
@@ -17,20 +17,15 @@ func isRequestValid(m interface{}) error {
 			field := strings.ToLower(err.Field())
 
 			if err.Tag() == "required" {
-				return auth.ErrRequired
+				return career.ErrRequired
 			}
 
 			switch field {
-				case "email":
-					return auth.ErrEmailFormat
-				case "id":
-					return auth.ErrIdFormat
-				case "password":
-					return auth.ErrPasswordLength
+			case "id":
+				return career.ErrIdFormat
 			}
 
 		}
 	}
-
 	return nil
 }

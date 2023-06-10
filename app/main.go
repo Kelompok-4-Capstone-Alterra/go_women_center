@@ -25,12 +25,20 @@ import (
 	CounselorUserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor/handler"
 	CounselorUserRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor/repository"
 	CounselorUserUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor/usecase"
-	ReviewUserRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/review/repository"
+  
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
+
+	CareerAdminHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/career/handler"
+	CareerAdminRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/career/repository"
+	CareerAdminUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/career/usecase"
+
+	CareerUserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/career/handler"
+	CareerUserRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/career/repository"
+	CareerUserUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/career/usecase"
 )
 
 func main() {
@@ -81,10 +89,15 @@ func main() {
 	userAuthUsecase := UserAuthUsecase.NewUserUsecase(userAuthRepo, googleUUID, &mailConf, otpRepo, otpGenerator, encryptor)
 	userAuthHandler := UserAuthHandler.NewUserHandler(userAuthUsecase, googleOauthConfig, jwtConf)
 
-	userCounselorRepo := CounselorUserRepo.NewMysqlCounselorRepository(db)
-	userReviewRepo := ReviewUserRepo.NewMysqlReviewRepository(db)
+	userCounselorRepo := CounselorUserRepository.NewMysqlCounselorRepository(db)
+	userReviewRepo := CounselorUserRepository.NewMysqlReviewRepository(db)
+
 	userCounselorUsecase := CounselorUserUsecase.NewCounselorUsecase(userCounselorRepo, userReviewRepo, userAuthRepo)
 	userCounselorHandler := CounselorUserHandler.NewCounselorHandler(userCounselorUsecase)
+
+	userCareerRepo := CareerUserRepository.NewMysqlCareerRepository(db)
+	userCareerUsecase := CareerUserUsecase.NewCareerUsecase(userCareerRepo)
+	userCareerHandler := CareerUserHandler.NewCareerHandler(userCareerUsecase)
 
 	adminAuthRepo := AdminAuthRepo.NewAdminRepo(db)
 	adminAuthUsecase := AdminAuthUsecase.NewAuthUsecase(adminAuthRepo, encryptor)
@@ -93,6 +106,10 @@ func main() {
 	adminCounselorRepo := CounselorAdminRepo.NewMysqlCounselorRepository(db)
 	adminCounselorUsecase := CounselorAdminUsecase.NewCounselorUsecase(adminCounselorRepo, image)
 	adminCounselorHandler := CounselorAdminHandler.NewCounselorHandler(adminCounselorUsecase)
+	
+	adminCareerRepo := CareerAdminRepository.NewMysqlCareerRepository(db)
+	adminCareerUsecase := CareerAdminUsecase.NewCareerUsecase(adminCareerRepo, image)
+	adminCareerHandler := CareerAdminHandler.NewCareerHandler(adminCareerUsecase)
 
 	adminScheduleRepo := AdminScheduleRepo.NewMysqlScheduleRepository(db)
 	adminScheduleUsecase := AdminScheduleUsecase.NewScheduleUsecase(adminCounselorRepo, adminScheduleRepo, googleUUID)
@@ -124,6 +141,7 @@ func main() {
 	users := e.Group("/users")
 	{
 		users.GET("/counselors", userCounselorHandler.GetAll)
+		users.GET("/careers", userCareerHandler.GetAll)
 	}
 
 	restrictUsers := e.Group("/users", userAuthMidd.JWTUser())
@@ -136,6 +154,8 @@ func main() {
 		restrictUsers.GET("/counselors/:id", userCounselorHandler.GetById)
 		restrictUsers.POST("/counselors/:id/reviews", userCounselorHandler.CreateReview)
 		restrictUsers.GET("/counselors/:id/reviews", userCounselorHandler.GetAllReview)
+
+		restrictUsers.GET("/careers/:id", userCareerHandler.GetById)
 	}
 	
 
@@ -157,6 +177,12 @@ func main() {
 		restrictAdmin.GET("/counselors/:id/schedules", adminScheduleHandler.GetByCounselorId)
 		restrictAdmin.DELETE("/counselors/:id/schedules", adminScheduleHandler.Delete)
 		restrictAdmin.PUT("/counselors/:id/schedules", adminScheduleHandler.Update)
+
+		restrictAdmin.GET("/careers", adminCareerHandler.GetAll)
+		restrictAdmin.POST("/careers", adminCareerHandler.Create)
+		restrictAdmin.GET("/careers/:id", adminCareerHandler.GetById)
+		restrictAdmin.PUT("/careers/:id", adminCareerHandler.Update)
+		restrictAdmin.DELETE("/careers/:id", adminCareerHandler.Delete)
 	}
 
 

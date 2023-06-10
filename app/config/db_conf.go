@@ -53,6 +53,7 @@ func(dbc *DBconf) InitDB() *gorm.DB {
 	db.AutoMigrate(&entity.Review{})
 	db.AutoMigrate(&entity.Date{})
 	db.AutoMigrate(&entity.Time{})
+	db.AutoMigrate(&entity.Career{})
 	
 	return db
 }
