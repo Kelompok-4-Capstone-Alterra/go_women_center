@@ -28,7 +28,7 @@ func (rlr mysqlReadingListRepository) GetAll(id_user, name string, offset, limit
 	var readingList []response.ReadingList
 	var totalData int64
 
-	err := rlr.DB.Table("reading_lists").Count(&totalData).Offset(offset).Limit(limit).Find(&readingList).Error
+	err := rlr.DB.Table("reading_lists").Where("name LIKE ?", "%"+name+"%").Count(&totalData).Offset(offset).Limit(limit).Find(&readingList).Error
 
 	if err != nil {
 		return nil, totalData, err
