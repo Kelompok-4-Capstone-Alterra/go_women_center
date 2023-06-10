@@ -32,7 +32,6 @@ import (
 	ForumUserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum/handler"
 	ForumUserRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum/repository"
 	ForumUserUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum/usecase"
-	ReviewUserRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/review/repository"
 	UserForumAdminHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/user_forum/handler"
 	UserForumAdminRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/user_forum/repository"
 	UserForumAdminUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/user_forum/usecase"
@@ -100,8 +99,8 @@ func main() {
 	userAuthUsecase := UserAuthUsecase.NewUserUsecase(userAuthRepo, googleUUID, &mailConf, otpRepo, otpGenerator, encryptor)
 	userAuthHandler := UserAuthHandler.NewUserHandler(userAuthUsecase, googleOauthConfig, jwtConf)
 
-	userCounselorRepo := CounselorUserRepository.NewMysqlCounselorRepository(db)
-	userReviewRepo := CounselorUserRepository.NewMysqlReviewRepository(db)
+	userCounselorRepo := CounselorUserRepo.NewMysqlCounselorRepository(db)
+	userReviewRepo := CounselorUserRepo.NewMysqlReviewRepository(db)
 
 	userCounselorUsecase := CounselorUserUsecase.NewCounselorUsecase(userCounselorRepo, userReviewRepo, userAuthRepo)
 	userCounselorHandler := CounselorUserHandler.NewCounselorHandler(userCounselorUsecase)
