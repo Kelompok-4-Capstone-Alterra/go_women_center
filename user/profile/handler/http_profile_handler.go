@@ -54,7 +54,10 @@ func(h *ProfileHandler) Update(c echo.Context) error {
 		status := http.StatusInternalServerError
 
 		switch err {
-			case profile.ErrBirthDateFormat:
+		case profile.ErrUserNotFound:
+			case
+				profile.ErrProfilePictureFormat,
+				profile.ErrBirthDateFormat:
 				status = http.StatusBadRequest
 		}
 
@@ -84,7 +87,7 @@ func(h *ProfileHandler) UpdatePassword(c echo.Context) error {
 		status := http.StatusInternalServerError
 
 		switch err {
-		case profile.ErrPasswordNotMatch:
+			case profile.ErrPasswordNotMatch:
 				status = http.StatusBadRequest
 		}
 

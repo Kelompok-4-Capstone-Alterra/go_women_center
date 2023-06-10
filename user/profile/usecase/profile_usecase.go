@@ -8,7 +8,6 @@ import (
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/profile"
 	repo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/profile/repository"
-	"golang.org/x/sync/errgroup"
 )
 
 type ProfileUsecase interface {
@@ -52,68 +51,56 @@ func(u *profileUsecase) GetById(id string) (profile.GetByIdResponse, error) {
 
 func(u *profileUsecase) Update(input profile.UpdateRequest) error {
 	
-	var g errgroup.Group
-	
-	var user entity.User
 
-	g.Go(func() error {
-		var err error
-		user, err = u.profileRepo.GetById(input.ID)
-	
-		if err != nil {
-			return profile.ErrInternalServerError
-		}
-		return nil
-	})
+	user, err := u.profileRepo.GetById(input.ID)
 
-	var birthDate time.Time
-	
-	g.Go(func() error {
-		var err error
-		birthDate, err = time.Parse(time.DateOnly, input.BirthDate)
-	
-		if err != nil {
-			return profile.ErrBirthDateFormat
-		}
-		return nil
-	})
-
-	if user.Email != input.Email {
-		g.Go(func() error {
-			
-			err := u.profileRepo.GetByEmail(input.Email)
-		
-			if err != nil {
-				return profile.ErrEmailDuplicate
-			}
-			return nil
-		})
-	
-		g.Go(func() error {
-			err := u.profileRepo.GetByUsername(input.Username)		
-		
-			if err != nil {
-				return profile.ErrUsernameDuplicate
-			}
-			return nil
-		})
+	if err != nil {
+		log.Println(err.Error())
+		return profile.ErrInternalServerError
 	}
-
-	if err := g.Wait(); err !=nil{
-		return err
-	}
-
+	
 	userProfile := entity.User{
 		ID: input.ID,
 		Username: input.Username,
 		Name: input.Name,
 		Email: input.Email,
 		PhoneNumber: input.PhoneNumber,
-		BirthDate: &birthDate,
+	}
+	
+	if input.BirthDate != "" {
+		log.Println(input.BirthDate)
+		birthDate, err := time.Parse(time.DateOnly, input.BirthDate)
+	
+		if err != nil {
+			log.Println(err.Error())
+			return profile.ErrBirthDateFormat
+		}
+		*userProfile.BirthDate = birthDate
+	}
+
+	// check if email or username already exist
+
+	if input.Email != "" && user.Email != input.Email {	
+		err := u.profileRepo.GetByEmail(input.Email)
+	
+		if err != nil {
+			log.Println(err.Error())
+			return profile.ErrEmailDuplicate
+		}
+	}
+
+	if input.Username != "" && user.Username != input.Username{
+		err := u.profileRepo.GetByUsername(input.Username)		
+	
+		if err != nil {
+			log.Println(err.Error())
+			return profile.ErrUsernameDuplicate
+		}
 	}
 
 	if input.ProfilePicture != nil {
 
+		
 		if !u.image.IsImageValid(input.ProfilePicture) {
 			return profile.ErrProfilePictureFormat
 		}
@@ -123,8 +110,6 @@ func(u *profileUsecase) Update(input profile.UpdateRequest) error {
 		if err != nil {
 			return profile.ErrInternalServerError
 		}
-		
-		userProfile.ProfilePicture = path
 
 		err = u.image.DeleteImageFromS3(user.ProfilePicture)
 
@@ -132,13 +117,15 @@ func(u *profileUsecase) Update(input profile.UpdateRequest) error {
 			return profile.ErrInternalServerError
 		}
 
+		userProfile.ProfilePicture = path
+
 	}
 
-	err := u.profileRepo.Update(userProfile)
+	err = u.profileRepo.Update(userProfile)
 
 	if err != nil {
-		log.Println(err)
-		return profile.ErrInternalServerError
+		log.Println(err.Error())
+		return err
 	}
 
 	return nil

@@ -11,11 +11,11 @@ type IdRequest struct {
 type UpdateRequest struct {
 	ID string
 	ProfilePicture *multipart.FileHeader `form:"profile_picture" validate:"omitempty"`
-	Username       string                `form:"username"`
-	Name           string                `form:"name"`
+	Username       string                `form:"username" validate:"omitempty"`
+	Name           string                `form:"name" validate:"omitempty"`
 	Email          string                `form:"email" validate:"omitempty,email"`
-	PhoneNumber    string                `form:"phone_number"`
-	BirthDate      string                `form:"birth_date" `
+	PhoneNumber    string                `form:"phone_number" validate:"omitempty"`
+	BirthDate      string                `form:"birth_date" validate:"omitempty"`
 }
 
 type UpdatePasswordRequest struct {
