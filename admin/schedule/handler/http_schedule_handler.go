@@ -32,7 +32,7 @@ func (h *scheduleHandler) GetByCounselorId(c echo.Context) error {
 		)
 	}
 
-	schedules, err := h.Usecase.GetByCounselorId(req.CounselorId)
+	schedule, err := h.Usecase.GetByCounselorId(req.CounselorId)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError,
@@ -40,8 +40,8 @@ func (h *scheduleHandler) GetByCounselorId(c echo.Context) error {
 		)
 	}
 
-	return c.JSON(http.StatusOK, helper.ResponseData("success get all schedule", http.StatusOK, echo.Map{
-		"schedules": schedules,
+	return c.JSON(http.StatusOK, helper.ResponseData("success get schedule counselor", http.StatusOK, echo.Map{
+		"schedule": schedule,
 	}))
 }
 
@@ -62,15 +62,21 @@ func (h *scheduleHandler) Create(c echo.Context) error {
 
 	if err != nil {
 		status := http.StatusInternalServerError
-		if err == schedule.ErrCounselorNotFound{
-			status = http.StatusNotFound
+
+		switch err {
+			case schedule.ErrCounselorNotFound:
+				status = http.StatusNotFound
+			case schedule.ErrTimeInvalid,
+				schedule.ErrDateInvalid:
+				status = http.StatusBadRequest
 		}
+
 		return c.JSON(status,
 			helper.ResponseData(err.Error(), status, nil),
 		)
 	}
 
-	return c.JSON(http.StatusOK, helper.ResponseData("success create schedule", http.StatusOK, nil))
+	return c.JSON(http.StatusOK, helper.ResponseData("success create schedule counselor", http.StatusOK, nil))
 }
 
 func(h *scheduleHandler) Update(c echo.Context) error {
@@ -89,15 +95,21 @@ func(h *scheduleHandler) Update(c echo.Context) error {
 
 	if err != nil {
 		status := http.StatusInternalServerError
-		if err == schedule.ErrCounselorNotFound{
-			status = http.StatusNotFound
+
+		switch err {
+			case schedule.ErrCounselorNotFound:
+				status = http.StatusNotFound
+			case schedule.ErrTimeInvalid,
+				schedule.ErrDateInvalid:
+				status = http.StatusBadRequest
 		}
+
 		return c.JSON(status,
 			helper.ResponseData(err.Error(), status, nil),
 		)
 	}
 
-	return c.JSON(http.StatusOK, helper.ResponseData("success update schedule", http.StatusOK, nil))
+	return c.JSON(http.StatusOK, helper.ResponseData("success update schedule counselor", http.StatusOK, nil))
 }
 
 func(h *scheduleHandler) Delete(c echo.Context) error {
@@ -124,5 +136,5 @@ func(h *scheduleHandler) Delete(c echo.Context) error {
 		)
 	}
 
-	return c.JSON(http.StatusOK, helper.ResponseData("success delete schedule", http.StatusOK, nil))
+	return c.JSON(http.StatusOK, helper.ResponseData("success delete schedule counselor", http.StatusOK, nil))
 }

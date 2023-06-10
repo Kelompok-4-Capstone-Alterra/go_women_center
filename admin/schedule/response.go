@@ -1,6 +1,6 @@
 package schedule
 
 type GetAllResponse struct {
-	Date []string `json:"dates"`
-	Time []string `json:"times"`
+	Dates []string `json:"dates"`
+	Times []string `json:"times"`
 }

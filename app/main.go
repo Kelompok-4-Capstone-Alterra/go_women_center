@@ -94,9 +94,8 @@ func main() {
 	adminCounselorUsecase := CounselorAdminUsecase.NewCounselorUsecase(adminCounselorRepo, image)
 	adminCounselorHandler := CounselorAdminHandler.NewCounselorHandler(adminCounselorUsecase)
 
-	adminDateRepo := AdminScheduleRepo.NewMysqlDateRepository(db)
-	adminTimeRepo := AdminScheduleRepo.NewMysqlTimeRepository(db)
-	adminScheduleUsecase := AdminScheduleUsecase.NewScheduleUsecase(adminCounselorRepo, adminDateRepo, adminTimeRepo, googleUUID)
+	adminScheduleRepo := AdminScheduleRepo.NewMysqlScheduleRepository(db)
+	adminScheduleUsecase := AdminScheduleUsecase.NewScheduleUsecase(adminCounselorRepo, adminScheduleRepo, googleUUID)
 	adminScheduleHandler := AdminScheduleHandler.NewScheduleHandler(adminScheduleUsecase)
 
 	topicHandler := TopicHandler.NewTopicHandler()

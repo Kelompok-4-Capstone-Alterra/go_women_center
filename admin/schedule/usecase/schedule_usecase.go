@@ -21,82 +21,36 @@ type ScheduleUsecase interface {
 
 type scheduleUsecase struct {
 	counselorRepo Counselor.CounselorRepository
-	dateRepo repo.DateRepository
-	timeRepo repo.TimeRepository
+	scheduleRepo repo.ScheduleRepository
 	UuidGenerator helper.UuidGenerator
 }
 
 func NewScheduleUsecase(
 		counselorRepo Counselor.CounselorRepository,
-		dateRepo repo.DateRepository,
-		timeRepo repo.TimeRepository,
+		scheduleRepo repo.ScheduleRepository,
 		uidGenerator helper.UuidGenerator,
 	) ScheduleUsecase {
 
-	return &scheduleUsecase{counselorRepo, dateRepo, timeRepo, uidGenerator}
+	return &scheduleUsecase{counselorRepo, scheduleRepo, uidGenerator}
 }
 
 func(u *scheduleUsecase) GetByCounselorId(counselorId string) (schedule.GetAllResponse, error) {
 	
 	_, err := u.counselorRepo.GetById(counselorId)
 
-	if ; err != nil {
+	if err != nil {
 		log.Println(err)
 		return schedule.GetAllResponse{}, schedule.ErrCounselorNotFound
 	}
 
-	g := errgroup.Group{}
-
-	
-	
-	var schedules schedule.GetAllResponse
-
-	
-	dates, err := u.dateRepo.GetByCounselorId(counselorId)
+	scheduleRes, err := u.scheduleRepo.GetByCounselorId(counselorId)
 
 	if err != nil {
-		log.Println(err)
-		return schedules, schedule.ErrInternalServerError
-	}
-
-	datesRes := make([]string, len(dates))
-
-	for i, date := range dates {
-		i := i
-		date := date
-		g.Go(func() error {
-			datesRes[i]	= date.Date.Format(time.DateOnly)
-			return nil
-		})
-	}
-
-	times, err := u.timeRepo.GetByCounselorId(counselorId)
-
-	if err != nil {
-		log.Println(err)
-		return schedule.GetAllResponse{}, schedule.ErrInternalServerError
-	}
-
-	timeRes := make([]string, len(times))
-
-	for i, time := range times {
-		i := i
-		time := time
-		g.Go(func() error {
-			timeRes[i] = time.Time
-			return nil
-		})
-	}
-
-	if err := g.Wait(); err != nil {
 		log.Println(err.Error())
-		return schedules, schedule.ErrInternalServerError
+		return scheduleRes, schedule.ErrInternalServerError
 	}
 
-	schedules.Time = timeRes
-	schedules.Date = datesRes
-
-	return schedules, nil
+	return scheduleRes, nil
 }
 
 func(u *scheduleUsecase) Create(input schedule.CreateRequest) error {
@@ -110,32 +64,44 @@ func(u *scheduleUsecase) Create(input schedule.CreateRequest) error {
 	
 	g := errgroup.Group{}
 
-	for _, date := range input.Dates {
+	var times = make([]entity.Time, len(input.Times))
+	var dates = make([]entity.Date, len(input.Dates))
+
+	for i, date := range input.Dates {
 		date := date
+		i := i
 		g.Go(func() error {
 			id, _ := u.UuidGenerator.GenerateUUID()
 
 			date, err := time.Parse(time.DateOnly, date)
 
 			if err != nil {
-				return schedule.ErrInternalServerError
+				return schedule.ErrDateInvalid
 			}
-
+			
 			newDate := entity.Date{
 				ID: id,
 				CounselorID: input.CounselorId,
 				Date: date,
 			}
 
-			return u.dateRepo.Create(newDate)
+			dates[i] = newDate
+			return nil
 		})	
 	}
 
-	for _, timedata := range input.Times {
+	for i, timedata := range input.Times {
 		
 		timedata := timedata
+		i := i
 		g.Go(func() error {
 			id, _ := u.UuidGenerator.GenerateUUID()
+
+			_, err := time.Parse(time.TimeOnly, timedata)
+
+			if err != nil {
+				return schedule.ErrTimeInvalid
+			}
 
 			newTime := entity.Time{
 				ID: id,
@@ -143,13 +109,21 @@ func(u *scheduleUsecase) Create(input schedule.CreateRequest) error {
 				Time: timedata,
 			}
 
-			return u.timeRepo.Create(newTime)
+			times[i] = newTime
+
+			return nil
 		})
 	}
 
 	if err := g.Wait(); err != nil {
 		log.Println(err.Error())
-		return schedule.ErrInternalServerError
+		return err
+	}
+
+	err = u.scheduleRepo.Create(dates, times)
+
+	if err != nil {
+		return schedule.ErrCounselorNotFound
 	}
 
 	return nil
@@ -163,18 +137,10 @@ func(u *scheduleUsecase) Delete(counselorId string) error {
 		log.Println(err.Error())
 		return schedule.ErrCounselorNotFound
 	}
-	g := errgroup.Group{}
 
-	g.Go(func() error {
-		return u.dateRepo.DeleteByCounselorId(counselorId)
-	})
+	err = u.scheduleRepo.DeleteByCounselorId(counselorId)
 
-	g.Go(func() error {
-		return u.timeRepo.DeleteByCounselorId(counselorId)
-	})
-
-	if err := g.Wait(); err != nil {
-		log.Println(err.Error())
+	if err != nil {
 		return schedule.ErrInternalServerError
 	}
 
@@ -193,22 +159,68 @@ func(u *scheduleUsecase) Update(input schedule.UpdateRequest) error {
 
 	g := errgroup.Group{}
 
-	g.Go(func() error {
-		return u.dateRepo.DeleteByCounselorId(input.CounselorId)
-	})
+	var times = make([]entity.Time, len(input.Times))
+	var dates = make([]entity.Date, len(input.Dates))
 
-	g.Go(func() error {
-		return u.timeRepo.DeleteByCounselorId(input.CounselorId)
-	})
+	for i, date := range input.Dates {
+		date := date
+		i := i
+		g.Go(func() error {
+			id, _ := u.UuidGenerator.GenerateUUID()
 
-	g.Go(func() error {
-		return u.Create(schedule.CreateRequest(input))
-	})
+			date, err := time.Parse(time.DateOnly, date)
+
+			if err != nil {
+				return schedule.ErrDateInvalid
+			}
+			
+			newDate := entity.Date{
+				ID: id,
+				CounselorID: input.CounselorId,
+				Date: date,
+			}
+
+			dates[i] = newDate
+			return nil
+		})	
+	}
+
+	for i, timedata := range input.Times {
+		
+		timedata := timedata
+		i := i
+		g.Go(func() error {
+			id, _ := u.UuidGenerator.GenerateUUID()
+
+			_, err := time.Parse(time.TimeOnly, timedata)
+
+			if err != nil {
+				return schedule.ErrTimeInvalid
+			}
+
+			newTime := entity.Time{
+				ID: id,
+				CounselorID: input.CounselorId,
+				Time: timedata,
+			}
+
+			times[i] = newTime
+
+			return nil
+		})
+	}
 
 	if err := g.Wait(); err != nil {
 		log.Println(err.Error())
+		return err
+	}
+
+	err = u.scheduleRepo.Update(input.CounselorId, dates, times)
+
+	if err != nil {
 		return schedule.ErrInternalServerError
 	}
+
 
 	return nil
 	

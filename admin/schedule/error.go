@@ -20,4 +20,6 @@ var (
 
 	// bad request
 	ErrIdFormat = errors.New("id must be a valid uuid")
+	ErrDateInvalid = errors.New("date must be a valid date")
+	ErrTimeInvalid = errors.New("time must be a valid time")
 )
