@@ -126,7 +126,7 @@ func main() {
 		users.GET("/counselors", userCounselorHandler.GetAll)
 	}
 
-	restrictUsers := e.Group("/users", userAuthMidd.JWTUser())
+	restrictUsers := e.Group("/users", userAuthMidd.JWTUser(), userAuthMidd.CheckUser(userAuthUsecase))
 
 	{	
 		restrictUsers.GET("/profile", userHandler.GetById)
@@ -151,7 +151,7 @@ func main() {
 	}
 
 	// ssl
-	// e.Logger.Fatal(e.StartTLS(":8080", "./ssl/certificate.crt", "./ssl/private.key"))
+	e.Logger.Fatal(e.StartTLS(":8080", "./ssl/certificate.crt", "./ssl/private.key"))
 
-	e.Logger.Fatal(e.Start(":8080"))
+	// e.Logger.Fatal(e.Start(":8080"))
 }
