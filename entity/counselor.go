@@ -16,11 +16,5 @@ type Counselor struct {
 	Dates          []Date `gorm:"foreignkey:CounselorID"`
 	Times 		   []Time `gorm:"foreignkey:CounselorID"`
 	DeletedAt 	   gorm.DeletedAt
-}
-
-func(c *Counselor) BeforeDelete(tx *gorm.DB) error {
-	tx.Model(&Review{}).Where("counselor_id = ?", c.ID).Delete(&Review{})
-	tx.Model(&Date{}).Where("counselor_id = ?", c.ID).Delete(&Date{})
-	tx.Model(&Time{}).Where("counselor_id = ?", c.ID).Delete(&Time{})
-	return nil
+  
 }

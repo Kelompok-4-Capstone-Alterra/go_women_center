@@ -40,8 +40,31 @@ func(r *mysqlReviewRepository) GetByCounselorId(counselorId string, offset, limi
 }
 
 func(r *mysqlReviewRepository) Save(review entity.Review) error {
-	
-	err := r.DB.Save(&review).Error
+
+	err := r.DB.Transaction(func(tx *gorm.DB) error {
+
+		var avgRating float32
+
+		err := tx.Model(&entity.Review{}).Where("counselor_id = ?", review.CounselorID).Select("AVG(rating)").Scan(&avgRating).Error
+		
+		if err != nil {
+			return err
+		}
+		
+		err = tx.Model(&entity.Counselor{}).Where("id = ?", review.CounselorID).Update("rating", avgRating).Error
+
+		if err != nil {
+			return err
+		}
+
+		err = tx.Save(&review).Error
+
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
 
 	if err != nil {
 		return err

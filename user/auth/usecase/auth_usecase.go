@@ -13,6 +13,7 @@ type UserUsecase interface {
 	Register(registerRequest user.RegisterUserRequest) error
 	VerifyEmail(email string) error
 	Login(loginRequest user.LoginUserRequest) (entity.User, error)
+	GetById(id string) (entity.User, error)
 }
 
 type userUsecase struct {
@@ -41,11 +42,21 @@ func (u *userUsecase) Register(registerRequest user.RegisterUserRequest) error {
 		return err
 	}
 
+	if storedOtp.Code != registerRequest.OTP {
+		storedOtp.Attempt++
+		if storedOtp.Attempt >= 3 {
+			u.otpRepo.Delete(storedOtp.Email)
+			return user.ErrMaxOtpAttempt
+		}
+		u.otpRepo.Update(storedOtp, time.Now().Add(time.Minute).Unix())
+		return user.ErrInvalidOtp
+	}
+
+
 	uuid, err := u.UuidGenerator.GenerateUUID()
 	if err != nil {
 		return err
 	}
-
 	
 	encryptedPass, _ := u.Encryptor.HashPassword(registerRequest.Password)
 
@@ -61,7 +72,7 @@ func (u *userUsecase) Register(registerRequest user.RegisterUserRequest) error {
 
 	_, err = u.repo.Create(data)
 	if err != nil {
-		return user.ErrInternalServerError
+		return err
 	}
 
 	return nil
@@ -72,9 +83,11 @@ func (u *userUsecase) VerifyEmail(email string) error {
 	if err != nil {
 		return user.ErrInternalServerError
 	}
+
 	otp := repository.Otp{
 		Email: email,
 		Code:  otpCode,
+		Attempt: 0,
 	}
 
 	err = u.EmailSender.SendEmail(email, "OTP verification code (valid for 1 minute)", otpCode) //TODO: write subject and body template
@@ -95,8 +108,16 @@ func (u *userUsecase) Login(loginRequest user.LoginUserRequest) (entity.User, er
 	}
 
 	if !u.Encryptor.CheckPasswordHash(loginRequest.Password, data.Password) {
-		return entity.User{}, user.ErrInternalServerError
+		return entity.User{}, user.ErrInvalidCredential
 	}
 
+	return data, nil
+}
+
+func(u *userUsecase) GetById(id string) (entity.User, error) {
+	data, err := u.repo.GetById(id)
+	if err != nil {
+		return entity.User{}, user.ErrInternalServerError
+	}
 	return data, nil
 }

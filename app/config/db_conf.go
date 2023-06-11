@@ -20,7 +20,7 @@ type DBconf struct {
 	DB_Name     string
 }
 
-func(dbc *DBconf) InitDB() *gorm.DB {
+func (dbc *DBconf) InitDB() *gorm.DB {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		dbc.DB_Username,
 		dbc.DB_Password,
@@ -39,7 +39,7 @@ func(dbc *DBconf) InitDB() *gorm.DB {
 	)
 
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
-		Logger: newLogger,
+		Logger:         newLogger,
 		TranslateError: true,
 	})
 	if err != nil {
@@ -53,7 +53,10 @@ func(dbc *DBconf) InitDB() *gorm.DB {
 	db.AutoMigrate(&entity.Review{})
 	db.AutoMigrate(&entity.Date{})
 	db.AutoMigrate(&entity.Time{})
+	db.AutoMigrate(&entity.Forum{})
+	db.AutoMigrate(&entity.UserForum{})
+
 	db.AutoMigrate(&entity.Career{})
-	
+
 	return db
 }
