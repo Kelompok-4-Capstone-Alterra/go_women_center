@@ -13,6 +13,7 @@ type UserUsecase interface {
 	Register(registerRequest user.RegisterUserRequest) error
 	VerifyEmail(email string) error
 	Login(loginRequest user.LoginUserRequest) (entity.User, error)
+	GetById(id string) (entity.User, error)
 }
 
 type userUsecase struct {
@@ -110,5 +111,13 @@ func (u *userUsecase) Login(loginRequest user.LoginUserRequest) (entity.User, er
 		return entity.User{}, user.ErrInvalidCredential
 	}
 
+	return data, nil
+}
+
+func(u *userUsecase) GetById(id string) (entity.User, error) {
+	data, err := u.repo.GetById(id)
+	if err != nil {
+		return entity.User{}, user.ErrInternalServerError
+	}
 	return data, nil
 }

@@ -29,12 +29,19 @@ import (
 	CounselorUserRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor/repository"
 	CounselorUserUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor/usecase"
 
+	UserProfileHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/profile/handler"
+	UserProfileRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/profile/repository"
+	UserProfileUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/profile/usecase"
+	ReviewUserRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/review/repository"
+
+
 	ForumUserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum/handler"
 	ForumUserRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum/repository"
 	ForumUserUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum/usecase"
 	UserForumAdminHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/user_forum/handler"
 	UserForumAdminRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/user_forum/repository"
 	UserForumAdminUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/user_forum/usecase"
+
 
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/labstack/echo/v4"
@@ -105,6 +112,11 @@ func main() {
 	userCounselorUsecase := CounselorUserUsecase.NewCounselorUsecase(userCounselorRepo, userReviewRepo, userAuthRepo)
 	userCounselorHandler := CounselorUserHandler.NewCounselorHandler(userCounselorUsecase)
 
+
+	userRepo := UserProfileRepo.NewMysqlUserRepository(db)
+	userUsecase := UserProfileUsecase.NewProfileUsecase(userRepo, image, encryptor)
+	userHandler := UserProfileHandler.NewProfileHandler(userUsecase)
+
 	userCareerRepo := CareerUserRepository.NewMysqlCareerRepository(db)
 	userCareerUsecase := CareerUserUsecase.NewCareerUsecase(userCareerRepo)
 	userCareerHandler := CareerUserHandler.NewCareerHandler(userCareerUsecase)
@@ -120,7 +132,6 @@ func main() {
 	adminCareerRepo := CareerAdminRepository.NewMysqlCareerRepository(db)
 	adminCareerUsecase := CareerAdminUsecase.NewCareerUsecase(adminCareerRepo, image)
 	adminCareerHandler := CareerAdminHandler.NewCareerHandler(adminCareerUsecase)
-
 
 	adminScheduleRepo := AdminScheduleRepo.NewMysqlScheduleRepository(db)
 	adminScheduleUsecase := AdminScheduleUsecase.NewScheduleUsecase(adminCounselorRepo, adminScheduleRepo, googleUUID)
@@ -166,13 +177,12 @@ func main() {
 		users.GET("/careers", userCareerHandler.GetAll)
 	}
 
-	restrictUsers := e.Group("/users", userAuthMidd.JWTUser())
-	{
-		restrictUsers.GET("/profile", func(c echo.Context) error {
-			user := c.Get("user").(*helper.JwtCustomUserClaims)
-			return c.JSON(http.StatusOK, user)
-		})
+	restrictUsers := e.Group("/users", userAuthMidd.JWTUser(), userAuthMidd.CheckUser(userAuthUsecase))
 
+	{	
+		restrictUsers.GET("/profile", userHandler.GetById)
+		restrictUsers.PUT("/profile", userHandler.Update)
+		restrictUsers.PUT("/profile/password", userHandler.UpdatePassword)
 		restrictUsers.GET("/counselors/:id", userCounselorHandler.GetById)
 		restrictUsers.POST("/counselors/:id/reviews", userCounselorHandler.CreateReview)
 		restrictUsers.GET("/counselors/:id/reviews", userCounselorHandler.GetAllReview)
@@ -189,10 +199,6 @@ func main() {
 	restrictAdmin := e.Group("/admin", adminAuthMidd.JWTAdmin())
 
 	{
-		restrictAdmin.GET("/profile", func(c echo.Context) error {
-			admin := c.Get("admin").(*helper.JwtCustomAdminClaims)
-			return c.JSON(http.StatusOK, admin)
-    })
 
 		restrictAdmin.GET("/counselors", adminCounselorHandler.GetAll)
 		restrictAdmin.POST("/counselors", adminCounselorHandler.Create)
