@@ -1,8 +1,6 @@
 package usecase
 
 import (
-	"fmt"
-
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/auth"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/auth/repository"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
@@ -30,7 +28,6 @@ func (u *authUseCase) Login(request auth.LoginAdminRequest) (entity.Admin, error
 	if err != nil {
 		return entity.Admin{}, auth.ErrInternalServerError
 	}
-	fmt.Println(request.Password + " " + data.Password)
 	if !u.Encryptor.CheckPasswordHash(request.Password, data.Password) {
 		return entity.Admin{}, auth.ErrInvalidCredential
 	}

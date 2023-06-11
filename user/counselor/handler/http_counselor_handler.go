@@ -18,7 +18,7 @@ func NewCounselorHandler(CUcase usecase.CounselorUsecase) *counselorHandler {
 	return &counselorHandler{CUscase: CUcase}
 }
 
-func(h *counselorHandler) GetAll(c echo.Context) error {
+func (h *counselorHandler) GetAll(c echo.Context) error {
 
 	var getAllReq counselor.GetAllRequest
 
@@ -27,30 +27,30 @@ func(h *counselorHandler) GetAll(c echo.Context) error {
 	if err := isRequestValid(&getAllReq); err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
 	}
-	
+
 	page, offset, limit := helper.GetPaginateData(getAllReq.Page, getAllReq.Limit, "mobile")
 
 	topicStr := constant.TOPICS[getAllReq.Topic]
-	
+
 	counselors, totalPages, err := h.CUscase.GetAll(getAllReq.Search, topicStr, getAllReq.SortBy, offset, limit)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, helper.ResponseData(err.Error(), http.StatusInternalServerError, nil))
 	}
-	
+
 	if page > totalPages {
 		return c.JSON(http.StatusNotFound, helper.ResponseData(counselor.ErrPageNotFound.Error(), http.StatusNotFound, nil))
 	}
 
 	return c.JSON(http.StatusOK, helper.ResponseData("success get all conselor", http.StatusOK, echo.Map{
-		"counselors": counselors,
+		"counselors":    counselors,
 		"current_pages": page,
-		"total_pages": totalPages,
+		"total_pages":   totalPages,
 	}))
 }
 
-func(h *counselorHandler) GetById(c echo.Context) error {
-	
+func (h *counselorHandler) GetById(c echo.Context) error {
+
 	var idReq counselor.IdRequest
 
 	c.Bind(&idReq)
@@ -60,7 +60,7 @@ func(h *counselorHandler) GetById(c echo.Context) error {
 	}
 
 	counselorRes, err := h.CUscase.GetById(idReq.ID)
-	
+
 	if err != nil {
 		return c.JSON(http.StatusNotFound, helper.ResponseData(err.Error(), http.StatusNotFound, nil))
 	}
@@ -70,8 +70,8 @@ func(h *counselorHandler) GetById(c echo.Context) error {
 	}))
 }
 
-func(h *counselorHandler) GetAllReview(c echo.Context) error {
-	
+func (h *counselorHandler) GetAllReview(c echo.Context) error {
+
 	getAllReviewReq := counselor.GetAllReviewRequest{}
 
 	c.Bind(&getAllReviewReq)
@@ -87,9 +87,9 @@ func(h *counselorHandler) GetAllReview(c echo.Context) error {
 	if err != nil {
 		status := http.StatusInternalServerError
 
-		switch err{
-			case counselor.ErrCounselorNotFound:
-				status = http.StatusNotFound
+		switch err {
+		case counselor.ErrCounselorNotFound:
+			status = http.StatusNotFound
 		}
 
 		return c.JSON(status, helper.ResponseData(err.Error(), status, nil))
@@ -102,14 +102,14 @@ func(h *counselorHandler) GetAllReview(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, helper.ResponseData("success get all counselor review", http.StatusOK, echo.Map{
-		"reviews": reviews,
+		"reviews":       reviews,
 		"current_pages": page,
-		"total_pages": totalPages,
+		"total_pages":   totalPages,
 	}))
 }
 
-func(h *counselorHandler) CreateReview(c echo.Context) error {
-	
+func (h *counselorHandler) CreateReview(c echo.Context) error {
+
 	var reviewReq counselor.CreateReviewRequest
 
 	var user = c.Get("user").(*helper.JwtCustomUserClaims)
@@ -127,9 +127,9 @@ func(h *counselorHandler) CreateReview(c echo.Context) error {
 	if err != nil {
 		status := http.StatusInternalServerError
 
-		switch err	{
-			case counselor.ErrCounselorNotFound:
-				status = http.StatusNotFound
+		switch err {
+		case counselor.ErrCounselorNotFound:
+			status = http.StatusNotFound
 		}
 
 		return c.JSON(status, helper.ResponseData(err.Error(), status, nil))
