@@ -49,6 +49,9 @@ import (
 	CareerUserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/career/handler"
 	CareerUserRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/career/repository"
 	CareerUserUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/career/usecase"
+
+	TransactionUserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/transaction/handler"
+	TransactionUserUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/transaction/usecase"
 )
 
 func main() {
@@ -139,6 +142,9 @@ func main() {
 	userForumH := UserForumAdminHandler.NewUserForumHandler(userForumU)
 
 	topicHandler := TopicHandler.NewTopicHandler()
+
+	userTransactionHandler := TransactionUserHandler.NewTransactionHandler()
+	userTransactionUsecase := TransactionUserUsecase.NewtransactionUsecase()
 
 	e := echo.New()
 
