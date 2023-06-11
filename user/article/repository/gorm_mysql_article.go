@@ -10,6 +10,7 @@ type ArticleRepository interface {
 	GetAll(search string, offset, limit int) ([]article.GetAllResponse, int64, error)
 	GetById(id string) (article.GetByResponse, error)
 	Count() (int, error)
+	UpdateCount(id string, article entity.Article) error
 }
 
 type mysqlArticleRepository struct {
@@ -44,14 +45,16 @@ func (r *mysqlArticleRepository) GetById(id string) (article.GetByResponse, erro
 		return article, err
 	}
 
-	article.ViewCount++
+	return article, nil
+}
 
-	err = r.DB.Model(&entity.Article{}).Where("id = ?", id).Updates(entity.Article{ViewCount: article.ViewCount}).Error
+func (r *mysqlArticleRepository) UpdateCount(id string, article entity.Article) error {
+	err := r.DB.Model(&entity.Article{}).Where("id = ?", id).Updates(article).Error
 	if err != nil {
-		return article, err
+		return err
 	}
 
-	return article, nil
+	return nil
 }
 
 func (r *mysqlArticleRepository) Count() (int, error) {

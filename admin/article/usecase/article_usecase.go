@@ -1,12 +1,16 @@
 package usecase
 
 import (
+	"log"
 	"mime/multipart"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/article"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/article/repository"
+	Comment "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/comment/repository"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/constant"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
+	User "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth/repository"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
 )
@@ -15,18 +19,22 @@ type ArticleUsecase interface {
 	GetAll(search string, offset, limit int) ([]article.GetAllResponse, int, error)
 	GetTotalPages(limit int) (int, error)
 	GetById(id string) (article.GetByResponse, error)
+	GetAllComment(id string, offset, limit int) ([]article.CommentResponse, int, error)
 	Create(inputDetail article.CreateRequest, inputImage *multipart.FileHeader) error
 	Update(inputDetail article.UpdateRequest, inputImage *multipart.FileHeader) error
 	Delete(id string) error
+	DeleteComment(articleId, commentId string) error
 }
 
 type articleUsecase struct {
 	articleRepo repository.ArticleRepository
+	commentRepo Comment.CommentRepository
+	userRepo    User.UserRepository
 	image       helper.Image
 }
 
-func NewArticleUsecase(CRepo repository.ArticleRepository, Image helper.Image) ArticleUsecase {
-	return &articleUsecase{articleRepo: CRepo, image: Image}
+func NewArticleUsecase(ARepo repository.ArticleRepository, CommentRepo Comment.CommentRepository, UserRepo User.UserRepository, Image helper.Image) ArticleUsecase {
+	return &articleUsecase{articleRepo: ARepo, commentRepo: CommentRepo, userRepo: UserRepo, image: Image}
 }
 
 func (u *articleUsecase) GetAll(search string, offset, limit int) ([]article.GetAllResponse, int, error) {
@@ -140,6 +148,81 @@ func (u *articleUsecase) Delete(id string) error {
 
 	err = u.articleRepo.Delete(articleData.ID)
 
+	if err != nil {
+		return article.ErrInternalServerError
+	}
+
+	return nil
+}
+
+func (u *articleUsecase) GetAllComment(id string, offset, limit int) ([]article.CommentResponse, int, error) {
+
+	// Check article
+	_, err := u.articleRepo.GetById(id)
+	if err != nil {
+		return []article.CommentResponse{}, 0, article.ErrArticleNotFound
+	}
+
+	comments, totalData, err := u.commentRepo.GetByArticleId(id, offset, limit)
+	if err != nil {
+		log.Print(err.Error())
+		return []article.CommentResponse{}, 0, article.ErrInternalServerError
+	}
+
+	var commentsResponse = make([]article.CommentResponse, len(comments))
+	var g errgroup.Group
+
+	for i, comment := range comments {
+		i := i
+		comment := comment
+		g.Go(func() error {
+			user, err := u.userRepo.GetById(comment.UserID)
+			if err != nil {
+				return article.ErrInternalServerError
+			}
+			commentResponse := article.CommentResponse{
+				ID:             comment.ID,
+				ArticleID:      comment.ArticleID,
+				UserID:         user.ID,
+				ProfilePicture: user.ProfilePicture,
+				Username:       user.Username,
+				Comment:        comment.Comment,
+				CreatedAt:      comment.CreatedAt.Format("2006-01-02"),
+			}
+			commentsResponse[i] = commentResponse
+
+			return nil
+		})
+	}
+
+	if err := g.Wait(); err != nil {
+		return []article.CommentResponse{}, 0, err
+	}
+
+	totalPages := helper.GetTotalPages(int(totalData), limit)
+
+	return commentsResponse, totalPages, nil
+}
+
+func (u *articleUsecase) DeleteComment(articleId, commentId string) error {
+	comment, err := u.commentRepo.GetByArticleIdAndCommentId(articleId, commentId)
+
+	if err != nil {
+		return article.ErrCommentNotFound
+	}
+
+	articles, err := u.articleRepo.GetById(articleId)
+	if err != nil {
+		return article.ErrArticleNotFound
+	}
+	articles.CommentCount--
+
+	commentCount := entity.Article{
+		CommentCount: articles.CommentCount,
+	}
+	u.articleRepo.UpdateCount(articles.ID, commentCount)
+
+	err = u.commentRepo.Delete(comment.ID)
 	if err != nil {
 		return article.ErrInternalServerError
 	}

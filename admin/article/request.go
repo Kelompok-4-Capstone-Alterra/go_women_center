@@ -19,6 +19,17 @@ type UpdateRequest struct {
 	Image       *multipart.FileHeader `form:"image" validate:"omitempty"`
 }
 
+type GetAllCommentRequest struct {
+	ArticleID string `param:"id" validate:"required,uuid"`
+	Page      int    `query:"page"`
+	Limit     int    `query:"limit"`
+}
+
+type DeleteCommentRequest struct {
+	ArticleID string `param:"article_id" validate:"required,uuid"`
+	CommentID string `param:"comment_id" validate:"required,uuid"`
+}
+
 type IdRequest struct {
 	ID string `param:"id" validate:"required,uuid"`
 }

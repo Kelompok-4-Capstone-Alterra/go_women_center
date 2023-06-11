@@ -150,3 +150,66 @@ func (h *articleHandler) Delete(c echo.Context) error {
 	return c.JSON(http.StatusOK, helper.ResponseData("success delete article", http.StatusOK, nil))
 
 }
+
+func (h *articleHandler) GetAllComment(c echo.Context) error {
+
+	getAllCommentReq := article.GetAllCommentRequest{}
+
+	c.Bind(&getAllCommentReq)
+
+	if err := isRequestValid(&getAllCommentReq); err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
+	}
+
+	page, offset, limit := helper.GetPaginateData(getAllCommentReq.Page, getAllCommentReq.Limit, "mobile")
+
+	comments, totalData, err := h.ArticleUsecase.GetAllComment(getAllCommentReq.ArticleID, offset, limit)
+
+	if err != nil {
+		status := http.StatusInternalServerError
+
+		switch err {
+		case article.ErrArticleNotFound:
+			status = http.StatusNotFound
+		}
+
+		return c.JSON(status, helper.ResponseData(err.Error(), status, nil))
+	}
+
+	totalPages := helper.GetTotalPages(totalData, limit)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, helper.ResponseData(err.Error(), http.StatusInternalServerError, nil))
+	}
+
+	return c.JSON(http.StatusOK, helper.ResponseData("success get all article comment", http.StatusOK, echo.Map{
+		"comments":      comments,
+		"current_pages": page,
+		"total_pages":   totalPages,
+	}))
+}
+
+func (h *articleHandler) DeleteComment(c echo.Context) error {
+	var commentReq article.DeleteCommentRequest
+
+	c.Bind(&commentReq)
+
+	if err := isRequestValid(&commentReq); err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
+	}
+
+	err := h.ArticleUsecase.DeleteComment(commentReq.ArticleID, commentReq.CommentID)
+
+	if err != nil {
+		status := http.StatusInternalServerError
+
+		switch err {
+		case article.ErrArticleNotFound:
+			status = http.StatusNotFound
+		}
+
+		return c.JSON(status, helper.ResponseData(err.Error(), status, nil))
+	}
+
+	return c.JSON(http.StatusOK, helper.ResponseData("success delete comment", http.StatusOK, nil))
+}

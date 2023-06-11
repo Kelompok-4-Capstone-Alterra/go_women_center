@@ -40,6 +40,7 @@ import (
 	ArticleAdminHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/article/handler"
 	ArticleAdminRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/article/repository"
 	ArticleAdminUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/article/usecase"
+	CommentAdminRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/comment/repository"
 
 	ArticleUserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/article/handler"
 	ArticleUserRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/article/repository"
@@ -57,10 +58,10 @@ func main() {
 		DB_Name:     os.Getenv("DB_NAME"),
 	}
 
-	sslconf := config.SSLconf{
-		SSL_CERT:        os.Getenv("SSL_CERT"),
-		SSL_PRIVATE_KEY: os.Getenv("SSL_PRIVATE_KEY"),
-	}
+	// sslconf := config.SSLconf{
+	// 	SSL_CERT:        os.Getenv("SSL_CERT"),
+	// 	SSL_PRIVATE_KEY: os.Getenv("SSL_PRIVATE_KEY"),
+	// }
 
 	googleOauthConfig := &oauth2.Config{
 		RedirectURL:  "http://localhost:8080/google/callback",
@@ -75,11 +76,11 @@ func main() {
 		"smtp.gmail.com",
 		os.Getenv("CONFIG_AUTH_EMAIL"),
 		os.Getenv("CONFIG_AUTH_PASSWORD"),
-		"Women Center <ivanhilmideran@gmail.com>", //TODO: set email to the proper one
+		"Women Center <averilprimayuda@gmail.com>", //TODO: set email to the proper one
 	)
 
 	db := dbconf.InitDB()
-	sslconf.InitSSL()
+	// sslconf.InitSSL()
 
 	// helper
 	jwtConf := helper.NewAuthJWT(os.Getenv("JWT_SECRET_USER"), os.Getenv("JWT_SECRET_ADMIN"))
@@ -121,8 +122,9 @@ func main() {
 	adminCareerUsecase := CareerAdminUsecase.NewCareerUsecase(adminCareerRepo, image)
 	adminCareerHandler := CareerAdminHandler.NewCareerHandler(adminCareerUsecase)
 
+	adminCommentRepo := CommentAdminRepository.NewMysqlArticleRepository(db)
 	adminArticleRepo := ArticleAdminRepository.NewMysqlArticleRepository(db)
-	adminArticleUsecase := ArticleAdminUsecase.NewArticleUsecase(adminArticleRepo, image)
+	adminArticleUsecase := ArticleAdminUsecase.NewArticleUsecase(adminArticleRepo, adminCommentRepo, userAuthRepo, image)
 	adminArticleHandler := ArticleAdminHandler.NewArticleHandler(adminArticleUsecase)
 
 	topicHandler := TopicHandler.NewTopicHandler()
@@ -169,7 +171,7 @@ func main() {
 		restrictUsers.GET("/articles/:id", userArticleHandler.GetById)
 		restrictUsers.POST("/articles/:id/comments", userArticleHandler.CreateComment)
 		restrictUsers.GET("/articles/:id/comments", userArticleHandler.GetAllComment)
-		restrictUsers.DELETE("/articles/:id/comments", userArticleHandler.DeleteComment)
+		restrictUsers.DELETE("/articles/:article_id/comments/:comment_id", userArticleHandler.DeleteComment)
 	}
 
 	restrictAdmin := e.Group("/admin", adminAuthMidd.JWTAdmin())
@@ -197,11 +199,13 @@ func main() {
 		restrictAdmin.GET("/articles/:id", adminArticleHandler.GetById)
 		restrictAdmin.PUT("/articles/:id", adminArticleHandler.Update)
 		restrictAdmin.DELETE("/articles/:id", adminArticleHandler.Delete)
+		restrictAdmin.GET("/articles/:id/comments", adminArticleHandler.GetAllComment)
+		restrictAdmin.DELETE("/articles/:article_id/comments/:comment_id", adminArticleHandler.DeleteComment)
 
 	}
 
 	// ssl
-	e.Logger.Fatal(e.StartTLS(":8080", "./ssl/certificate.crt", "./ssl/private.key"))
+	// e.Logger.Fatal(e.StartTLS(":8080", "./ssl/certificate.crt", "./ssl/private.key"))
 
-	// e.Logger.Fatal(e.Start(":8080"))
+	e.Logger.Fatal(e.Start(":8080"))
 }

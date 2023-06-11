@@ -151,7 +151,7 @@ func (h *articleHandler) DeleteComment(c echo.Context) error {
 
 	commentReq.UserID = user.ID
 
-	err := h.ArticleUsecase.DeleteComment(commentReq.UserID, commentReq.ArticleID)
+	err := h.ArticleUsecase.DeleteComment(commentReq.UserID, commentReq.ArticleID, commentReq.CommentID)
 
 	if err != nil {
 		status := http.StatusInternalServerError

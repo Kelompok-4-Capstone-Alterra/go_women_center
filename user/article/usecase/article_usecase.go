@@ -18,7 +18,7 @@ type ArticleUsecase interface {
 	GetById(id string) (article.GetByResponse, error)
 	GetAllComment(id string, offset, limit int) ([]article.CommentResponse, int, error)
 	CreateComment(input article.CreateCommentRequest) error
-	DeleteComment(userId, articleId string) error
+	DeleteComment(userId, articleId, commentId string) error
 }
 
 type articleUsecase struct {
@@ -44,21 +44,31 @@ func (u *articleUsecase) GetAll(search string, offset, limit int) ([]article.Get
 
 func (u *articleUsecase) GetById(id string) (article.GetByResponse, error) {
 	articleData, err := u.articleRepo.GetById(id)
-
 	if err != nil {
 		return articleData, article.ErrArticleNotFound
 	}
+	articleData.ViewCount++
+
+	viewCount := entity.Article{
+		ViewCount: articleData.ViewCount,
+	}
+	u.articleRepo.UpdateCount(articleData.ID, viewCount)
 
 	return articleData, nil
 }
 
 func (u *articleUsecase) CreateComment(inputComment article.CreateCommentRequest) error {
 
-	_, err := u.articleRepo.GetById(inputComment.ArticleID)
-
+	articles, err := u.articleRepo.GetById(inputComment.ArticleID)
 	if err != nil {
 		return article.ErrArticleNotFound
 	}
+	articles.CommentCount++
+
+	commentCount := entity.Article{
+		CommentCount: articles.CommentCount,
+	}
+	u.articleRepo.UpdateCount(articles.ID, commentCount)
 
 	uuid, _ := helper.NewGoogleUUID().GenerateUUID()
 
@@ -70,6 +80,27 @@ func (u *articleUsecase) CreateComment(inputComment article.CreateCommentRequest
 	}
 
 	err = u.commentRepo.Save(newComment)
+
+	if err != nil {
+		return article.ErrInternalServerError
+	}
+	return nil
+}
+
+func (u *articleUsecase) UpdateCount(inputDetail article.UpdateCountRequest) error {
+
+	articleData, err := u.articleRepo.GetById(inputDetail.ID)
+
+	if err != nil {
+		return article.ErrArticleNotFound
+	}
+
+	articleUpdate := entity.Article{
+		CommentCount: articleData.CommentCount,
+		ViewCount:    articleData.ViewCount,
+	}
+	err = u.articleRepo.UpdateCount(articleData.ID, articleUpdate)
+
 	if err != nil {
 		return article.ErrInternalServerError
 	}
@@ -103,6 +134,8 @@ func (u *articleUsecase) GetAllComment(id string, offset, limit int) ([]article.
 			}
 			commentResponse := article.CommentResponse{
 				ID:             comment.ID,
+				ArticleID:      comment.ArticleID,
+				UserID:         user.ID,
 				ProfilePicture: user.ProfilePicture,
 				Username:       user.Username,
 				Comment:        comment.Comment,
@@ -123,12 +156,23 @@ func (u *articleUsecase) GetAllComment(id string, offset, limit int) ([]article.
 	return commentsResponse, totalPages, nil
 }
 
-func (u *articleUsecase) DeleteComment(userId, articleId string) error {
-	comment, err := u.commentRepo.GetByUserIdAndArticleId(userId, articleId)
+func (u *articleUsecase) DeleteComment(userId, articleId, commentId string) error {
+	comment, err := u.commentRepo.GetByUserIdAndArticleIdAndCommentId(userId, articleId, commentId)
 
 	if err != nil {
 		return article.ErrCommentNotFound
 	}
+
+	articles, err := u.articleRepo.GetById(articleId)
+	if err != nil {
+		return article.ErrArticleNotFound
+	}
+	articles.CommentCount--
+
+	commentCount := entity.Article{
+		CommentCount: articles.CommentCount,
+	}
+	u.articleRepo.UpdateCount(articles.ID, commentCount)
 
 	err = u.commentRepo.Delete(comment.ID)
 	if err != nil {

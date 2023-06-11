@@ -11,7 +11,7 @@ type Comment struct {
 	ArticleID string `gorm:"type:varchar(36);not null"`
 	UserID    string `gorm:"type:varchar(36);not null"`
 	Comment   string
-	CreatedAt time.Time
+	CreatedAt time.Time `gorm:"format:2006-01-02"`
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 }

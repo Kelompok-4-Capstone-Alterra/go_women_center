@@ -8,9 +8,7 @@ import (
 type CommentRepository interface {
 	GetByArticleId(articleId string, offset, limit int) ([]entity.Comment, int64, error)
 	Save(comment entity.Comment) error
-	GetByUserIdAndArticleId(userId, articleId string) (entity.Comment, error)
-	GetByUserId(userId string) (entity.Comment, error)
-	GetByUserIdAndArticleIdAndCommentId(userId, articleId, commentId string) (entity.Comment, error)
+	GetByArticleIdAndCommentId(articleId, commentId string) (entity.Comment, error)
 	Delete(id string) error
 }
 
@@ -62,22 +60,10 @@ func (r *mysqlArticleRepository) GetByUserIdAndArticleId(userId, articleId strin
 	return comment, nil
 }
 
-func (r *mysqlArticleRepository) GetByUserIdAndArticleIdAndCommentId(userId, articleId, commentId string) (entity.Comment, error) {
+func (r *mysqlArticleRepository) GetByArticleIdAndCommentId(articleId, commentId string) (entity.Comment, error) {
 	comment := entity.Comment{}
 
-	err := r.DB.Where("user_id = ? AND  article_id= ? AND  id= ?", userId, articleId, commentId).First(&comment).Error
-
-	if err != nil {
-		return comment, err
-	}
-
-	return comment, nil
-}
-
-func (r *mysqlArticleRepository) GetByUserId(userId string) (entity.Comment, error) {
-	comment := entity.Comment{}
-
-	err := r.DB.Where("user_id = ?", userId).First(&comment).Error
+	err := r.DB.Where("article_id= ? AND  id= ?", articleId, commentId).First(&comment).Error
 
 	if err != nil {
 		return comment, err
