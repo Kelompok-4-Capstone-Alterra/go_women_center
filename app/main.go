@@ -161,7 +161,7 @@ func main() {
 
 	midtransServerKey := os.Getenv("MIDTRANS_SERVER_KEY")
 	
-	userTransactionUsecase := TransactionUserUsecase.NewtransactionUsecase(midtransServerKey)
+	userTransactionUsecase := TransactionUserUsecase.NewtransactionUsecase(midtransServerKey, googleUUID)
 	userTransactionHandler := TransactionUserHandler.NewTransactionHandler(userTransactionUsecase)
 
 	e := echo.New()
