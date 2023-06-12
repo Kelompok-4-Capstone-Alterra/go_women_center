@@ -69,10 +69,10 @@ func main() {
 		DB_Name:     os.Getenv("DB_NAME"),
 	}
 
-	sslconf := config.SSLconf{
-		SSL_CERT:        os.Getenv("SSL_CERT"),
-		SSL_PRIVATE_KEY: os.Getenv("SSL_PRIVATE_KEY"),
-	}
+	// sslconf := config.SSLconf{
+	// 	SSL_CERT:        os.Getenv("SSL_CERT"),
+	// 	SSL_PRIVATE_KEY: os.Getenv("SSL_PRIVATE_KEY"),
+	// }
 
 	googleOauthConfig := &oauth2.Config{
 		RedirectURL:  "http://localhost:8080/google/callback",
@@ -91,7 +91,7 @@ func main() {
 	)
 
 	db := dbconf.InitDB()
-	sslconf.InitSSL()
+	// sslconf.InitSSL()
 
 	// helper
 	jwtConf := helper.NewAuthJWT(os.Getenv("JWT_SECRET_USER"), os.Getenv("JWT_SECRET_ADMIN"))
@@ -113,7 +113,6 @@ func main() {
 	userCounselorUsecase := CounselorUserUsecase.NewCounselorUsecase(userCounselorRepo, userReviewRepo, userAuthRepo)
 	userCounselorHandler := CounselorUserHandler.NewCounselorHandler(userCounselorUsecase)
 
-
 	userRepo := UserProfileRepo.NewMysqlUserRepository(db)
 	userUsecase := UserProfileUsecase.NewProfileUsecase(userRepo, image, encryptor)
 	userHandler := UserProfileHandler.NewProfileHandler(userUsecase)
@@ -133,7 +132,7 @@ func main() {
 	adminCareerRepo := CareerAdminRepository.NewMysqlCareerRepository(db)
 	adminCareerUsecase := CareerAdminUsecase.NewCareerUsecase(adminCareerRepo, image)
 	adminCareerHandler := CareerAdminHandler.NewCareerHandler(adminCareerUsecase)
-	
+
 	adminUsersRepo := UsersAdminRepository.NewMysqlUserRepository(db)
 	adminUsersUsecase := UsersAdminUsecase.NewUserUsecase(adminUsersRepo)
 	adminUsersHandler := UsersAdminHandler.NewUserHandler(adminUsersUsecase)
@@ -184,7 +183,7 @@ func main() {
 
 	restrictUsers := e.Group("/users", userAuthMidd.JWTUser(), userAuthMidd.CheckUser(userAuthUsecase))
 
-	{	
+	{
 		restrictUsers.GET("/profile", userHandler.GetById)
 		restrictUsers.PUT("/profile", userHandler.Update)
 		restrictUsers.PUT("/profile/password", userHandler.UpdatePassword)
@@ -226,12 +225,13 @@ func main() {
 		restrictAdmin.GET("/users/:id", adminUsersHandler.GetById)
 		restrictAdmin.DELETE("/users/:id", adminUsersHandler.Delete)
 
+		restrictAdmin.GET("/forums", forumAdminH.GetAll)
+		restrictAdmin.GET("/forums/:id", forumAdminH.GetById)
 		restrictAdmin.DELETE("/forums/:id", forumAdminH.Delete)
 	}
 
-
 	// ssl
-	e.Logger.Fatal(e.StartTLS(":8080", "./ssl/certificate.crt", "./ssl/private.key"))
+	// e.Logger.Fatal(e.StartTLS(":8080", "./ssl/certificate.crt", "./ssl/private.key"))
 
-	// e.Logger.Fatal(e.Start(":8080"))
+	e.Logger.Fatal(e.Start(":8080"))
 }

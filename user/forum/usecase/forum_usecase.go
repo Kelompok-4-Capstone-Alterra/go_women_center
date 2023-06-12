@@ -74,19 +74,31 @@ func (fu ForumUsecase) Create(forum *entity.Forum) error {
 }
 
 func (fu ForumUsecase) Update(id, user_id string, forumId *entity.Forum) error {
-	err := fu.ForumR.Update(id, user_id, forumId)
+	_, err := fu.ForumR.GetById(id, user_id)
 
 	if err != nil {
 		return err
+	}
+
+	err2 := fu.ForumR.Update(id, user_id, forumId)
+
+	if err2 != nil {
+		return err2
 	}
 	return nil
 }
 
 func (fu ForumUsecase) Delete(id, user_id string) error {
-	err := fu.ForumR.Delete(id, user_id)
+	_, err := fu.ForumR.GetById(id, user_id)
 
 	if err != nil {
 		return err
+	}
+
+	err2 := fu.ForumR.Delete(id, user_id)
+
+	if err != nil {
+		return err2
 	}
 	return nil
 }
