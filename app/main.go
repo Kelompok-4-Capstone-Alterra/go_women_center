@@ -12,12 +12,12 @@ import (
 	CounselorAdminHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor/handler"
 	CounselorAdminRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor/repository"
 	CounselorAdminUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor/usecase"
-	AdminScheduleHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/schedule/handler"
-	AdminScheduleRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/schedule/repository"
-	AdminScheduleUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/schedule/usecase"
 	ForumAdminHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/forum/handler"
 	ForumAdminRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/forum/repository"
 	ForumAdminUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/forum/usecase"
+	AdminScheduleHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/schedule/handler"
+	AdminScheduleRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/schedule/repository"
+	AdminScheduleUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/schedule/usecase"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/app/config"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
 	TopicHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/topic/handler"
@@ -28,6 +28,10 @@ import (
 	CounselorUserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor/handler"
 	CounselorUserRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor/repository"
 	CounselorUserUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor/usecase"
+
+	UserProfileHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/profile/handler"
+	UserProfileRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/profile/repository"
+	UserProfileUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/profile/usecase"
 
 	ForumUserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum/handler"
 	ForumUserRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum/repository"
@@ -41,6 +45,10 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
+
+	UsersAdminHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/users/handler"
+	UsersAdminRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/users/repository"
+	UsersAdminUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/users/usecase"
 
 	CareerAdminHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/career/handler"
 	CareerAdminRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/career/repository"
@@ -108,6 +116,11 @@ func main() {
 	userCounselorUsecase := CounselorUserUsecase.NewCounselorUsecase(userCounselorRepo, userReviewRepo, userAuthRepo)
 	userCounselorHandler := CounselorUserHandler.NewCounselorHandler(userCounselorUsecase)
 
+
+	userRepo := UserProfileRepo.NewMysqlUserRepository(db)
+	userUsecase := UserProfileUsecase.NewProfileUsecase(userRepo, image, encryptor)
+	userHandler := UserProfileHandler.NewProfileHandler(userUsecase)
+
 	userCareerRepo := CareerUserRepository.NewMysqlCareerRepository(db)
 	userCareerUsecase := CareerUserUsecase.NewCareerUsecase(userCareerRepo)
 	userCareerHandler := CareerUserHandler.NewCareerHandler(userCareerUsecase)
@@ -123,7 +136,10 @@ func main() {
 	adminCareerRepo := CareerAdminRepository.NewMysqlCareerRepository(db)
 	adminCareerUsecase := CareerAdminUsecase.NewCareerUsecase(adminCareerRepo, image)
 	adminCareerHandler := CareerAdminHandler.NewCareerHandler(adminCareerUsecase)
-
+	
+	adminUsersRepo := UsersAdminRepository.NewMysqlUserRepository(db)
+	adminUsersUsecase := UsersAdminUsecase.NewUserUsecase(adminUsersRepo)
+	adminUsersHandler := UsersAdminHandler.NewUserHandler(adminUsersUsecase)
 
 	adminScheduleRepo := AdminScheduleRepo.NewMysqlScheduleRepository(db)
 	adminScheduleUsecase := AdminScheduleUsecase.NewScheduleUsecase(adminCounselorRepo, adminScheduleRepo, googleUUID)
@@ -174,13 +190,12 @@ func main() {
 		users.GET("/careers", userCareerHandler.GetAll)
 	}
 
-	restrictUsers := e.Group("/users", userAuthMidd.JWTUser())
-	{
-		restrictUsers.GET("/profile", func(c echo.Context) error {
-			user := c.Get("user").(*helper.JwtCustomUserClaims)
-			return c.JSON(http.StatusOK, user)
-		})
+	restrictUsers := e.Group("/users", userAuthMidd.JWTUser(), userAuthMidd.CheckUser(userAuthUsecase))
 
+	{	
+		restrictUsers.GET("/profile", userHandler.GetById)
+		restrictUsers.PUT("/profile", userHandler.Update)
+		restrictUsers.PUT("/profile/password", userHandler.UpdatePassword)
 		restrictUsers.GET("/counselors/:id", userCounselorHandler.GetById)
 		restrictUsers.POST("/counselors/:id/reviews", userCounselorHandler.CreateReview)
 		restrictUsers.GET("/counselors/:id/reviews", userCounselorHandler.GetAllReview)
@@ -197,10 +212,6 @@ func main() {
 	restrictAdmin := e.Group("/admin", adminAuthMidd.JWTAdmin())
 
 	{
-		restrictAdmin.GET("/profile", func(c echo.Context) error {
-			admin := c.Get("admin").(*helper.JwtCustomAdminClaims)
-			return c.JSON(http.StatusOK, admin)
-    })
 
 		restrictAdmin.GET("/counselors", adminCounselorHandler.GetAll)
 		restrictAdmin.POST("/counselors", adminCounselorHandler.Create)
@@ -218,6 +229,10 @@ func main() {
 		restrictAdmin.GET("/careers/:id", adminCareerHandler.GetById)
 		restrictAdmin.PUT("/careers/:id", adminCareerHandler.Update)
 		restrictAdmin.DELETE("/careers/:id", adminCareerHandler.Delete)
+
+		restrictAdmin.GET("/users", adminUsersHandler.GetAll)
+		restrictAdmin.GET("/users/:id", adminUsersHandler.GetById)
+		restrictAdmin.DELETE("/users/:id", adminUsersHandler.Delete)
 
 		restrictAdmin.DELETE("/forums/:id", forumAdminH.Delete)
 	}
