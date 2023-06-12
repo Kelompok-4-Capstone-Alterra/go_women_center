@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	response "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/reading_list"
@@ -26,9 +27,12 @@ func NewMysqlReadingListRepository(db *gorm.DB) ReadingListRepository {
 
 func (rlr mysqlReadingListRepository) GetAll(id_user, name string, offset, limit int) ([]response.ReadingList, int64, error) {
 	var readingList []response.ReadingList
-	var totalData int64
+	var totalData int64 = 3
 
-	err := rlr.DB.Table("reading_lists").Where("name LIKE ?", "%"+name+"%").Count(&totalData).Offset(offset).Limit(limit).Find(&readingList).Error
+	err := rlr.DB.Table("reading_lists").Select("reading_lists.id, reading_lists.user_id, reading_lists.name, reading_lists.description, COUNT(reading_list_articles.id) AS article_total").
+		Joins("LEFT JOIN reading_list_articles ON reading_lists.id = reading_list_articles.reading_list_id").
+		Joins("LEFT JOIN articles ON articles.id = reading_list_articles.article_id").Where("name LIKE ?", "%"+name+"%").
+		Group("reading_lists.id").Count(&totalData).Offset(offset).Limit(limit).Preload("ReadingListArticles").Find(&readingList).Error
 
 	if err != nil {
 		return nil, totalData, err
@@ -38,8 +42,12 @@ func (rlr mysqlReadingListRepository) GetAll(id_user, name string, offset, limit
 }
 
 func (rlr mysqlReadingListRepository) GetById(id, user_id string) (*response.ReadingList, error) {
+	fmt.Println("get by id")
 	var readingList response.ReadingList
-	err := rlr.DB.Table("reading_lists").First(&readingList).Error
+	err := rlr.DB.Table("reading_lists").Select("reading_lists.id, reading_lists.user_id, reading_lists.name, reading_lists.description, COUNT(reading_list_articles.id) AS article_total").
+		Joins("INNER JOIN reading_list_articles ON reading_lists.id = reading_list_articles.reading_list_id").
+		Joins("INNER JOIN articles ON articles.id = reading_list_articles.article_id").Where("reading_lists.id = ?", id).
+		Preload("ReadingListArticles").First(&readingList).Error
 
 	if err != nil {
 		return nil, err
@@ -57,15 +65,14 @@ func (rlr mysqlReadingListRepository) Create(readingList *entity.ReadingList) er
 	return nil
 }
 
-func (rlr mysqlReadingListRepository) Update(id, user_id string, readingList *entity.ReadingList) error {
-	var readingListId entity.ReadingList
+func (rlr mysqlReadingListRepository) Update(id, user_id string, readingListId *entity.ReadingList) error {
+	var readingList entity.ReadingList
 	err := rlr.DB.Where("id = ?", id).Take(&entity.ReadingList{}).Error
-
 	if err != nil {
 		return err
 	}
 
-	err2 := rlr.DB.Model(&readingListId).Where("id = ? AND user_id = ? ", id, user_id).Updates(&readingList).RowsAffected
+	err2 := rlr.DB.Model(&readingList).Where("id = ? AND user_id = ? ", id, user_id).Updates(&readingListId).RowsAffected
 	if err2 != 1 {
 		return errors.New("errors")
 	}

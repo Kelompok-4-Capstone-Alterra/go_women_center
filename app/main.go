@@ -50,6 +50,10 @@ import (
 	ReadingListHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/reading_list/handler"
 	ReadingListRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/reading_list/repository"
 	ReadingListUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/reading_list/usecase"
+
+	ReadingListArticleHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/reading_list_article/handler"
+	ReadingListArticleRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/reading_list_article/repository"
+	ReadingListArticleUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/reading_list_article/usecase"
 )
 
 func main() {
@@ -137,6 +141,10 @@ func main() {
 	ReadingListU := ReadingListUsecase.NewReadingListUsecase(ReadingListR)
 	ReadingListH := ReadingListHandler.NewReadingListHandler(ReadingListU)
 
+	ReadingListArticleR := ReadingListArticleRepository.NewMysqlReadingListArticleRepository(db)
+	ReadingListArticleU := ReadingListArticleUsecase.NewReadingListArticleUsecase(ReadingListArticleR)
+	ReadingListArticleH := ReadingListArticleHandler.NewReadingListArticleHandler(ReadingListArticleU)
+
 	topicHandler := TopicHandler.NewTopicHandler()
 
 	e := echo.New()
@@ -189,6 +197,9 @@ func main() {
 		restrictUsers.POST("/reading-lists", ReadingListH.Create)
 		restrictUsers.PUT("/reading-lists/:id", ReadingListH.Update)
 		restrictUsers.DELETE("/reading-lists/:id", ReadingListH.Delete)
+
+		restrictUsers.POST("/reading-lists/joins", ReadingListArticleH.Create)
+		restrictUsers.DELETE("/reading-lists/joins/:id", ReadingListArticleH.Delete)
 
 	}
 
