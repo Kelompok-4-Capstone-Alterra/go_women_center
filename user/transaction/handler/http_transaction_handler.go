@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"net/http"
+
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/transaction/usecase"
 	"github.com/labstack/echo/v4"
 )
@@ -12,10 +14,12 @@ type transactionHandler struct {
 }
 
 func NewTransactionHandler(transactionUsecase usecase.TransactionUsecase) *transactionHandler {
-	return &transactionHandler{}
+	return &transactionHandler{
+		Usecase: transactionUsecase,
+	}
 }
 
 func (h *transactionHandler) GenerateTransaction(c echo.Context) error {
 	h.Usecase.GenerateTransaction()
-	return nil
+	return c.JSON(http.StatusOK, "controller success")
 }

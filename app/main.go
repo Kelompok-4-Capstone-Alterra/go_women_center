@@ -160,6 +160,7 @@ func main() {
 	topicHandler := TopicHandler.NewTopicHandler()
 
 	midtransServerKey := os.Getenv("MIDTRANS_SERVER_KEY")
+	
 	userTransactionUsecase := TransactionUserUsecase.NewtransactionUsecase(midtransServerKey)
 	userTransactionHandler := TransactionUserHandler.NewTransactionHandler(userTransactionUsecase)
 

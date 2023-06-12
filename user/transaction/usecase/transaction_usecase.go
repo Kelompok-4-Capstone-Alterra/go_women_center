@@ -15,7 +15,7 @@ type transactionUsecase struct {
 	serverKey string
 }
 
-func NewtransactionUsecase(inputServerKey string) *transactionUsecase {
+func NewtransactionUsecase(inputServerKey string) TransactionUsecase {
 	return &transactionUsecase{
 		serverKey: inputServerKey,
 	}
@@ -30,7 +30,7 @@ func (t *transactionUsecase) GenerateTransaction() error {
 	// 2. Initiate Snap request param
 	req := &snap.Request{
 		TransactionDetails: midtrans.TransactionDetails{
-			OrderID:  "YOUR-ORDER-ID-12456",
+			OrderID:  "YOUR-ORDER-ID-12457",
 			GrossAmt: 100000,
 		}, 
 		CreditCard: &snap.CreditCardDetails{
