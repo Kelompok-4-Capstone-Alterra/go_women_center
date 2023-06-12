@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"log"
+	"time"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/article"
@@ -43,10 +44,13 @@ func (u *articleUsecase) GetAll(search string, offset, limit int) ([]article.Get
 }
 
 func (u *articleUsecase) GetById(id string) (article.GetByResponse, error) {
+
 	articleData, err := u.articleRepo.GetById(id)
+
 	if err != nil {
 		return articleData, article.ErrArticleNotFound
 	}
+
 	articleData.ViewCount++
 
 	viewCount := entity.Article{
@@ -54,7 +58,25 @@ func (u *articleUsecase) GetById(id string) (article.GetByResponse, error) {
 	}
 	u.articleRepo.UpdateCount(articleData.ID, viewCount)
 
-	return articleData, nil
+	dateStr := articleData.Date.Format("2006-01-02")
+
+	date, err := time.Parse("2006-01-02", dateStr)
+	if err != nil {
+		return articleData, err
+	}
+
+	articleDataResponse := article.GetByResponse{
+		ID:           articleData.ID,
+		Image:        articleData.Image,
+		Author:       articleData.Author,
+		Topic:        articleData.Topic,
+		ViewCount:    articleData.ViewCount,
+		CommentCount: articleData.CommentCount,
+		Description:  articleData.Description,
+		Date:         date,
+	}
+
+	return articleDataResponse, nil
 }
 
 func (u *articleUsecase) CreateComment(inputComment article.CreateCommentRequest) error {

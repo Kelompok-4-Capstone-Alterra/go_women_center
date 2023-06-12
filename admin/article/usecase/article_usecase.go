@@ -3,6 +3,7 @@ package usecase
 import (
 	"log"
 	"mime/multipart"
+	"time"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/article"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/article/repository"
@@ -68,7 +69,25 @@ func (u *articleUsecase) GetById(id string) (article.GetByResponse, error) {
 		return articleData, article.ErrArticleNotFound
 	}
 
-	return articleData, nil
+	dateStr := articleData.Date.Format("2006-01-02")
+
+	date, err := time.Parse("2006-01-02", dateStr)
+	if err != nil {
+		return articleData, err
+	}
+
+	articleDataResponse := article.GetByResponse{
+		ID:           articleData.ID,
+		Image:        articleData.Image,
+		Author:       articleData.Author,
+		Topic:        articleData.Topic,
+		ViewCount:    articleData.ViewCount,
+		CommentCount: articleData.CommentCount,
+		Description:  articleData.Description,
+		Date:         date,
+	}
+
+	return articleDataResponse, nil
 }
 
 func (u *articleUsecase) Create(inputDetail article.CreateRequest, inputImage *multipart.FileHeader) error {
@@ -85,6 +104,7 @@ func (u *articleUsecase) Create(inputDetail article.CreateRequest, inputImage *m
 		Topic:       constant.TOPICS[inputDetail.Topic],
 		Author:      inputDetail.Author,
 		Description: inputDetail.Description,
+		Date:        time.Now(),
 		Image:       path,
 	}
 
