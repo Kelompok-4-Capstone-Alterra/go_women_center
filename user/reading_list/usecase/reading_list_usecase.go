@@ -54,19 +54,31 @@ func (rlu ReadingListUsecase) Create(readingList *entity.ReadingList) error {
 }
 
 func (rlu ReadingListUsecase) Update(id, user_id string, readingListId *entity.ReadingList) error {
-	err := rlu.ReadingListR.Update(id, user_id, readingListId)
+	_, err := rlu.ReadingListR.GetById(id, user_id)
 
 	if err != nil {
 		return err
+	}
+
+	err2 := rlu.ReadingListR.Update(id, user_id, readingListId)
+
+	if err2 != nil {
+		return err2
 	}
 	return nil
 }
 
 func (rlu ReadingListUsecase) Delete(id, user_id string) error {
-	err := rlu.ReadingListR.Delete(id, user_id)
+	_, err := rlu.ReadingListR.GetById(id, user_id)
 
 	if err != nil {
 		return err
+	}
+
+	err2 := rlu.ReadingListR.Delete(id, user_id)
+
+	if err2 != nil {
+		return err2
 	}
 	return nil
 }

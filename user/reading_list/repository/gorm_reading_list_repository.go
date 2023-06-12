@@ -2,7 +2,6 @@ package repository
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	response "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/reading_list"
@@ -42,14 +41,15 @@ func (rlr mysqlReadingListRepository) GetAll(id_user, name string, offset, limit
 }
 
 func (rlr mysqlReadingListRepository) GetById(id, user_id string) (*response.ReadingList, error) {
-	fmt.Println("get by id")
 	var readingList response.ReadingList
 	err := rlr.DB.Table("reading_lists").Select("reading_lists.id, reading_lists.user_id, reading_lists.name, reading_lists.description, COUNT(reading_list_articles.id) AS article_total").
 		Joins("INNER JOIN reading_list_articles ON reading_lists.id = reading_list_articles.reading_list_id").
-		Joins("INNER JOIN articles ON articles.id = reading_list_articles.article_id").Where("reading_lists.id = ?", id).
-		Preload("ReadingListArticles").First(&readingList).Error
+		Joins("INNER JOIN articles ON articles.id = reading_list_articles.article_id").
+		Preload("ReadingListArticles").First(&readingList, "reading_lists.id = ?", id).Error
 
-	if err != nil {
+	if readingList.ID == "" {
+		return nil, errors.New("invallid id reading list")
+	} else if err != nil {
 		return nil, err
 	}
 
@@ -67,29 +67,19 @@ func (rlr mysqlReadingListRepository) Create(readingList *entity.ReadingList) er
 
 func (rlr mysqlReadingListRepository) Update(id, user_id string, readingListId *entity.ReadingList) error {
 	var readingList entity.ReadingList
-	err := rlr.DB.Where("id = ?", id).Take(&entity.ReadingList{}).Error
+	err := rlr.DB.Model(&readingList).Where("id = ? AND user_id = ? ", id, user_id).Updates(&readingListId).Error
+
 	if err != nil {
 		return err
-	}
-
-	err2 := rlr.DB.Model(&readingList).Where("id = ? AND user_id = ? ", id, user_id).Updates(&readingListId).RowsAffected
-	if err2 != 1 {
-		return errors.New("errors")
 	}
 
 	return nil
 }
 
 func (rlr mysqlReadingListRepository) Delete(id, user_id string) error {
-	err := rlr.DB.Where("id = ?", id).Take(&entity.ReadingList{}).Error
-
+	err := rlr.DB.Where("id = ? AND user_id = ? ", id, user_id).Delete(&entity.ReadingList{}).Error
 	if err != nil {
 		return err
-	}
-
-	err2 := rlr.DB.Where("id = ? AND user_id = ? ", id, user_id).Delete(&entity.ReadingList{}).RowsAffected
-	if err2 != 1 {
-		return errors.New("errors")
 	}
 	return nil
 }
