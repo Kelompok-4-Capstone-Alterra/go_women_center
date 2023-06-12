@@ -8,7 +8,7 @@ import (
 
 type ArticleRepository interface {
 	GetAll(search string, offset, limit int) ([]article.GetAllResponse, int64, error)
-	GetById(id string) (article.GetByResponse, error)
+	GetById(id string) (entity.Article, error)
 	Count() (int, error)
 	UpdateCount(id string, article entity.Article) error
 }
@@ -38,8 +38,8 @@ func (r *mysqlArticleRepository) GetAll(search string, offset, limit int) ([]art
 	return article, count, nil
 }
 
-func (r *mysqlArticleRepository) GetById(id string) (article.GetByResponse, error) {
-	var article article.GetByResponse
+func (r *mysqlArticleRepository) GetById(id string) (entity.Article, error) {
+	var article entity.Article
 	err := r.DB.Model(&entity.Article{}).First(&article, "id = ?", id).Error
 	if err != nil {
 		return article, err

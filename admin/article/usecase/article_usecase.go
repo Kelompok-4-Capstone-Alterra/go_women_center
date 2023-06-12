@@ -65,17 +65,6 @@ func (u *articleUsecase) GetById(id string) (article.GetByResponse, error) {
 
 	articleData, err := u.articleRepo.GetById(id)
 
-	if err != nil {
-		return articleData, article.ErrArticleNotFound
-	}
-
-	dateStr := articleData.Date.Format("2006-01-02")
-
-	date, err := time.Parse("2006-01-02", dateStr)
-	if err != nil {
-		return articleData, err
-	}
-
 	articleDataResponse := article.GetByResponse{
 		ID:           articleData.ID,
 		Image:        articleData.Image,
@@ -84,7 +73,11 @@ func (u *articleUsecase) GetById(id string) (article.GetByResponse, error) {
 		ViewCount:    articleData.ViewCount,
 		CommentCount: articleData.CommentCount,
 		Description:  articleData.Description,
-		Date:         date,
+		Date:         articleData.Date.Format("2006-01-01"),
+	}
+
+	if err != nil {
+		return articleDataResponse, article.ErrArticleNotFound
 	}
 
 	return articleDataResponse, nil

@@ -16,7 +16,7 @@ type Article struct {
 	CommentCount int    `gorm:"type:int;default:0"`
 	Description  string
 	Comments     []Comment `gorm:"foreignkey:ArticleID"`
-	Date         time.Time `gorm:"type:date"`
+	Date         time.Time `gorm:"type:date,format:2006-01-02"`
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 	DeletedAt    gorm.DeletedAt `gorm:"index"`
