@@ -1,8 +1,6 @@
 package repository
 
 import (
-	"errors"
-
 	response "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/forum"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"gorm.io/gorm"
@@ -51,7 +49,7 @@ func (fr mysqlForumRepository) GetAll(topic, categories, myforum string, offset,
 		Find(&response).Error
 
 	if err != nil {
-		return nil, totalData, errors.New("failed to get all forum data")
+		return nil, totalData, err
 	}
 
 	return response, totalData, nil
@@ -85,7 +83,7 @@ func (fr mysqlForumRepository) GetAllByPopular(topic, popular, categories, myfor
 		Find(&response).Error
 
 	if err != nil {
-		return nil, totalData, errors.New("failed to get all forum data")
+		return nil, totalData, err
 	}
 
 	return response, totalData, nil
@@ -119,7 +117,7 @@ func (fr mysqlForumRepository) GetAllByCreated(topic, created, categories, myfor
 		Find(&response).Error
 
 	if err != nil {
-		return nil, totalData, errors.New("failed to get all forum data")
+		return nil, totalData, err
 	}
 
 	return response, totalData, nil
@@ -135,10 +133,8 @@ func (fr mysqlForumRepository) GetById(id string) (*response.ResponseForum, erro
 		Group("forums.id").Having("forums.id =?", id).Preload("UserForums").
 		Find(&forumDetail).Error
 
-	if forumDetail.ID == "" {
-		return nil, errors.New("invalid id user " + id)
-	} else if err != nil {
-		return nil, errors.New("failed to get forum data details")
+	if err != nil {
+		return nil, err
 	}
 
 	return &forumDetail, nil
@@ -147,7 +143,7 @@ func (fr mysqlForumRepository) GetById(id string) (*response.ResponseForum, erro
 func (fr mysqlForumRepository) Delete(id string) error {
 	err := fr.DB.Where("id = ? ", id).Delete(&entity.Forum{}).Error
 	if err != nil {
-		return errors.New("failed to delete forum data")
+		return err
 	}
 	return nil
 }

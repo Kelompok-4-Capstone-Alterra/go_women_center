@@ -1,8 +1,6 @@
 package repository
 
 import (
-	"errors"
-
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	response "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum"
 	"gorm.io/gorm"
@@ -63,7 +61,7 @@ func (fr mysqlForumRepository) GetAll(id, topic, categories, myforum string, off
 	}
 
 	if err != nil {
-		return nil, totalData, errors.New("failed to get all forum data")
+		return nil, totalData, err
 	}
 
 	return response, totalData, nil
@@ -107,7 +105,7 @@ func (fr mysqlForumRepository) GetAllByPopular(id_user, topic, popular, categori
 	}
 
 	if err != nil {
-		return nil, totalData, errors.New("failed to get all forum data")
+		return nil, totalData, err
 	}
 
 	return response, totalData, nil
@@ -151,7 +149,7 @@ func (fr mysqlForumRepository) GetAllByCreated(id_user, topic, created, categori
 	}
 
 	if err != nil {
-		return nil, totalData, errors.New("failed to get all forum data")
+		return nil, totalData, err
 	}
 
 	return response, totalData, nil
@@ -175,10 +173,8 @@ func (fr mysqlForumRepository) GetById(id, user_id string) (*response.ResponseFo
 	}
 	forumDetail.UserForums = nil
 
-	if forumDetail.ID == "" {
-		return nil, errors.New("invalid id user " + id)
-	} else if err != nil {
-		return nil, errors.New("failed to get forum data details")
+	if err != nil {
+		return nil, err
 	}
 
 	return &forumDetail, nil
@@ -188,26 +184,26 @@ func (fr mysqlForumRepository) Create(forum *entity.Forum) error {
 	err := fr.DB.Save(forum).Error
 
 	if err != nil {
-		return errors.New("failed created forum data")
+		return err
 	}
 	return nil
 }
 
 func (fr mysqlForumRepository) Update(id, user_id string, forumId *entity.Forum) error {
 	var forum entity.Forum
-	err2 := fr.DB.Model(&forum).Where("id = ? AND user_id = ? ", id, user_id).Updates(&forumId).Error
+	err := fr.DB.Model(&forum).Where("id = ? AND user_id = ? ", id, user_id).Updates(&forumId).Error
 
-	if err2 != nil {
-		return errors.New("failed to updated forum data")
+	if err != nil {
+		return err
 	}
 
 	return nil
 }
 
 func (fr mysqlForumRepository) Delete(id, user_id string) error {
-	err2 := fr.DB.Where("id = ? AND user_id = ? ", id, user_id).Delete(&entity.Forum{}).Error
-	if err2 != nil {
-		return errors.New("failed to delete forum data")
+	err := fr.DB.Where("id = ? AND user_id = ? ", id, user_id).Delete(&entity.Forum{}).Error
+	if err != nil {
+		return err
 	}
 	return nil
 }

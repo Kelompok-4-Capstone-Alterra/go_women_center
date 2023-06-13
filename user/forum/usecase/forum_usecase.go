@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"errors"
 	"strconv"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/constant"
@@ -45,7 +46,7 @@ func (fu ForumUsecase) GetAll(id_user, topic, popular, created, categories, myfo
 	}
 
 	if err != nil {
-		return nil, 0, err
+		return nil, 0, errors.New("failed to get all forum data")
 	}
 
 	totalPages := helper.GetTotalPages(int(totalData), limit)
@@ -57,8 +58,12 @@ func (fu ForumUsecase) GetById(id, user_id string) (*response.ResponseForum, err
 	forum, err := fu.ForumR.GetById(id, user_id)
 
 	if err != nil {
-		return nil, err
+		return nil, errors.New("failed to get forum data details")
 	}
+	if forum.ID == "" {
+		return nil, errors.New("invalid forum id " + id)
+	}
+
 	return forum, nil
 }
 
@@ -68,37 +73,43 @@ func (fu ForumUsecase) Create(forum *entity.Forum) error {
 
 	err := fu.ForumR.Create(forum)
 	if err != nil {
-		return err
+		return errors.New("failed created forum data")
 	}
 	return nil
 }
 
 func (fu ForumUsecase) Update(id, user_id string, forumId *entity.Forum) error {
-	_, err := fu.ForumR.GetById(id, user_id)
+	forum, err := fu.ForumR.GetById(id, user_id)
 
 	if err != nil {
-		return err
+		return errors.New("failed to get forum data details")
+	}
+	if forum.ID == "" {
+		return errors.New("page not found")
 	}
 
 	err2 := fu.ForumR.Update(id, user_id, forumId)
 
 	if err2 != nil {
-		return err2
+		return errors.New("failed to updated forum data")
 	}
 	return nil
 }
 
 func (fu ForumUsecase) Delete(id, user_id string) error {
-	_, err := fu.ForumR.GetById(id, user_id)
+	forum, err := fu.ForumR.GetById(id, user_id)
 
 	if err != nil {
-		return err
+		return errors.New("failed to get forum data details")
+	}
+	if forum.ID == "" {
+		return errors.New("page not found")
 	}
 
 	err2 := fu.ForumR.Delete(id, user_id)
 
-	if err != nil {
-		return err2
+	if err2 != nil {
+		return errors.New("failed to delete forum data")
 	}
 	return nil
 }

@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"errors"
 	"strconv"
 
 	response "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/forum"
@@ -42,7 +43,7 @@ func (fu ForumUsecase) GetAll(topic, popular, created, categories, myforum strin
 	}
 
 	if err != nil {
-		return nil, 0, err
+		return nil, 0, errors.New("failed to get all forum data")
 	}
 
 	for i := 0; i < len(forums); i++ {
@@ -58,7 +59,9 @@ func (fu ForumUsecase) GetById(id string) (*response.ResponseForum, error) {
 	forum, err := fu.ForumR.GetById(id)
 
 	if err != nil {
-		return nil, err
+		return nil, errors.New("failed to get forum data details")
+	} else if forum.ID == "" {
+		return nil, errors.New("invalid forum id " + id)
 	}
 
 	forum.UserForums = nil
@@ -66,14 +69,17 @@ func (fu ForumUsecase) GetById(id string) (*response.ResponseForum, error) {
 }
 
 func (fu ForumUsecase) Delete(id string) error {
-	_, err := fu.ForumR.GetById(id)
+	forum, err := fu.ForumR.GetById(id)
+
 	if err != nil {
-		return err
+		return errors.New("failed to get forum data details")
+	} else if forum.ID == "" {
+		return errors.New("invalid forum id " + id)
 	}
 
 	err2 := fu.ForumR.Delete(id)
-	if err != nil {
-		return err2
+	if err2 != nil {
+		return errors.New("failed to delete forum data")
 	}
 	return nil
 }

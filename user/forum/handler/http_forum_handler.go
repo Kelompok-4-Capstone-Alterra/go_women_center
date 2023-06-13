@@ -47,7 +47,7 @@ func (fh ForumHandler) GetAll(c echo.Context) error {
 	}
 
 	if page > totalPages {
-		return c.JSON(http.StatusBadRequest, helper.ResponseData("page "+c.QueryParam("page")+" is not available", http.StatusBadRequest, nil))
+		return c.JSON(http.StatusBadRequest, helper.ResponseData("page not found", http.StatusBadRequest, nil))
 	}
 
 	return c.JSON(http.StatusOK, helper.ResponseData("success to get all forum data", http.StatusOK, echo.Map{
