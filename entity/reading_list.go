@@ -7,12 +7,12 @@ import (
 )
 
 type ReadingList struct {
-	ID                  string               `gorm:"primarykey" json:"id"`
-	UserId              string               `json:"user_id" form:"user_id"`
-	Name                string               `json:"name" form:"name"`
-	Description         string               `json:"description" form:"description"`
-	ReadingListArticles []ReadingListArticle `gorm:"foreignKey:ReadingListId" json:"reading_list"`
-	CreatedAt           time.Time            `json:"created_at"`
-	UpdatedAt           time.Time            `json:"updated_at"`
-	DeletedAt           gorm.DeletedAt       `gorm:"index" json:"deleted_at"`
+	ID                  string `gorm:"primarykey"`
+	UserId              string
+	Name                string
+	Description         string
+	ReadingListArticles []ReadingListArticle `gorm:"foreignKey:ReadingListId"`
+	CreatedAt           time.Time
+	UpdatedAt           time.Time
+	DeletedAt           gorm.DeletedAt `gorm:"index"`
 }

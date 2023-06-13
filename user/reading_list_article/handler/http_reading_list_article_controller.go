@@ -3,8 +3,8 @@ package handler
 import (
 	"net/http"
 
-	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
+	readingListArticle "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/reading_list_article"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/reading_list_article/usecase"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -27,15 +27,16 @@ func NewReadingListArticleHandler(ReadingListArticleU usecase.ReadingListArticle
 
 func (rlah ReadingListArticleHandler) Create(c echo.Context) error {
 	var user = c.Get("user").(*helper.JwtCustomUserClaims)
-	var ReadingListArticle entity.ReadingListArticle
-	c.Bind(&ReadingListArticle)
-	uuidWithHyphen := uuid.New()
-	ReadingListArticle.ID = uuidWithHyphen.String()
-	ReadingListArticle.UserId = user.ID
+	var createRequest readingListArticle.CreateRequest
+	c.Bind(&createRequest)
 
-	err := rlah.ReadingListArticleU.Create(&ReadingListArticle)
+	uuidWithHyphen := uuid.New()
+	createRequest.ID = uuidWithHyphen.String()
+	createRequest.UserId = user.ID
+
+	err := rlah.ReadingListArticleU.Create(&createRequest)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, helper.ResponseData("Failed to join the forum", http.StatusBadRequest, nil))
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
 	}
 	return c.JSON(http.StatusOK, helper.ResponseData("Successfully joined the forum", http.StatusOK, nil))
 }

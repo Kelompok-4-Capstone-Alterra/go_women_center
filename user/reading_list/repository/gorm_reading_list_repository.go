@@ -1,8 +1,6 @@
 package repository
 
 import (
-	"errors"
-
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	response "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/reading_list"
 	"gorm.io/gorm"
@@ -47,9 +45,7 @@ func (rlr mysqlReadingListRepository) GetById(id, user_id string) (*response.Rea
 		Joins("INNER JOIN articles ON articles.id = reading_list_articles.article_id").
 		Preload("ReadingListArticles").First(&readingList, "reading_lists.id = ?", id).Error
 
-	if readingList.ID == "" {
-		return nil, errors.New("invallid id reading list")
-	} else if err != nil {
+	if err != nil {
 		return nil, err
 	}
 

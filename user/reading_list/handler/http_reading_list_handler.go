@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
+	readingList "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/reading_list"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/reading_list/usecase"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -41,6 +41,11 @@ func (rlh ReadingListHandler) GetAll(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
 	}
+
+	if page > totalPages {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(readingList.ErrPageNotFound.Error(), http.StatusBadRequest, nil))
+	}
+
 	return c.JSON(http.StatusOK, helper.ResponseData("success to get all reading list data", http.StatusOK, echo.Map{
 		"reading_list":  reading_list,
 		"current_pages": page,
@@ -61,14 +66,14 @@ func (rlh ReadingListHandler) GetById(c echo.Context) error {
 
 func (rlh ReadingListHandler) Create(c echo.Context) error {
 	var user = c.Get("user").(*helper.JwtCustomUserClaims)
-	var reading_list entity.ReadingList
-	c.Bind(&reading_list)
+	var createForum readingList.CreateRequest
+	c.Bind(&createForum)
 
 	uuidWithHyphen := uuid.New()
-	reading_list.ID = uuidWithHyphen.String()
-	reading_list.UserId = user.ID
+	createForum.ID = uuidWithHyphen.String()
+	createForum.UserId = user.ID
 
-	err := rlh.ReadingListU.Create(&reading_list)
+	err := rlh.ReadingListU.Create(&createForum)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
@@ -78,10 +83,10 @@ func (rlh ReadingListHandler) Create(c echo.Context) error {
 
 func (rlh ReadingListHandler) Update(c echo.Context) error {
 	var user = c.Get("user").(*helper.JwtCustomUserClaims)
-	reading_list := entity.ReadingList{}
+	var updateRequest readingList.UpdateRequest
 	id := c.Param("id")
-	c.Bind(&reading_list)
-	err := rlh.ReadingListU.Update(id, user.ID, &reading_list)
+	c.Bind(&updateRequest)
+	err := rlh.ReadingListU.Update(id, user.ID, &updateRequest)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))

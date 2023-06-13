@@ -2,11 +2,12 @@ package usecase
 
 import (
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
+	readingListArticle "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/reading_list_article"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/reading_list_article/repository"
 )
 
 type ReadingListArticleUsecaseInterface interface {
-	Create(readingListArticle *entity.ReadingListArticle) error
+	Create(createRequest *readingListArticle.CreateRequest) error
 	Delete(id, user_id string) error
 }
 
@@ -20,19 +21,31 @@ func NewReadingListArticleUsecase(ReadingListArticleR repository.ReadingListArti
 	}
 }
 
-func (rlau ReadingListArticleUsecase) Create(readingListArticle *entity.ReadingListArticle) error {
-	err := rlau.ReadingListArticleR.Create(readingListArticle)
+func (rlau ReadingListArticleUsecase) Create(createRequest *readingListArticle.CreateRequest) error {
+	newReadingListArticle := entity.ReadingListArticle{
+		ID:            createRequest.ID,
+		ArticleId:     createRequest.ArticleId,
+		ReadingListId: createRequest.ReadingListId,
+		UserId:        createRequest.UserId,
+	}
+
+	err := rlau.ReadingListArticleR.Create(&newReadingListArticle)
 	if err != nil {
-		return err
+		return readingListArticle.ErrFailedAddReadingListArticle
 	}
 	return nil
 }
 
 func (rlau ReadingListArticleUsecase) Delete(id, user_id string) error {
-	err := rlau.ReadingListArticleR.Delete(id, user_id)
+	_, err := rlau.ReadingListArticleR.GetById(id, user_id)
+	if err != nil {
+		return readingListArticle.ErrPageNotFound
+	}
+
+	err = rlau.ReadingListArticleR.Delete(id, user_id)
 
 	if err != nil {
-		return err
+		return readingListArticle.ErrFailedDeleteReadingListArticle
 	}
 	return nil
 }

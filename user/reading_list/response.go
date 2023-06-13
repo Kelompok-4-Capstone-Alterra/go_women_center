@@ -1,4 +1,4 @@
-package entity
+package readingList
 
 import (
 	"time"

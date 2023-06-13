@@ -1,13 +1,12 @@
 package repository
 
 import (
-	"errors"
-
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"gorm.io/gorm"
 )
 
 type ReadingListArticleRepository interface {
+	GetById(id, user_id string) (*entity.ReadingListArticle, error)
 	Create(readingListArticle *entity.ReadingListArticle) error
 	Delete(id, user_id string) error
 }
@@ -20,6 +19,17 @@ func NewMysqlReadingListArticleRepository(db *gorm.DB) ReadingListArticleReposit
 	return &mysqlReadingListArticleRepository{DB: db}
 }
 
+func (rlar mysqlReadingListArticleRepository) GetById(id, user_id string) (*entity.ReadingListArticle, error) {
+	var readingListArticle entity.ReadingListArticle
+	err := rlar.DB.Where("id = ? AND user_id = ? ", id, user_id).First(&readingListArticle).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &readingListArticle, nil
+}
+
 func (rlar mysqlReadingListArticleRepository) Create(readingListArticle *entity.ReadingListArticle) error {
 	err := rlar.DB.Save(readingListArticle).Error
 
@@ -30,15 +40,9 @@ func (rlar mysqlReadingListArticleRepository) Create(readingListArticle *entity.
 }
 
 func (rlar mysqlReadingListArticleRepository) Delete(id, user_id string) error {
-	err := rlar.DB.Where("id = ?", id).Take(&entity.ReadingListArticle{}).Error
-
+	err := rlar.DB.Where("id = ? AND user_id = ? ", id, user_id).Delete(&entity.ReadingListArticle{}).Error
 	if err != nil {
 		return err
-	}
-
-	err2 := rlar.DB.Where("id = ? AND user_id = ? ", id, user_id).Delete(&entity.ReadingListArticle{}).RowsAffected
-	if err2 != 1 {
-		return errors.New("errors")
 	}
 	return nil
 }
