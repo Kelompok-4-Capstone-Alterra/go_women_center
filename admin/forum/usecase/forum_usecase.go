@@ -2,8 +2,8 @@ package usecase
 
 import (
 	"errors"
-	"strconv"
 
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/forum"
 	response "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/forum"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/forum/repository"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/constant"
@@ -11,7 +11,7 @@ import (
 )
 
 type ForumUsecaseInterface interface {
-	GetAll(topic, popular, created, categories, getMyForum string, offset, limit int) ([]response.ResponseForum, int, error)
+	GetAll(getAllParam forum.GetAllRequest) ([]response.ResponseForum, int, error)
 	GetById(id string) (*response.ResponseForum, error)
 	Delete(id string) error
 }
@@ -26,20 +26,19 @@ func NewForumUsecase(ForumR repository.ForumRepository) ForumUsecaseInterface {
 	}
 }
 
-func (fu ForumUsecase) GetAll(topic, popular, created, categories, myforum string, offset, limit int) ([]response.ResponseForum, int, error) {
+func (fu ForumUsecase) GetAll(getAllParam forum.GetAllRequest) ([]response.ResponseForum, int, error) {
 	var forums []response.ResponseForum
 	var err error
 	var totalData int64
 
-	idCategories, _ := strconv.Atoi(categories)
-	categories = constant.TOPICS[idCategories]
+	categories := constant.TOPICS[getAllParam.Categories]
 
-	if created == "asc" || created == "desc" {
-		forums, totalData, err = fu.ForumR.GetAllByCreated(topic, created, categories, myforum, offset, limit)
-	} else if popular == "asc" || popular == "desc" {
-		forums, totalData, err = fu.ForumR.GetAllByPopular(topic, popular, categories, myforum, offset, limit)
+	if getAllParam.Created == "asc" || getAllParam.Created == "desc" {
+		forums, totalData, err = fu.ForumR.GetAllByCreated(getAllParam, categories)
+	} else if getAllParam.Popular == "asc" || getAllParam.Popular == "desc" {
+		forums, totalData, err = fu.ForumR.GetAllByPopular(getAllParam, categories)
 	} else {
-		forums, totalData, err = fu.ForumR.GetAll(topic, categories, myforum, offset, limit)
+		forums, totalData, err = fu.ForumR.GetAll(getAllParam, categories)
 	}
 
 	if err != nil {
@@ -50,7 +49,7 @@ func (fu ForumUsecase) GetAll(topic, popular, created, categories, myforum strin
 		forums[i].UserForums = nil
 	}
 
-	totalPages := helper.GetTotalPages(int(totalData), limit)
+	totalPages := helper.GetTotalPages(int(totalData), getAllParam.Limit)
 
 	return forums, totalPages, nil
 }
