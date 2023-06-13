@@ -116,7 +116,6 @@ func main() {
 	userCounselorUsecase := CounselorUserUsecase.NewCounselorUsecase(userCounselorRepo, userReviewRepo, userAuthRepo)
 	userCounselorHandler := CounselorUserHandler.NewCounselorHandler(userCounselorUsecase)
 
-
 	userRepo := UserProfileRepo.NewMysqlUserRepository(db)
 	userUsecase := UserProfileUsecase.NewProfileUsecase(userRepo, image, encryptor)
 	userHandler := UserProfileHandler.NewProfileHandler(userUsecase)
@@ -136,7 +135,7 @@ func main() {
 	adminCareerRepo := CareerAdminRepository.NewMysqlCareerRepository(db)
 	adminCareerUsecase := CareerAdminUsecase.NewCareerUsecase(adminCareerRepo, image)
 	adminCareerHandler := CareerAdminHandler.NewCareerHandler(adminCareerUsecase)
-	
+
 	adminUsersRepo := UsersAdminRepository.NewMysqlUserRepository(db)
 	adminUsersUsecase := UsersAdminUsecase.NewUserUsecase(adminUsersRepo)
 	adminUsersHandler := UsersAdminHandler.NewUserHandler(adminUsersUsecase)
@@ -160,7 +159,7 @@ func main() {
 	topicHandler := TopicHandler.NewTopicHandler()
 
 	midtransServerKey := os.Getenv("MIDTRANS_SERVER_KEY")
-	
+
 	userTransactionUsecase := TransactionUserUsecase.NewtransactionUsecase(midtransServerKey, googleUUID)
 	userTransactionHandler := TransactionUserHandler.NewTransactionHandler(userTransactionUsecase)
 
@@ -177,7 +176,7 @@ func main() {
 	})
 
 	// payment temporaty route
-	e.GET("/payment", userTransactionHandler.GenerateTransaction)
+	e.GET("/payment", userTransactionHandler.SendTransaction)
 	e.POST("/payment/callback", userTransactionHandler.Notification)
 
 	e.GET("/topics", topicHandler.GetAll)
@@ -196,7 +195,7 @@ func main() {
 
 	restrictUsers := e.Group("/users", userAuthMidd.JWTUser(), userAuthMidd.CheckUser(userAuthUsecase))
 
-	{	
+	{
 		restrictUsers.GET("/profile", userHandler.GetById)
 		restrictUsers.PUT("/profile", userHandler.Update)
 		restrictUsers.PUT("/profile/password", userHandler.UpdatePassword)
@@ -240,7 +239,6 @@ func main() {
 
 		restrictAdmin.DELETE("/forums/:id", forumAdminH.Delete)
 	}
-
 
 	// ssl
 	// e.Logger.Fatal(e.StartTLS(":8080", "./ssl/certificate.crt", "./ssl/private.key"))

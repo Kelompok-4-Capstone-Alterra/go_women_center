@@ -10,26 +10,26 @@ import (
 )
 
 type TransactionUsecase interface {
-	GenerateTransaction(transactionRequest transaction.GenerateTransactionRequest) (transaction.GenerateTransactionResponse, error)
+	SendTransaction(transactionRequest transaction.SendTransactionRequest) (transaction.SendTransactionResponse, error)
 }
 
 type transactionUsecase struct {
-	serverKey string
+	serverKey     string
 	uuidGenerator helper.UuidGenerator
 }
 
 func NewtransactionUsecase(
-		inputServerKey string,
-		uuidGenerator helper.UuidGenerator,
-	) TransactionUsecase {
+	inputServerKey string,
+	uuidGenerator helper.UuidGenerator,
+) TransactionUsecase {
 	return &transactionUsecase{
-		serverKey: inputServerKey,
+		serverKey:     inputServerKey,
 		uuidGenerator: uuidGenerator,
 	}
 }
 
-func (t *transactionUsecase) GenerateTransaction(transactionRequest transaction.GenerateTransactionRequest) (transaction.GenerateTransactionResponse, error) {
-	res := transaction.GenerateTransactionResponse{}
+func (t *transactionUsecase) SendTransaction(transactionRequest transaction.SendTransactionRequest) (transaction.SendTransactionResponse, error) {
+	res := transaction.SendTransactionResponse{}
 
 	// 1. Initiate Snap client
 	var s = snap.Client{}
@@ -46,29 +46,30 @@ func (t *transactionUsecase) GenerateTransaction(transactionRequest transaction.
 		TransactionDetails: midtrans.TransactionDetails{
 			OrderID:  transactionId,
 			GrossAmt: 100000,
-		}, 
+		},
 		CreditCard: &snap.CreditCardDetails{
 			Secure: true,
 		},
 		CustomerDetail: &midtrans.CustomerDetails{
-			Email: transactionRequest.Email,
+			Email: "john@doe.com",
 			Phone: "081234567890",
 		},
 	}
 
 	// 3. Execute request create Snap transaction to Midtrans Snap API
-	
+
 	// TODO: send order id
 	snapResp, _ := s.CreateTransaction(req)
 
 	res.ID = transactionId
-	res.Link = snapResp.RedirectURL
+	res.PaymentLink = snapResp.RedirectURL
 
 	// TODO: create transaction in db with status pending
+
 	// catch callback res from midtrans
 	// if status 200 then update status success
 	// else then update status to canceled
-	
+
 	return res, nil
 }
 

@@ -23,9 +23,14 @@ func NewTransactionHandler(transactionUsecase usecase.TransactionUsecase) *trans
 	}
 }
 
-func (h *transactionHandler) GenerateTransaction(c echo.Context) error {
-	request := transaction.GenerateTransactionRequest{}
-	err := c.Bind(&request)
+func (h *transactionHandler) GenerateTransaction() {
+
+}
+
+func (h *transactionHandler) SendTransaction(c echo.Context) error {
+	// get jwt token and check for validity
+	user := c.Get("user").(*helper.JwtCustomUserClaims)
+	err := user.Valid()
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
 			err.Error(),
@@ -34,7 +39,19 @@ func (h *transactionHandler) GenerateTransaction(c echo.Context) error {
 		))
 	}
 
-	data, err := h.Usecase.GenerateTransaction(request)
+	request := transaction.SendTransactionRequest{
+		UserCredential: user,
+	}
+	err = c.Bind(&request)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
+			err.Error(),
+			http.StatusInternalServerError,
+			nil,
+		))
+	}
+
+	data, err := h.Usecase.SendTransaction(request)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
 			err.Error(),
