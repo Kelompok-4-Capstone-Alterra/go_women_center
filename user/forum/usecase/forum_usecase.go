@@ -1,8 +1,6 @@
 package usecase
 
 import (
-	"errors"
-
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/constant"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
@@ -44,7 +42,7 @@ func (fu ForumUsecase) GetAll(getAllParam forum.GetAllRequest) ([]forum.Response
 	}
 
 	if err != nil {
-		return nil, 0, errors.New("failed to get all forum data")
+		return nil, 0, forum.ErrFailedGetForum
 	}
 
 	totalPages := helper.GetTotalPages(int(totalData), getAllParam.Limit)
@@ -53,21 +51,21 @@ func (fu ForumUsecase) GetAll(getAllParam forum.GetAllRequest) ([]forum.Response
 }
 
 func (fu ForumUsecase) GetById(id, user_id string) (*forum.ResponseForum, error) {
-	forum, err := fu.ForumR.GetById(id, user_id)
+	data, err := fu.ForumR.GetById(id, user_id)
 
 	if err != nil {
-		return nil, errors.New("failed to get forum data details")
+		return nil, forum.ErrFailedGetDetailForum
 	}
-	if forum.ID == "" {
-		return nil, errors.New("invalid forum id " + id)
+	if data.ID == "" {
+		return nil, forum.ErrPageNotFound
 	}
 
-	return forum, nil
+	return data, nil
 }
 
 func (fu ForumUsecase) Create(createForum *forum.CreateRequest) error {
 	category := constant.TOPICS[createForum.Category]
-	forum := entity.Forum{
+	newForum := entity.Forum{
 		ID:       createForum.ID,
 		UserId:   createForum.UserId,
 		Category: category,
@@ -75,21 +73,21 @@ func (fu ForumUsecase) Create(createForum *forum.CreateRequest) error {
 		Topic:    createForum.Topic,
 	}
 
-	err := fu.ForumR.Create(&forum)
+	err := fu.ForumR.Create(&newForum)
 	if err != nil {
-		return errors.New("failed created forum data")
+		return forum.ErrFailedCreateForum
 	}
 	return nil
 }
 
 func (fu ForumUsecase) Update(id, user_id string, forumId *forum.UpdateRequest) error {
-	forum, err := fu.ForumR.GetById(id, user_id)
+	data, err := fu.ForumR.GetById(id, user_id)
 
 	if err != nil {
-		return errors.New("failed to get forum data details")
+		return forum.ErrFailedGetDetailForum
 	}
-	if forum.ID == "" {
-		return errors.New("page not found")
+	if data.ID == "" {
+		return forum.ErrPageNotFound
 	}
 
 	category := constant.TOPICS[forumId.Category]
@@ -98,28 +96,28 @@ func (fu ForumUsecase) Update(id, user_id string, forumId *forum.UpdateRequest) 
 		Link:     forumId.Link,
 		Topic:    forumId.Topic,
 	}
-	err2 := fu.ForumR.Update(id, user_id, &newForum)
+	err = fu.ForumR.Update(id, user_id, &newForum)
 
-	if err2 != nil {
-		return errors.New("failed to updated forum data")
+	if err != nil {
+		return forum.ErrFailedUpdateForum
 	}
 	return nil
 }
 
 func (fu ForumUsecase) Delete(id, user_id string) error {
-	forum, err := fu.ForumR.GetById(id, user_id)
+	data, err := fu.ForumR.GetById(id, user_id)
 
 	if err != nil {
-		return errors.New("failed to get forum data details")
+		return forum.ErrFailedGetDetailForum
 	}
-	if forum.ID == "" {
-		return errors.New("page not found")
+	if data.ID == "" {
+		return forum.ErrPageNotFound
 	}
 
-	err2 := fu.ForumR.Delete(id, user_id)
+	err = fu.ForumR.Delete(id, user_id)
 
-	if err2 != nil {
-		return errors.New("failed to delete forum data")
+	if err != nil {
+		return forum.ErrFailedDeleteForum
 	}
 	return nil
 }
