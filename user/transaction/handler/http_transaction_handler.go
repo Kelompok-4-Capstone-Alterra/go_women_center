@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
@@ -48,4 +50,18 @@ func (h *transactionHandler) GenerateTransaction(c echo.Context) error {
 			"data": data,
 		},
 	))
+}
+
+func (h *transactionHandler) Notification(c echo.Context) error {
+	json_map := make(map[string]interface{})
+	err := json.
+		NewDecoder(c.Request().Body).
+		Decode(&json_map)
+	if err != nil {
+		return err
+	}
+
+	log.Println(json_map)
+
+	return c.JSON(http.StatusOK, nil)
 }

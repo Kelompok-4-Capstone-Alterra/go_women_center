@@ -175,7 +175,10 @@ func main() {
 	e.GET("/healthcheck", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, "hello")
 	})
+
+	// payment temporaty route
 	e.GET("/payment", userTransactionHandler.GenerateTransaction)
+	e.POST("/payment/callback", userTransactionHandler.Notification)
 
 	e.GET("/topics", topicHandler.GetAll)
 	e.POST("/verify", userAuthHandler.VerifyEmailHandler)
