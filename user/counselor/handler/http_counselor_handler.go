@@ -30,7 +30,7 @@ func (h *counselorHandler) GetAll(c echo.Context) error {
 
 	page, offset, limit := helper.GetPaginateData(getAllReq.Page, getAllReq.Limit, "mobile")
 
-	topicStr := constant.TOPICS[getAllReq.Topic]
+	topicStr := constant.TOPICS[getAllReq.Topic][0]
 
 	counselors, totalPages, err := h.CUscase.GetAll(getAllReq.Search, topicStr, getAllReq.SortBy, offset, limit)
 
