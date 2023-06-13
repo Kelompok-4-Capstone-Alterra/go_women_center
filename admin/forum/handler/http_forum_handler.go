@@ -40,6 +40,11 @@ func (fh ForumHandler) GetAll(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
 	}
+
+	if page > totalPages {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData("page "+c.QueryParam("page")+" is not available", http.StatusBadRequest, nil))
+	}
+
 	return c.JSON(http.StatusOK, helper.ResponseData("success to get all forum data", http.StatusOK, echo.Map{
 		"forums":        forums,
 		"current_pages": page,
