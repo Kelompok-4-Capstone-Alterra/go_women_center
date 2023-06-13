@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"errors"
-	"strconv"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/constant"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
@@ -67,13 +66,11 @@ func (fu ForumUsecase) GetById(id, user_id string) (*forum.ResponseForum, error)
 }
 
 func (fu ForumUsecase) Create(createForum *forum.CreateRequest) error {
-	topic, _ := strconv.Atoi(createForum.Category)
-	createForum.Category = constant.TOPICS[topic]
-
+	category := constant.TOPICS[createForum.Category]
 	forum := entity.Forum{
 		ID:       createForum.ID,
 		UserId:   createForum.UserId,
-		Category: createForum.Category,
+		Category: category,
 		Link:     createForum.Link,
 		Topic:    createForum.Topic,
 	}
@@ -95,7 +92,13 @@ func (fu ForumUsecase) Update(id, user_id string, forumId *forum.UpdateRequest) 
 		return errors.New("page not found")
 	}
 
-	err2 := fu.ForumR.Update(id, user_id, forumId)
+	category := constant.TOPICS[forumId.Category]
+	newForum := entity.Forum{
+		Category: category,
+		Link:     forumId.Link,
+		Topic:    forumId.Topic,
+	}
+	err2 := fu.ForumR.Update(id, user_id, &newForum)
 
 	if err2 != nil {
 		return errors.New("failed to updated forum data")

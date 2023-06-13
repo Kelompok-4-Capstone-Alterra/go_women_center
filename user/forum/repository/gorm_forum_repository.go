@@ -12,7 +12,7 @@ type ForumRepository interface {
 	GetAllByCreated(getAllParam forum.GetAllRequest, categories string) ([]forum.ResponseForum, int64, error)
 	GetById(id, user_id string) (*forum.ResponseForum, error)
 	Create(createForum *entity.Forum) error
-	Update(id, user_id string, forumId *forum.UpdateRequest) error
+	Update(id, user_id string, forumId *entity.Forum) error
 	Delete(id, user_id string) error
 }
 
@@ -189,7 +189,7 @@ func (fr mysqlForumRepository) Create(createForum *entity.Forum) error {
 	return nil
 }
 
-func (fr mysqlForumRepository) Update(id, user_id string, forumId *forum.UpdateRequest) error {
+func (fr mysqlForumRepository) Update(id, user_id string, forumId *entity.Forum) error {
 	var forum entity.Forum
 	err := fr.DB.Model(&forum).Where("id = ? AND user_id = ? ", id, user_id).Updates(&forumId).Error
 

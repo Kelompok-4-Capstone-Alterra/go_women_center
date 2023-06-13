@@ -15,13 +15,13 @@ type GetAllRequest struct {
 type CreateRequest struct {
 	ID       string `gorm:"primarykey" json:"id"`
 	UserId   string `json:"user_id" form:"user_id"`
-	Category string `json:"category" form:"category"`
+	Category int    `json:"category" form:"category"`
 	Link     string `json:"link" form:"link"`
 	Topic    string `json:"topic" form:"topic"`
 }
 
 type UpdateRequest struct {
-	Category string `json:"category" form:"category"`
+	Category int    `json:"category" form:"category"`
 	Link     string `json:"link" form:"link"`
 	Topic    string `json:"topic" form:"topic"`
 }
