@@ -2,10 +2,10 @@ package handler
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
+	request "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum/usecase"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -31,28 +31,23 @@ func NewForumHandler(ForumU usecase.ForumUsecaseInterface) ForumHandlerInterface
 
 func (fh ForumHandler) GetAll(c echo.Context) error {
 	var user = c.Get("user").(*helper.JwtCustomUserClaims)
-	getCreated := c.QueryParam("created")
-	getTopic := c.QueryParam("topic")
-	getPopular := c.QueryParam("popular")
-	getCategories := c.QueryParam("categories")
-	getMyForum := c.QueryParam("myforum")
-	page, _ := strconv.Atoi(c.QueryParam("page"))
-	limit, _ := strconv.Atoi(c.QueryParam("limit"))
+	var getAllParam request.QueryParamRequest
+	c.Bind(&getAllParam)
+	getAllParam.IdUser = user.ID
+	getAllParam.Page, getAllParam.Offset, getAllParam.Limit = helper.GetPaginateData(getAllParam.Page, getAllParam.Limit)
 
-	page, offset, limit := helper.GetPaginateData(page, limit)
-
-	forums, totalPages, err := fh.ForumU.GetAll(user.ID, getTopic, getPopular, getCreated, getCategories, getMyForum, offset, limit)
+	forums, totalPages, err := fh.ForumU.GetAll(getAllParam)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
 	}
 
-	if page > totalPages {
+	if getAllParam.Page > totalPages {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData("page not found", http.StatusBadRequest, nil))
 	}
 
 	return c.JSON(http.StatusOK, helper.ResponseData("success to get all forum data", http.StatusOK, echo.Map{
 		"forums":        forums,
-		"current_pages": page,
+		"current_pages": getAllParam.Page,
 		"total_pages":   totalPages,
 	}))
 }
