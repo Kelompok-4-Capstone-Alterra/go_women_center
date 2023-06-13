@@ -3,9 +3,8 @@ package handler
 import (
 	"net/http"
 
-	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
-	request "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum"
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum/usecase"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -31,7 +30,7 @@ func NewForumHandler(ForumU usecase.ForumUsecaseInterface) ForumHandlerInterface
 
 func (fh ForumHandler) GetAll(c echo.Context) error {
 	var user = c.Get("user").(*helper.JwtCustomUserClaims)
-	var getAllParam request.QueryParamRequest
+	var getAllParam forum.GetAllRequest
 	c.Bind(&getAllParam)
 	getAllParam.IdUser = user.ID
 	getAllParam.Page, getAllParam.Offset, getAllParam.Limit = helper.GetPaginateData(getAllParam.Page, getAllParam.Limit)
@@ -65,14 +64,14 @@ func (fh ForumHandler) GetById(c echo.Context) error {
 
 func (fh ForumHandler) Create(c echo.Context) error {
 	var user = c.Get("user").(*helper.JwtCustomUserClaims)
-	var forum entity.Forum
-	c.Bind(&forum)
+	var createForum forum.CreateRequest
+	c.Bind(&createForum)
 
 	uuidWithHyphen := uuid.New()
-	forum.ID = uuidWithHyphen.String()
-	forum.UserId = user.ID
+	createForum.ID = uuidWithHyphen.String()
+	createForum.UserId = user.ID
 
-	err := fh.ForumU.Create(&forum)
+	err := fh.ForumU.Create(&createForum)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
@@ -82,10 +81,10 @@ func (fh ForumHandler) Create(c echo.Context) error {
 
 func (fh ForumHandler) Update(c echo.Context) error {
 	var user = c.Get("user").(*helper.JwtCustomUserClaims)
-	forum := entity.Forum{}
+	var updateForum forum.UpdateRequest
 	id := c.Param("id")
-	c.Bind(&forum)
-	err := fh.ForumU.Update(id, user.ID, &forum)
+	c.Bind(&updateForum)
+	err := fh.ForumU.Update(id, user.ID, &updateForum)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))

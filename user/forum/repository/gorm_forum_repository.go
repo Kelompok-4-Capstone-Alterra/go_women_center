@@ -7,12 +7,12 @@ import (
 )
 
 type ForumRepository interface {
-	GetAll(getAllParam forum.QueryParamRequest, categories string) ([]forum.ResponseForum, int64, error)
-	GetAllByPopular(getAllParam forum.QueryParamRequest, categories string) ([]forum.ResponseForum, int64, error)
-	GetAllByCreated(getAllParam forum.QueryParamRequest, categories string) ([]forum.ResponseForum, int64, error)
+	GetAll(getAllParam forum.GetAllRequest, categories string) ([]forum.ResponseForum, int64, error)
+	GetAllByPopular(getAllParam forum.GetAllRequest, categories string) ([]forum.ResponseForum, int64, error)
+	GetAllByCreated(getAllParam forum.GetAllRequest, categories string) ([]forum.ResponseForum, int64, error)
 	GetById(id, user_id string) (*forum.ResponseForum, error)
-	Create(forum *entity.Forum) error
-	Update(id, user_id string, forumId *entity.Forum) error
+	Create(createForum *entity.Forum) error
+	Update(id, user_id string, forumId *forum.UpdateRequest) error
 	Delete(id, user_id string) error
 }
 
@@ -24,7 +24,7 @@ func NewMysqlForumRepository(db *gorm.DB) ForumRepository {
 	return &mysqlForumRepository{DB: db}
 }
 
-func (fr mysqlForumRepository) GetAll(getAllParam forum.QueryParamRequest, categories string) ([]forum.ResponseForum, int64, error) {
+func (fr mysqlForumRepository) GetAll(getAllParam forum.GetAllRequest, categories string) ([]forum.ResponseForum, int64, error) {
 	var logicOperationCategory string
 	var logicOperationUser string
 	var totalData int64
@@ -67,7 +67,7 @@ func (fr mysqlForumRepository) GetAll(getAllParam forum.QueryParamRequest, categ
 	return response, totalData, nil
 }
 
-func (fr mysqlForumRepository) GetAllByPopular(getAllParam forum.QueryParamRequest, categories string) ([]forum.ResponseForum, int64, error) {
+func (fr mysqlForumRepository) GetAllByPopular(getAllParam forum.GetAllRequest, categories string) ([]forum.ResponseForum, int64, error) {
 	var logicOperationCategory string
 	var logicOperationUser string
 	var totalData int64
@@ -111,7 +111,7 @@ func (fr mysqlForumRepository) GetAllByPopular(getAllParam forum.QueryParamReque
 	return response, totalData, nil
 }
 
-func (fr mysqlForumRepository) GetAllByCreated(getAllParam forum.QueryParamRequest, categories string) ([]forum.ResponseForum, int64, error) {
+func (fr mysqlForumRepository) GetAllByCreated(getAllParam forum.GetAllRequest, categories string) ([]forum.ResponseForum, int64, error) {
 	var logicOperationCategory string
 	var logicOperationUser string
 	var totalData int64
@@ -180,8 +180,8 @@ func (fr mysqlForumRepository) GetById(id, user_id string) (*forum.ResponseForum
 	return &forumDetail, nil
 }
 
-func (fr mysqlForumRepository) Create(forum *entity.Forum) error {
-	err := fr.DB.Save(forum).Error
+func (fr mysqlForumRepository) Create(createForum *entity.Forum) error {
+	err := fr.DB.Save(createForum).Error
 
 	if err != nil {
 		return err
@@ -189,7 +189,7 @@ func (fr mysqlForumRepository) Create(forum *entity.Forum) error {
 	return nil
 }
 
-func (fr mysqlForumRepository) Update(id, user_id string, forumId *entity.Forum) error {
+func (fr mysqlForumRepository) Update(id, user_id string, forumId *forum.UpdateRequest) error {
 	var forum entity.Forum
 	err := fr.DB.Model(&forum).Where("id = ? AND user_id = ? ", id, user_id).Updates(&forumId).Error
 

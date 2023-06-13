@@ -7,16 +7,15 @@ import (
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/constant"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
-	request "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum"
-	response "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum"
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum/repository"
 )
 
 type ForumUsecaseInterface interface {
-	GetAll(getAllParam request.QueryParamRequest) ([]response.ResponseForum, int, error)
-	GetById(id, user_id string) (*response.ResponseForum, error)
-	Create(forum *entity.Forum) error
-	Update(id, user_id string, forumId *entity.Forum) error
+	GetAll(getAllParam forum.GetAllRequest) ([]forum.ResponseForum, int, error)
+	GetById(id, user_id string) (*forum.ResponseForum, error)
+	Create(createForum *forum.CreateRequest) error
+	Update(id, user_id string, forumId *forum.UpdateRequest) error
 	Delete(id, user_id string) error
 }
 
@@ -30,8 +29,8 @@ func NewForumUsecase(ForumR repository.ForumRepository) ForumUsecaseInterface {
 	}
 }
 
-func (fu ForumUsecase) GetAll(getAllParam request.QueryParamRequest) ([]response.ResponseForum, int, error) {
-	var forums []response.ResponseForum
+func (fu ForumUsecase) GetAll(getAllParam forum.GetAllRequest) ([]forum.ResponseForum, int, error) {
+	var forums []forum.ResponseForum
 	var err error
 	var totalData int64
 
@@ -54,7 +53,7 @@ func (fu ForumUsecase) GetAll(getAllParam request.QueryParamRequest) ([]response
 	return forums, totalPages, nil
 }
 
-func (fu ForumUsecase) GetById(id, user_id string) (*response.ResponseForum, error) {
+func (fu ForumUsecase) GetById(id, user_id string) (*forum.ResponseForum, error) {
 	forum, err := fu.ForumR.GetById(id, user_id)
 
 	if err != nil {
@@ -67,18 +66,26 @@ func (fu ForumUsecase) GetById(id, user_id string) (*response.ResponseForum, err
 	return forum, nil
 }
 
-func (fu ForumUsecase) Create(forum *entity.Forum) error {
-	topic, _ := strconv.Atoi(forum.Category)
-	forum.Category = constant.TOPICS[topic]
+func (fu ForumUsecase) Create(createForum *forum.CreateRequest) error {
+	topic, _ := strconv.Atoi(createForum.Category)
+	createForum.Category = constant.TOPICS[topic]
 
-	err := fu.ForumR.Create(forum)
+	forum := entity.Forum{
+		ID:       createForum.ID,
+		UserId:   createForum.UserId,
+		Category: createForum.Category,
+		Link:     createForum.Link,
+		Topic:    createForum.Topic,
+	}
+
+	err := fu.ForumR.Create(&forum)
 	if err != nil {
 		return errors.New("failed created forum data")
 	}
 	return nil
 }
 
-func (fu ForumUsecase) Update(id, user_id string, forumId *entity.Forum) error {
+func (fu ForumUsecase) Update(id, user_id string, forumId *forum.UpdateRequest) error {
 	forum, err := fu.ForumR.GetById(id, user_id)
 
 	if err != nil {
