@@ -45,6 +45,10 @@ func (fu ForumUsecase) GetAll(topic, popular, created, categories, myforum strin
 		return nil, 0, err
 	}
 
+	for i := 0; i < len(forums); i++ {
+		forums[i].UserForums = nil
+	}
+
 	totalPages := helper.GetTotalPages(int(totalData), limit)
 
 	return forums, totalPages, nil
@@ -56,6 +60,8 @@ func (fu ForumUsecase) GetById(id string) (*response.ResponseForum, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	forum.UserForums = nil
 	return forum, nil
 }
 
