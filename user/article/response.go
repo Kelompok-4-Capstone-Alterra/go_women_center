@@ -33,3 +33,10 @@ type CommentResponse struct {
 	Comment        string `json:"comment"`
 	CreatedAt      string `json:"created_at"`
 }
+
+type ReadingListArticleResponse struct {
+	ID            string `json:"id"`
+	ArticleID     string `json:"article_id"`
+	ReadingListID string `json:"reading_list_id"`
+	UserID        string `json:"user_id"`
+}
