@@ -57,9 +57,10 @@ func (u *articleUsecase) GetAll(search string, offset, limit int) ([]article.Get
 				Image:        articles.Image,
 				Author:       articles.Author,
 				Topic:        articles.Topic,
+				Title:        articles.Title,
 				ViewCount:    articles.ViewCount,
 				CommentCount: articles.CommentCount,
-				Date:         articles.Date.Format("2006-01-01"),
+				Date:         articles.Date.Format("2006-01-02"),
 			}
 			articlesResponse[i] = articleResponse
 
@@ -96,10 +97,11 @@ func (u *articleUsecase) GetById(id string) (article.GetByResponse, error) {
 		Image:        articleData.Image,
 		Author:       articleData.Author,
 		Topic:        articleData.Topic,
+		Title:        articleData.Title,
 		ViewCount:    articleData.ViewCount,
 		CommentCount: articleData.CommentCount,
 		Description:  articleData.Description,
-		Date:         articleData.Date.Format("2006-01-01"),
+		Date:         articleData.Date.Format("2006-01-02"),
 	}
 
 	if err != nil {
