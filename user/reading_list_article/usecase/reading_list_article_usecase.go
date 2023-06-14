@@ -7,7 +7,7 @@ import (
 )
 
 type ReadingListArticleUsecaseInterface interface {
-	Create(createRequest *readingListArticle.CreateRequest) error
+	Create(createRequest []readingListArticle.CreateRequest) error
 	Delete(id, user_id string) error
 }
 
@@ -21,12 +21,16 @@ func NewReadingListArticleUsecase(ReadingListArticleR repository.ReadingListArti
 	}
 }
 
-func (rlau ReadingListArticleUsecase) Create(createRequest *readingListArticle.CreateRequest) error {
-	newReadingListArticle := entity.ReadingListArticle{
-		ID:            createRequest.ID,
-		ArticleId:     createRequest.ArticleId,
-		ReadingListId: createRequest.ReadingListId,
-		UserId:        createRequest.UserId,
+func (rlau ReadingListArticleUsecase) Create(createRequest []readingListArticle.CreateRequest) error {
+	var newReadingListArticle []entity.ReadingListArticle
+	var InputReadingListArticle entity.ReadingListArticle
+
+	for i := 0; i < len(createRequest); i++ {
+		InputReadingListArticle.ID = createRequest[i].ID
+		InputReadingListArticle.ArticleId = createRequest[i].ArticleId
+		InputReadingListArticle.ReadingListId = createRequest[i].ReadingListId
+		InputReadingListArticle.UserId = createRequest[i].UserId
+		newReadingListArticle = append(newReadingListArticle, InputReadingListArticle)
 	}
 
 	err := rlau.ReadingListArticleR.Create(&newReadingListArticle)

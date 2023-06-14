@@ -7,7 +7,7 @@ import (
 
 type ReadingListArticleRepository interface {
 	GetById(id, user_id string) (*entity.ReadingListArticle, error)
-	Create(readingListArticle *entity.ReadingListArticle) error
+	Create(readingListArticle *[]entity.ReadingListArticle) error
 	Delete(id, user_id string) error
 }
 
@@ -30,8 +30,8 @@ func (rlar mysqlReadingListArticleRepository) GetById(id, user_id string) (*enti
 	return &readingListArticle, nil
 }
 
-func (rlar mysqlReadingListArticleRepository) Create(readingListArticle *entity.ReadingListArticle) error {
-	err := rlar.DB.Save(readingListArticle).Error
+func (rlar mysqlReadingListArticleRepository) Create(readingListArticle *[]entity.ReadingListArticle) error {
+	err := rlar.DB.Create(readingListArticle).Error
 
 	if err != nil {
 		return err
@@ -40,7 +40,7 @@ func (rlar mysqlReadingListArticleRepository) Create(readingListArticle *entity.
 }
 
 func (rlar mysqlReadingListArticleRepository) Delete(id, user_id string) error {
-	err := rlar.DB.Where("id = ? AND user_id = ? ", id, user_id).Delete(&entity.ReadingListArticle{}).Error
+	err := rlar.DB.Unscoped().Where("id = ? AND user_id = ? ", id, user_id).Delete(&entity.ReadingListArticle{}).Error
 	if err != nil {
 		return err
 	}
