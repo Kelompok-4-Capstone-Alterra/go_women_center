@@ -122,11 +122,14 @@ func (u *articleUsecase) Create(inputDetail article.CreateRequest, inputImage *m
 	newArticle := entity.Article{
 		ID:          uuid,
 		Title:       inputDetail.Title,
-		Topic:       constant.TOPICS[inputDetail.Topic],
 		Author:      inputDetail.Author,
 		Description: inputDetail.Description,
 		Date:        time.Now(),
 		Image:       path,
+	}
+
+	if topic, ok := constant.TOPICS[inputDetail.Topic]; ok{
+		newArticle.Topic = topic
 	}
 
 	err = u.articleRepo.Create(newArticle)
