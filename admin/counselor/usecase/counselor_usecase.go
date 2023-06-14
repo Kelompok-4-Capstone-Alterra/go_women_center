@@ -81,7 +81,7 @@ func(u *counselorUsecase) Create(input counselor.CreateRequest) error{
 		Name: input.Name,
 		Email: input.Email,
 		Username: input.Username,
-		Topic: constant.TOPICS[input.Topic],
+		Topic: constant.TOPICS[input.Topic][0],
 		Description: input.Description,
 		Price: input.Price,
 		ProfilePicture: path,
@@ -124,7 +124,7 @@ func(u *counselorUsecase) Update(input counselor.UpdateRequest) error {
 		Name: input.Name,
 		Email: input.Email,
 		Username: input.Username,
-		Topic: constant.TOPICS[input.Topic],
+		Topic: constant.TOPICS[input.Topic][0],
 		Description: input.Description,
 		Price: input.Price,
 	}
