@@ -60,6 +60,7 @@ import (
 
 	TransactionUserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/transaction/handler"
 	TransactionUserUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/transaction/usecase"
+	TransactionUserRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/transaction/repository"
 )
 
 func main() {
@@ -160,7 +161,8 @@ func main() {
 
 	midtransServerKey := os.Getenv("MIDTRANS_SERVER_KEY")
 
-	userTransactionUsecase := TransactionUserUsecase.NewtransactionUsecase(midtransServerKey, googleUUID)
+	userTransactionRepo := TransactionUserRepo.NewMysqltransactionRepository(db)
+	userTransactionUsecase := TransactionUserUsecase.NewtransactionUsecase(midtransServerKey, googleUUID, userTransactionRepo)
 	userTransactionHandler := TransactionUserHandler.NewTransactionHandler(userTransactionUsecase)
 
 	e := echo.New()
