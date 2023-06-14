@@ -16,7 +16,8 @@ import (
 )
 
 type TransactionUsecase interface {
-	SendTransaction(transactionRequest transaction.SendTransactionRequest) (entity.Transaction, error)
+	SendTransaction(transactionRequest transaction.SendTransactionRequest) (transaction.SendTransactionResponse, error)
+	UpdateStatus(transactionId string, transactionStatus string) error
 }
 
 type transactionUsecase struct {
@@ -39,13 +40,13 @@ func NewtransactionUsecase(
 }
 
 // send transaction to 
-func (u *transactionUsecase) SendTransaction(trRequest transaction.SendTransactionRequest) (entity.Transaction, error) {
+func (u *transactionUsecase) SendTransaction(trRequest transaction.SendTransactionRequest) (transaction.SendTransactionResponse, error) {
 	// Initiate Snap client
 	var s = snap.Client{}
 	s.New(u.serverKey, midtrans.Sandbox) // sandbox
 	transactionId, err := u.uuidGenerator.GenerateUUID()
 	if err != nil {
-		return entity.Transaction{}, err
+		return transaction.SendTransactionResponse{}, err
 	}
 
 	// Initiate Snap request param
@@ -73,7 +74,7 @@ func (u *transactionUsecase) SendTransaction(trRequest transaction.SendTransacti
 	// check topic availability
 	trTopic, ok := constant.TOPICS[trRequest.CounselorTopicKey]
 	if !ok {
-		return entity.Transaction{}, transaction.ErrorInvalidGenre
+		return transaction.SendTransactionResponse{}, transaction.ErrorInvalidGenre
 	}
 
 	// initialize db data model
@@ -97,21 +98,39 @@ func (u *transactionUsecase) SendTransaction(trRequest transaction.SendTransacti
 
 	data, err := u.repo.CreateTransaction(transactionData)
 	if err != nil {
-		return entity.Transaction{}, err
+		return transaction.SendTransactionResponse{}, err
 	}
 
-	return data, nil
+	res.Data = data
+
+	return res, nil
 }
 
 // catch callback res from midtrans
 // if status 200 then update status success
 // else then update status to canceled
-func (t *transactionUsecase) VerifyPayment() {
+func (u *transactionUsecase) UpdateStatus(transactionId string, transactionStatus string) error {
+	savedTransaction, err := u.verifyById(transactionId)
+	if err != nil {
+		return err
+	}
 
+	_, err = u.repo.UpdateStatusByData(savedTransaction, transactionStatus)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// check status after payment
+func (u *transactionUsecase) verifyById(id string) (entity.Transaction, error) {
+	savedTransaction, err := u.repo.GetById(id)
+	if err != nil {
+		return entity.Transaction{}, err
+	}
+	return savedTransaction, nil
 }
 
 // success only
 func GetAll() {}
-
-// check status after payment
-func VerifyById(id string) {}
