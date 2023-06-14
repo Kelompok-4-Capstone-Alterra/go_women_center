@@ -126,7 +126,6 @@ func (u *articleUsecase) GetById(id string) (article.GetByResponse, error) {
 		Author:       articleData.Author,
 		Topic:        articleData.Topic,
 		Title:        articleData.Title,
-		ViewCount:    articleData.ViewCount,
 		CommentCount: articleData.CommentCount,
 		Description:  articleData.Description,
 		Date:         articleData.Date.Format("2006-01-02"),
@@ -142,6 +141,8 @@ func (u *articleUsecase) GetById(id string) (article.GetByResponse, error) {
 		ViewCount: articleData.ViewCount,
 	}
 	u.articleRepo.UpdateCount(articleData.ID, viewCount)
+
+	articleDataResponse.ViewCount = articleData.ViewCount
 
 	return articleDataResponse, nil
 }
