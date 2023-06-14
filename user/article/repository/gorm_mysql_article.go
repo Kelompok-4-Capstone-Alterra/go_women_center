@@ -63,6 +63,7 @@ func getArticleIDs(articles []entity.Article) []string {
 	return ids
 }
 
+
 func (r *mysqlArticleRepository) GetById(id string) (entity.Article, error) {
 	var article entity.Article
 	err := r.DB.Model(&entity.Article{}).First(&article, "id = ?", id).Error
