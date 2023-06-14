@@ -211,7 +211,8 @@ func main() {
 		restrictUsers.POST("/forums/joins", userForumH.Create)
 		restrictUsers.GET("/careers/:id", userCareerHandler.GetById)
 		
-		restrictUsers.POST("/transaction", userTransactionHandler.SendTransaction)
+		restrictUsers.GET("/transactions", userTransactionHandler.GetAllTransaction)
+		restrictUsers.POST("/transactions", userTransactionHandler.SendTransaction)
 	}
 
 	e.POST("/transaction/callback", userTransactionHandler.MidtransNotification)
