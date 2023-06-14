@@ -38,6 +38,13 @@ func (u *articleUsecase) GetAll(search string, offset, limit int) ([]article.Get
 		return []article.GetAllResponse{}, 0, article.ErrInternalServerError
 	}
 
+	readingListArticles, err := u.GetReadingListArticles()
+
+	if err != nil {
+		log.Print(err.Error())
+		return []article.GetAllResponse{}, 0, article.ErrInternalServerError
+	}
+
 	var articlesResponse = make([]article.GetAllResponse, len(articles))
 	var g errgroup.Group
 
@@ -55,15 +62,6 @@ func (u *articleUsecase) GetAll(search string, offset, limit int) ([]article.Get
 				CommentCount: articles.CommentCount,
 				Date:         articles.Date.Format("2006-01-02"),
 			}
-
-			// Check if there are same data from variable articlesResponse, return only once, and add variable "Saved : true" to articleResponse
-			for _, response := range articlesResponse {
-				if response.ID == articleResponse.ID {
-					articleResponse.Saved = true
-					break
-				}
-			}
-
 			articlesResponse[i] = articleResponse
 
 			return nil
@@ -74,7 +72,48 @@ func (u *articleUsecase) GetAll(search string, offset, limit int) ([]article.Get
 		return []article.GetAllResponse{}, 0, err
 	}
 
+	for i, articleData := range articlesResponse {
+		for _, ReadingListData := range readingListArticles {
+			if articleData.ID == ReadingListData.ArticleID {
+				articlesResponse[i].Saved = true
+				break
+			}
+		}
+	}
+
 	return articlesResponse, helper.GetTotalPages(int(totalData), limit), nil
+}
+
+func (u *articleUsecase) GetReadingListArticles() ([]article.ReadingListArticleResponse, error) {
+	readingListArticles, err := u.articleRepo.GetReadingListArticles()
+	if err != nil {
+		log.Print(err.Error())
+		return []article.ReadingListArticleResponse{}, article.ErrInternalServerError
+	}
+
+	var ReadingListArticlesResponse = make([]article.ReadingListArticleResponse, len(readingListArticles))
+	var g errgroup.Group
+
+	for i, ReadingListArticle := range readingListArticles {
+		i := i
+		ReadingListArticle := ReadingListArticle
+		g.Go(func() error {
+			ReadingListArticle := article.ReadingListArticleResponse{
+				ID:            ReadingListArticle.ID,
+				ArticleID:     ReadingListArticle.ArticleId,
+				UserID:        ReadingListArticle.UserId,
+				ReadingListID: ReadingListArticle.ReadingListId,
+			}
+			ReadingListArticlesResponse[i] = ReadingListArticle
+			return nil
+		})
+	}
+
+	if err := g.Wait(); err != nil {
+		return []article.ReadingListArticleResponse{}, err
+	}
+
+	return ReadingListArticlesResponse, nil
 }
 
 func (u *articleUsecase) GetById(id string) (article.GetByResponse, error) {
