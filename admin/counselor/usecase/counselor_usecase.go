@@ -119,14 +119,17 @@ func(u *counselorUsecase) Update(input counselor.UpdateRequest) error {
 			return counselor.ErrUsernameConflict
 		}
 	}
-
+	
 	counselorUpdate := entity.Counselor{
 		Name: input.Name,
 		Email: input.Email,
 		Username: input.Username,
-		Topic: constant.TOPICS[input.Topic][0],
 		Description: input.Description,
 		Price: input.Price,
+	}
+	
+	if topic, ok := constant.TOPICS[input.Topic]; ok {
+		counselorUpdate.Topic = topic[0]
 	}
 
 	if input.ProfilePicture != nil {

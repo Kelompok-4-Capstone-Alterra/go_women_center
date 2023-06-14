@@ -17,6 +17,11 @@ func isRequestValid(m interface{}) error {
 			field := strings.ToLower(err.Field())
 
 			if err.Tag() == "required" {
+
+				if field == "topic" {
+					return counselor.ErrRequiredTopic
+				}
+
 				return counselor.ErrRequired
 			}
 
