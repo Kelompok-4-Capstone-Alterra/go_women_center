@@ -10,6 +10,7 @@ type ArticleRepository interface {
 	GetById(id string) (entity.Article, error)
 	Count() (int, error)
 	UpdateCount(id string, article entity.Article) error
+	GetReadingListArticles() ([]entity.ReadingListArticle, error)
 }
 
 type mysqlArticleRepository struct {
@@ -35,34 +36,27 @@ func (r *mysqlArticleRepository) GetAll(search string, offset, limit int) ([]ent
 		return nil, 0, err
 	}
 
-	var readingListArticles []entity.ReadingListArticle
-	err = r.DB.Model(&entity.ReadingListArticle{}).
-		Where("article_id IN (?)", getArticleIDs(articles)).
-		Find(&readingListArticles).Error
-
-	if err != nil {
-		return nil, 0, err
-	}
-
-	for _, article := range articles {
-		for _, readingListArticle := range readingListArticles {
-			if article.ID == readingListArticle.ArticleId {
-				articles = append(articles, article)
-			}
-		}
-	}
-
 	return articles, count, nil
 }
 
-func getArticleIDs(articles []entity.Article) []string {
-	var ids []string
-	for _, article := range articles {
-		ids = append(ids, article.ID)
+func (r *mysqlArticleRepository) GetReadingListArticles() ([]entity.ReadingListArticle, error) {
+	var readingListArticles []entity.ReadingListArticle
+	err := r.DB.Model(&entity.ReadingListArticle{}).
+		Find(&readingListArticles).Error
+
+	if err != nil {
+		return nil, err
 	}
-	return ids
+	return readingListArticles, nil
 }
 
+// func getArticleIDs(articles []entity.Article) []string {
+// 	var ids []string
+// 	for _, article := range articles {
+// 		ids = append(ids, article.ID)
+// 	}
+// 	return ids
+// }
 
 func (r *mysqlArticleRepository) GetById(id string) (entity.Article, error) {
 	var article entity.Article
