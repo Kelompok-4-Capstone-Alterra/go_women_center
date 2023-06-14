@@ -18,9 +18,9 @@ type Transaction struct {
 	TimeStart          string    // Convert from time to valid string first
 	ConsultationMethod string
 	Status             transaction.Status `gorm:"type:varchar(36)"`
-	ValueVoucher       float64
-	GrossPrice         float64
-	TotalPrice         float64
+	ValueVoucher       int64
+	GrossPrice         int64
+	TotalPrice         int64
 	IsReviewed         bool
 	Created_at         time.Time
 }
