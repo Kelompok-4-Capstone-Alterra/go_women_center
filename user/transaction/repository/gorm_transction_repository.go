@@ -2,6 +2,7 @@ package repository
 
 import (
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
+	trError "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/transaction"
 	"gorm.io/gorm"
 )
 
@@ -22,7 +23,7 @@ func NewMysqltransactionRepository(db *gorm.DB) MysqlTransactionRepository {
 func (tr *mysqlTransactionRepository) CreateTransaction(transaction entity.Transaction) (entity.Transaction, error) {
 	err := tr.DB.Create(&transaction).Error
 	if err != nil {
-		return entity.Transaction{}, err
+		return entity.Transaction{}, trError.ErrorInsertDB
 	}
 	return transaction, nil
 }
