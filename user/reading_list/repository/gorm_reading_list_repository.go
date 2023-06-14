@@ -29,7 +29,7 @@ func (rlr mysqlReadingListRepository) GetAll(id_user, name string, offset, limit
 	err := rlr.DB.Table("reading_lists").Select("reading_lists.id, reading_lists.user_id, reading_lists.name, reading_lists.description, COUNT(reading_list_articles.id) AS article_total").
 		Joins("LEFT JOIN reading_list_articles ON reading_lists.id = reading_list_articles.reading_list_id").
 		Joins("LEFT JOIN articles ON articles.id = reading_list_articles.article_id").Where("name LIKE ?", "%"+name+"%").
-		Group("reading_lists.id").Count(&totalData).Offset(offset).Limit(limit).Preload("ReadingListArticles").Find(&readingList).Error
+		Group("reading_lists.id").Count(&totalData).Offset(offset).Limit(limit).Preload("ReadingListArticles.Articles").Find(&readingList).Error
 
 	if err != nil {
 		return nil, totalData, err
