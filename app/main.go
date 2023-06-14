@@ -214,7 +214,7 @@ func main() {
 		restrictUsers.POST("/transaction", userTransactionHandler.SendTransaction)
 	}
 
-	e.POST("/transaction/callback", userTransactionHandler.Notification)
+	e.POST("/transaction/callback", userTransactionHandler.MidtransNotification)
 
 	restrictAdmin := e.Group("/admin", adminAuthMidd.JWTAdmin())
 
