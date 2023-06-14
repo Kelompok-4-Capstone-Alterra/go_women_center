@@ -123,7 +123,6 @@ func main() {
 	userCounselorUsecase := CounselorUserUsecase.NewCounselorUsecase(userCounselorRepo, userReviewRepo, userAuthRepo)
 	userCounselorHandler := CounselorUserHandler.NewCounselorHandler(userCounselorUsecase)
 
-
 	userRepo := UserProfileRepo.NewMysqlUserRepository(db)
 	userUsecase := UserProfileUsecase.NewProfileUsecase(userRepo, image, encryptor)
 	userHandler := UserProfileHandler.NewProfileHandler(userUsecase)
@@ -148,7 +147,7 @@ func main() {
 	adminCareerRepo := CareerAdminRepository.NewMysqlCareerRepository(db)
 	adminCareerUsecase := CareerAdminUsecase.NewCareerUsecase(adminCareerRepo, image)
 	adminCareerHandler := CareerAdminHandler.NewCareerHandler(adminCareerUsecase)
-	
+
 	adminUsersRepo := UsersAdminRepository.NewMysqlUserRepository(db)
 	adminUsersUsecase := UsersAdminUsecase.NewUserUsecase(adminUsersRepo)
 	adminUsersHandler := UsersAdminHandler.NewUserHandler(adminUsersUsecase)
@@ -204,7 +203,6 @@ func main() {
 		users.GET("/articles/:id", userArticleHandler.GetById)
 	}
 
-
 	restrictUsers := e.Group("/users", userAuthMidd.JWTUser())
 	{
 		restrictUsers.GET("/profile", func(c echo.Context) error {
@@ -212,74 +210,69 @@ func main() {
 			return c.JSON(http.StatusOK, user)
 		})
 
-	restrictUsers := e.Group("/users", userAuthMidd.JWTUser(), userAuthMidd.CheckUser(userAuthUsecase))
+		restrictUsers := e.Group("/users", userAuthMidd.JWTUser(), userAuthMidd.CheckUser(userAuthUsecase))
 
+		{
+			restrictUsers.GET("/profile", userHandler.GetById)
+			restrictUsers.PUT("/profile", userHandler.Update)
+			restrictUsers.PUT("/profile/password", userHandler.UpdatePassword)
+			restrictUsers.GET("/counselors/:id", userCounselorHandler.GetById)
+			restrictUsers.POST("/counselors/:id/reviews", userCounselorHandler.CreateReview)
+			restrictUsers.GET("/counselors/:id/reviews", userCounselorHandler.GetAllReview)
 
-	{	
-		restrictUsers.GET("/profile", userHandler.GetById)
-		restrictUsers.PUT("/profile", userHandler.Update)
-		restrictUsers.PUT("/profile/password", userHandler.UpdatePassword)
-		restrictUsers.GET("/counselors/:id", userCounselorHandler.GetById)
-		restrictUsers.POST("/counselors/:id/reviews", userCounselorHandler.CreateReview)
-		restrictUsers.GET("/counselors/:id/reviews", userCounselorHandler.GetAllReview)
+			restrictUsers.GET("/forums", forumH.GetAll)
+			restrictUsers.GET("/forums/:id", forumH.GetById)
+			restrictUsers.POST("/forums", forumH.Create)
+			restrictUsers.PUT("/forums/:id", forumH.Update)
+			restrictUsers.DELETE("/forums/:id", forumH.Delete)
+			restrictUsers.POST("/forums/joins", userForumH.Create)
+			restrictUsers.GET("/careers/:id", userCareerHandler.GetById)
 
-		restrictUsers.GET("/forums", forumH.GetAll)
-		restrictUsers.GET("/forums/:id", forumH.GetById)
-		restrictUsers.POST("/forums", forumH.Create)
-		restrictUsers.PUT("/forums/:id", forumH.Update)
-		restrictUsers.DELETE("/forums/:id", forumH.Delete)
-		restrictUsers.POST("/forums/joins", userForumH.Create)
-		restrictUsers.GET("/careers/:id", userCareerHandler.GetById)
+			restrictUsers.POST("/articles/:id/comments", userArticleHandler.CreateComment)
+			restrictUsers.GET("/articles/:id/comments", userArticleHandler.GetAllComment)
+			restrictUsers.DELETE("/articles/:article_id/comments/:comment_id", userArticleHandler.DeleteComment)
+		}
 
-		restrictUsers.POST("/articles/:id/comments", userArticleHandler.CreateComment)
-		restrictUsers.GET("/articles/:id/comments", userArticleHandler.GetAllComment)
-		restrictUsers.DELETE("/articles/:article_id/comments/:comment_id", userArticleHandler.DeleteComment)
+		restrictAdmin := e.Group("/admin", adminAuthMidd.JWTAdmin())
+
+		{
+
+			restrictAdmin.GET("/counselors", adminCounselorHandler.GetAll)
+			restrictAdmin.POST("/counselors", adminCounselorHandler.Create)
+			restrictAdmin.GET("/counselors/:id", adminCounselorHandler.GetById)
+			restrictAdmin.PUT("/counselors/:id", adminCounselorHandler.Update)
+			restrictAdmin.DELETE("/counselors/:id", adminCounselorHandler.Delete)
+
+			restrictAdmin.POST("/counselors/:id/schedules", adminScheduleHandler.Create)
+			restrictAdmin.GET("/counselors/:id/schedules", adminScheduleHandler.GetByCounselorId)
+			restrictAdmin.DELETE("/counselors/:id/schedules", adminScheduleHandler.Delete)
+			restrictAdmin.PUT("/counselors/:id/schedules", adminScheduleHandler.Update)
+
+			restrictAdmin.GET("/careers", adminCareerHandler.GetAll)
+			restrictAdmin.POST("/careers", adminCareerHandler.Create)
+			restrictAdmin.GET("/careers/:id", adminCareerHandler.GetById)
+			restrictAdmin.PUT("/careers/:id", adminCareerHandler.Update)
+			restrictAdmin.DELETE("/careers/:id", adminCareerHandler.Delete)
+
+			restrictAdmin.GET("/articles", adminArticleHandler.GetAll)
+			restrictAdmin.POST("/articles", adminArticleHandler.Create)
+			restrictAdmin.GET("/articles/:id", adminArticleHandler.GetById)
+			restrictAdmin.PUT("/articles/:id", adminArticleHandler.Update)
+			restrictAdmin.DELETE("/articles/:id", adminArticleHandler.Delete)
+			restrictAdmin.GET("/articles/:id/comments", adminArticleHandler.GetAllComment)
+			restrictAdmin.DELETE("/articles/:article_id/comments/:comment_id", adminArticleHandler.DeleteComment)
+
+			restrictAdmin.GET("/users", adminUsersHandler.GetAll)
+			restrictAdmin.GET("/users/:id", adminUsersHandler.GetById)
+			restrictAdmin.DELETE("/users/:id", adminUsersHandler.Delete)
+
+			restrictAdmin.DELETE("/forums/:id", forumAdminH.Delete)
+
+		}
+
+		// ssl
+		e.Logger.Fatal(e.StartTLS(":8080", "./ssl/certificate.crt", "./ssl/private.key"))
+
+		// e.Logger.Fatal(e.Start(":8080"))
 	}
-
-	restrictAdmin := e.Group("/admin", adminAuthMidd.JWTAdmin())
-
-	{
-
-		restrictAdmin.GET("/counselors", adminCounselorHandler.GetAll)
-		restrictAdmin.POST("/counselors", adminCounselorHandler.Create)
-		restrictAdmin.GET("/counselors/:id", adminCounselorHandler.GetById)
-		restrictAdmin.PUT("/counselors/:id", adminCounselorHandler.Update)
-		restrictAdmin.DELETE("/counselors/:id", adminCounselorHandler.Delete)
-
-
-
-		restrictAdmin.POST("/counselors/:id/schedules", adminScheduleHandler.Create)
-		restrictAdmin.GET("/counselors/:id/schedules", adminScheduleHandler.GetByCounselorId)
-		restrictAdmin.DELETE("/counselors/:id/schedules", adminScheduleHandler.Delete)
-		restrictAdmin.PUT("/counselors/:id/schedules", adminScheduleHandler.Update)
-
-
-		restrictAdmin.GET("/careers", adminCareerHandler.GetAll)
-		restrictAdmin.POST("/careers", adminCareerHandler.Create)
-		restrictAdmin.GET("/careers/:id", adminCareerHandler.GetById)
-		restrictAdmin.PUT("/careers/:id", adminCareerHandler.Update)
-		restrictAdmin.DELETE("/careers/:id", adminCareerHandler.Delete)
-
-		restrictAdmin.GET("/articles", adminArticleHandler.GetAll)
-		restrictAdmin.POST("/articles", adminArticleHandler.Create)
-		restrictAdmin.GET("/articles/:id", adminArticleHandler.GetById)
-		restrictAdmin.PUT("/articles/:id", adminArticleHandler.Update)
-		restrictAdmin.DELETE("/articles/:id", adminArticleHandler.Delete)
-		restrictAdmin.GET("/articles/:id/comments", adminArticleHandler.GetAllComment)
-		restrictAdmin.DELETE("/articles/:article_id/comments/:comment_id", adminArticleHandler.DeleteComment)
-
-
-		restrictAdmin.GET("/users", adminUsersHandler.GetAll)
-		restrictAdmin.GET("/users/:id", adminUsersHandler.GetById)
-		restrictAdmin.DELETE("/users/:id", adminUsersHandler.Delete)
-
-		restrictAdmin.DELETE("/forums/:id", forumAdminH.Delete)
-
-	}
-
-
-	// ssl
-	e.Logger.Fatal(e.StartTLS(":8080", "./ssl/certificate.crt", "./ssl/private.key"))
-
-	// e.Logger.Fatal(e.Start(":8080"))
 }
