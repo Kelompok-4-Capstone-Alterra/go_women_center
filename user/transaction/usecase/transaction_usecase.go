@@ -18,6 +18,7 @@ import (
 type TransactionUsecase interface {
 	SendTransaction(transactionRequest transaction.SendTransactionRequest) (transaction.SendTransactionResponse, error)
 	UpdateStatus(transactionId string, transactionStatus string) error
+	GetAll() ([]entity.Transaction, error)
 }
 
 type transactionUsecase struct {
@@ -110,6 +111,7 @@ func (u *transactionUsecase) SendTransaction(trRequest transaction.SendTransacti
 // if status 200 then update status success
 // else then update status to canceled
 func (u *transactionUsecase) UpdateStatus(transactionId string, transactionStatus string) error {
+	// TODO: fix status message
 	savedTransaction, err := u.verifyById(transactionId)
 	if err != nil {
 		return err
@@ -133,4 +135,6 @@ func (u *transactionUsecase) verifyById(id string) (entity.Transaction, error) {
 }
 
 // success only
-func GetAll() {}
+func (u *transactionUsecase) GetAll() ([]entity.Transaction, error) {
+	return []entity.Transaction{}, nil
+}

@@ -67,6 +67,27 @@ func (h *transactionHandler) SendTransaction(c echo.Context) error {
 	))
 }
 
+func (h *transactionHandler) GetAllTransaction(c echo.Context) error {
+	// get jwt token and check for validity
+	user := c.Get("user").(*helper.JwtCustomUserClaims)
+	err := user.Valid()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
+			err.Error(),
+			http.StatusInternalServerError,
+			nil,
+		))
+	}
+
+	h.Usecase.GetAll()
+	
+	return c.JSON(http.StatusOK, helper.ResponseData(
+		"success get new transaction",
+		http.StatusOK,
+		nil,
+	))
+}
+
 func (h *transactionHandler) MidtransNotification(c echo.Context) error {
 	notifMap := make(map[string]interface{})
 	
