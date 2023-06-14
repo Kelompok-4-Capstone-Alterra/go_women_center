@@ -3,78 +3,115 @@ package usecase
 import (
 	// "log"
 
+	"time"
+
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/constant"
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
+	counselorUC "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor/usecase"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/transaction"
+	trRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/transaction/repository"
 	"github.com/midtrans/midtrans-go"
 	"github.com/midtrans/midtrans-go/snap"
 )
 
 type TransactionUsecase interface {
-	SendTransaction(transactionRequest transaction.SendTransactionRequest) (transaction.SendTransactionResponse, error)
+	SendTransaction(transactionRequest transaction.SendTransactionRequest) (entity.Transaction, error)
 }
 
 type transactionUsecase struct {
+	repo          trRepo.MysqlTransactionRepository
 	serverKey     string
 	uuidGenerator helper.UuidGenerator
+	Counselor     counselorUC.CounselorUsecase
 }
 
 func NewtransactionUsecase(
 	inputServerKey string,
 	uuidGenerator helper.UuidGenerator,
+	trRepo trRepo.MysqlTransactionRepository,
 ) TransactionUsecase {
 	return &transactionUsecase{
 		serverKey:     inputServerKey,
 		uuidGenerator: uuidGenerator,
+		repo:          trRepo,
 	}
 }
 
-func (t *transactionUsecase) SendTransaction(transactionRequest transaction.SendTransactionRequest) (transaction.SendTransactionResponse, error) {
-	res := transaction.SendTransactionResponse{}
-
-	// 1. Initiate Snap client
+// send transaction to 
+func (u *transactionUsecase) SendTransaction(trRequest transaction.SendTransactionRequest) (entity.Transaction, error) {
+	// Initiate Snap client
 	var s = snap.Client{}
-	s.New(t.serverKey, midtrans.Sandbox)
-	// Use to midtrans.Production if you want Production Environment (accept real transaction).
-
-	transactionId, err := t.uuidGenerator.GenerateUUID()
+	s.New(u.serverKey, midtrans.Sandbox) // sandbox
+	transactionId, err := u.uuidGenerator.GenerateUUID()
 	if err != nil {
-		return res, err
+		return entity.Transaction{}, err
 	}
 
-	// 2. Initiate Snap request param
+	// Initiate Snap request param
+	// using total price as grossamt
 	req := &snap.Request{
 		TransactionDetails: midtrans.TransactionDetails{
 			OrderID:  transactionId,
-			GrossAmt: 100000,
+			GrossAmt: trRequest.TotalPrice,
 		},
 		CreditCard: &snap.CreditCardDetails{
 			Secure: true,
 		},
 		CustomerDetail: &midtrans.CustomerDetails{
-			Email: "john@doe.com",
-			Phone: "081234567890",
+			FName: trRequest.UserCredential.Username,
+			Email: trRequest.UserCredential.Email,
 		},
 	}
 
-	// 3. Execute request create Snap transaction to Midtrans Snap API
-
-	// TODO: send order id
+	// Execute request create Snap transaction to Midtrans Snap API
+	res := transaction.SendTransactionResponse{}
 	snapResp, _ := s.CreateTransaction(req)
-
-	res.ID = transactionId
+	res.TransactionID = transactionId
 	res.PaymentLink = snapResp.RedirectURL
 
-	// TODO: create transaction in db with status pending
+	// check topic availability
+	trTopic, ok := constant.TOPICS[trRequest.CounselorTopicKey]
+	if !ok {
+		return entity.Transaction{}, transaction.ErrorInvalidGenre
+	}
 
-	// catch callback res from midtrans
-	// if status 200 then update status success
-	// else then update status to canceled
+	// initialize db data model
+	// TODO: check if transaction data implementation is correct
+	transactionData := entity.Transaction{
+		ID:                 transactionId,
+		UserId:             trRequest.UserCredential.ID,
+		DateId:             trRequest.CounselingDateID, 
+		CounselorId:        trRequest.CounselorID,
+		CounselorTopic:     trTopic,
+		TimeId:             trRequest.CounselingTimeID,
+		TimeStart:          trRequest.CounselingTimeStart,
+		ConsultationMethod: trRequest.CounselingMethod,
+		Status:             transaction.Pending,
+		ValueVoucher:       trRequest.ValueVoucher,
+		GrossPrice:         trRequest.GrossPrice,
+		TotalPrice:         trRequest.TotalPrice,
+		IsReviewed:         false,
+		Created_at:         time.Now(),
+	}
 
-	return res, nil
+	data, err := u.repo.CreateTransaction(transactionData)
+	if err != nil {
+		return entity.Transaction{}, err
+	}
+
+	return data, nil
+}
+
+// catch callback res from midtrans
+// if status 200 then update status success
+// else then update status to canceled
+func (t *transactionUsecase) VerifyPayment() {
+
 }
 
 // success only
-func getAll() {}
+func GetAll() {}
 
 // check status after payment
-func verifyById(id string) {}
+func VerifyById(id string) {}
