@@ -8,10 +8,11 @@ type SendTransactionRequest struct {
 	//TODO: check data type
 	UserCredential      *helper.JwtCustomUserClaims
 	CounselorID         string `json:"counselor_id"`
-	CounselingTimeID    string
-	CounselingTimeStart string
-	CounselingMethod    string
-	ValueVoucher        float64
-	GrossPrice          float64
-	TotalPrice          float64
+	CounselorTopicKey   int    `json:"counselor_topic"`
+	CounselingTimeID    string `json:"counselor_time_id"`
+	CounselingTimeStart string `json:"counseling_time_start"`
+	CounselingMethod    string `json:"counseling_method"`
+	ValueVoucher        int64  `json:"value_voucher"`
+	GrossPrice          int64  `json:"gross_price"`
+	TotalPrice          int64  `json:"total_price"`
 }
