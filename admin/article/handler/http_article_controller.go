@@ -201,7 +201,7 @@ func (h *articleHandler) DeleteComment(c echo.Context) error {
 	err := h.ArticleUsecase.DeleteComment(commentReq.ArticleID, commentReq.CommentID)
 
 	if err != nil {
-		status := http.StatusInternalServerError
+		status := http.StatusNotFound
 
 		switch err {
 		case article.ErrArticleNotFound:
