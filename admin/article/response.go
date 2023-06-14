@@ -8,6 +8,7 @@ type GetAllResponse struct {
 	Topic        string `json:"topic"`
 	ViewCount    int    `json:"view_count"`
 	CommentCount int    `json:"comment_count"`
+	Date         string `json:"date"`
 }
 
 type GetByResponse struct {
