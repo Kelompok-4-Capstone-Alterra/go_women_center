@@ -1,6 +1,6 @@
 package transaction
 
-type GenerateTransactionResponse struct {
-	ID string `json:"id"`
-	Link string `json:"link"`
+type SendTransactionResponse struct {
+	TransactionID string `json:"transaction_id"`
+	PaymentLink string `json:"payment_link"`
 }
