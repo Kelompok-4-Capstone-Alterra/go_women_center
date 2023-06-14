@@ -39,14 +39,40 @@ func NewArticleUsecase(ARepo repository.ArticleRepository, CommentRepo Comment.C
 }
 
 func (u *articleUsecase) GetAll(search string, offset, limit int) ([]article.GetAllResponse, int, error) {
-
 	articles, totalData, err := u.articleRepo.GetAll(search, offset, limit)
-
 	if err != nil {
-		return nil, 0, article.ErrInternalServerError
+		log.Print(err.Error())
+		return []article.GetAllResponse{}, 0, article.ErrInternalServerError
 	}
 
-	return articles, helper.GetTotalPages(int(totalData), limit), nil
+	var articlesResponse = make([]article.GetAllResponse, len(articles))
+	var g errgroup.Group
+
+	for i, articles := range articles {
+		i := i
+		articles := articles
+		g.Go(func() error {
+			articleResponse := article.GetAllResponse{
+				ID:           articles.ID,
+				Image:        articles.Image,
+				Author:       articles.Author,
+				Topic:        articles.Topic,
+				ViewCount:    articles.ViewCount,
+				CommentCount: articles.CommentCount,
+				Date:         articles.Date.Format("2006-01-01"),
+			}
+			articlesResponse[i] = articleResponse
+
+			return nil
+		})
+	}
+
+	if err := g.Wait(); err != nil {
+		return []article.GetAllResponse{}, 0, err
+	}
+
+
+	return articlesResponse, helper.GetTotalPages(int(totalData), limit), nil
 }
 
 func (u *articleUsecase) GetTotalPages(limit int) (int, error) {

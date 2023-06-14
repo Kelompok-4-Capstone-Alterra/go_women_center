@@ -1,13 +1,12 @@
 package repository
 
 import (
-	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/article"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"gorm.io/gorm"
 )
 
 type ArticleRepository interface {
-	GetAll(search string, offset, limit int) ([]article.GetAllResponse, int64, error)
+	GetAll(search string, offset, limit int) ([]entity.Article, int64, error)
 	GetById(id string) (entity.Article, error)
 	Create(article entity.Article) error
 	Update(id string, article entity.Article) error
@@ -24,8 +23,8 @@ func NewMysqlArticleRepository(db *gorm.DB) ArticleRepository {
 	return &mysqlArticleRepository{DB: db}
 }
 
-func (r *mysqlArticleRepository) GetAll(search string, offset, limit int) ([]article.GetAllResponse, int64, error) {
-	var article []article.GetAllResponse
+func (r *mysqlArticleRepository) GetAll(search string, offset, limit int) ([]entity.Article, int64, error) {
+	var article []entity.Article
 	var count int64
 	err := r.DB.Model(&entity.Article{}).
 		Where("topic LIKE ? OR title LIKE ? OR author LIKE ?",
