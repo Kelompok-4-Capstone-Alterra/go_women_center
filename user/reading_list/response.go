@@ -7,32 +7,27 @@ import (
 )
 
 type Article struct {
-	ID          string `gorm:"primary_key;type:varchar(36);uniqueindex;not null"`
-	Image       string `gorm:"type:varchar(255)"`
-	Title       string `gorm:"type:varchar(150);not null"`
-	Author      string `gorm:"type:varchar(150);not null"`
-	Topic       string `gorm:"type:varchar(50)"`
-	Description string
-	DeletedAt   gorm.DeletedAt `gorm:"index"`
+	ID     string `json:"id"`
+	Image  string `json:"image"`
+	Title  string `json:"title"`
+	Author string `json:"author"`
+	Topic  string `json:"category"`
 }
 
 type ReadingListArticle struct {
-	ID            string         `gorm:"primarykey" json:"id"`
-	ArticleId     string         `json:"article_id" form:"article_id"`
-	ReadingListId string         `gorm:"type:varchar(50);index" json:"reading_list_id" form:"reading_list_id"`
-	UserId        string         `json:"user_id" form:"user_id"`
-	Articles      Article        `gorm:"foreignKey:ArticleId"`
-	DeletedAt     gorm.DeletedAt `gorm:"index" json:"deleted_at"`
+	ID            string  `gorm:"primarykey" json:"id"`
+	ArticleId     string  `json:"-" form:"article_id"`
+	ReadingListId string  `gorm:"type:varchar(50);index" json:"-"`
+	Articles      Article `gorm:"foreignKey:ArticleId" json:"article"`
 }
 
 type ReadingList struct {
 	ID                  string               `gorm:"primarykey" json:"id"`
-	UserId              string               `json:"user_id" form:"user_id"`
-	Name                string               `json:"name" form:"name"`
-	Description         string               `json:"description" form:"description"`
+	UserId              string               `json:"user_id"`
+	Name                string               `json:"name"`
+	Description         string               `json:"description"`
 	ArticleTotal        int                  `json:"article_total"`
 	CreatedAt           time.Time            `json:"created_at"`
-	UpdatedAt           time.Time            `json:"updated_at"`
-	DeletedAt           gorm.DeletedAt       `gorm:"index" json:"deleted_at"`
+	DeletedAt           gorm.DeletedAt       `gorm:"index" json:"-"`
 	ReadingListArticles []ReadingListArticle `gorm:"foreignKey:ReadingListId" json:"reading_list_articles"`
 }

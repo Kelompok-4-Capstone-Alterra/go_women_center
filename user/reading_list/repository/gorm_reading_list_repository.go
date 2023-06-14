@@ -43,7 +43,7 @@ func (rlr mysqlReadingListRepository) GetById(id, user_id string) (*response.Rea
 	err := rlr.DB.Table("reading_lists").Select("reading_lists.id, reading_lists.user_id, reading_lists.name, reading_lists.description, COUNT(reading_list_articles.id) AS article_total").
 		Joins("INNER JOIN reading_list_articles ON reading_lists.id = reading_list_articles.reading_list_id").
 		Joins("INNER JOIN articles ON articles.id = reading_list_articles.article_id").
-		Preload("ReadingListArticles").First(&readingList, "reading_lists.id = ?", id).Error
+		Preload("ReadingListArticles.Articles").First(&readingList, "reading_lists.id = ?", id).Error
 
 	if err != nil {
 		return nil, err
