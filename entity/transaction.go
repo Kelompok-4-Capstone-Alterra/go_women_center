@@ -3,6 +3,7 @@ package entity
 import (
 	"time"
 
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/transaction"
 	"gorm.io/gorm"
 )
 
@@ -17,11 +18,10 @@ type Transaction struct {
 	TimeId             string    `gorm:"type:varchar(36)"`
 	TimeStart          string    // Convert from time to valid string first
 	ConsultationMethod string
-	Status             string // TODO: change to enum gorm
+	Status             transaction.Status `gorm:"type:varchar(36)"`
 	ValueVoucher       float64
 	GrossPrice         float64
 	TotalPrice         float64
 	IsReviewed         bool
 	Created_at         time.Time
-	Deleted_at         gorm.DeletedAt
 }
