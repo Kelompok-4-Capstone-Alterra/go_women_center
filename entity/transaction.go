@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/transaction"
-	"gorm.io/gorm"
 )
 
 type Transaction struct {
