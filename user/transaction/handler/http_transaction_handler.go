@@ -61,24 +61,43 @@ func (h *transactionHandler) SendTransaction(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, helper.ResponseData(
-		"success get all conselor",
+		"success creating new transaction",
 		http.StatusOK,
-		echo.Map{
-			"data": data,
-		},
+		data,
 	))
 }
 
-func (h *transactionHandler) Notification(c echo.Context) error {
-	json_map := make(map[string]interface{})
+func (h *transactionHandler) MidtransNotification(c echo.Context) error {
+	notifMap := make(map[string]interface{})
+	
 	err := json.
 		NewDecoder(c.Request().Body).
-		Decode(&json_map)
+		Decode(&notifMap)
 	if err != nil {
 		return err
 	}
+	transactionStatus, ok := notifMap["transaction_status"].(string)
+	if !ok {
+		log.Println("error at trans_status")
+		return c.JSON(http.StatusAccepted, "not a successfull transaction")
+	}
 
-	log.Println(json_map)
+	log.Println(transactionStatus)
+
+	transactionId, ok := notifMap["order_id"].(string)
+	if !ok {
+		log.Println("error at trans_id")
+		return c.JSON(http.StatusInternalServerError, transaction.ErrorTransactionNotFound)
+	}
+
+	log.Println(transactionId)
+
+	// verify and update transaction status
+	err = h.Usecase.UpdateStatus(transactionId, transactionStatus)
+	if err != nil {
+		log.Println(err.Error())
+		return c.JSON(http.StatusInternalServerError, transaction.ErrorTransactionNotFound)
+	}
 
 	return c.JSON(http.StatusOK, nil)
 }
