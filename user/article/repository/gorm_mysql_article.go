@@ -2,12 +2,11 @@ package repository
 
 import (
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
-	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/article"
 	"gorm.io/gorm"
 )
 
 type ArticleRepository interface {
-	GetAll(search string, offset, limit int) ([]article.GetAllResponse, int64, error)
+	GetAll(search string, offset, limit int) ([]entity.Article, int64, error)
 	GetById(id string) (entity.Article, error)
 	Count() (int, error)
 	UpdateCount(id string, article entity.Article) error
@@ -21,8 +20,8 @@ func NewMysqlArticleRepository(db *gorm.DB) ArticleRepository {
 	return &mysqlArticleRepository{DB: db}
 }
 
-func (r *mysqlArticleRepository) GetAll(search string, offset, limit int) ([]article.GetAllResponse, int64, error) {
-	var article []article.GetAllResponse
+func (r *mysqlArticleRepository) GetAll(search string, offset, limit int) ([]entity.Article, int64, error) {
+	var articles []entity.Article
 	var count int64
 	err := r.DB.Model(&entity.Article{}).
 		Where("topic LIKE ? OR title LIKE ? OR author LIKE ?",
@@ -30,12 +29,38 @@ func (r *mysqlArticleRepository) GetAll(search string, offset, limit int) ([]art
 		Count(&count).
 		Offset(offset).
 		Limit(limit).
-		Find(&article).Error
+		Find(&articles).Error
 
 	if err != nil {
 		return nil, 0, err
 	}
-	return article, count, nil
+
+	var readingListArticles []entity.ReadingListArticle
+	err = r.DB.Model(&entity.ReadingListArticle{}).
+		Where("article_id IN (?)", getArticleIDs(articles)).
+		Find(&readingListArticles).Error
+
+	if err != nil {
+		return nil, 0, err
+	}
+
+	for _, article := range articles {
+		for _, readingListArticle := range readingListArticles {
+			if article.ID == readingListArticle.ArticleId {
+				articles = append(articles, article)
+			}
+		}
+	}
+
+	return articles, count, nil
+}
+
+func getArticleIDs(articles []entity.Article) []string {
+	var ids []string
+	for _, article := range articles {
+		ids = append(ids, article.ID)
+	}
+	return ids
 }
 
 func (r *mysqlArticleRepository) GetById(id string) (entity.Article, error) {
