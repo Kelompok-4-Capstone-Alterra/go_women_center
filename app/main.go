@@ -176,8 +176,6 @@ func main() {
 	})
 
 	// payment temporaty route
-	e.GET("/payment", userTransactionHandler.SendTransaction)
-	e.POST("/payment/callback", userTransactionHandler.Notification)
 
 	e.GET("/topics", topicHandler.GetAll)
 	e.POST("/verify", userAuthHandler.VerifyEmailHandler)
@@ -210,7 +208,11 @@ func main() {
 		restrictUsers.DELETE("/forums/:id", forumH.Delete)
 		restrictUsers.POST("/forums/joins", userForumH.Create)
 		restrictUsers.GET("/careers/:id", userCareerHandler.GetById)
+		
+		restrictUsers.POST("/transaction", userTransactionHandler.SendTransaction)
 	}
+
+	e.POST("/transaction/callback", userTransactionHandler.Notification)
 
 	restrictAdmin := e.Group("/admin", adminAuthMidd.JWTAdmin())
 
