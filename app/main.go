@@ -199,8 +199,8 @@ func main() {
 	{
 		users.GET("/counselors", userCounselorHandler.GetAll)
 		users.GET("/careers", userCareerHandler.GetAll)
-		users.GET("/articles", userArticleHandler.GetAll)
-		users.GET("/articles/:id", userArticleHandler.GetById)
+		users.GET("/public/articles", userArticleHandler.GetAll)
+		users.GET("/public/articles/:id", userArticleHandler.GetById)
 	}
 
 	restrictUsers := e.Group("/users", userAuthMidd.JWTUser())
@@ -228,6 +228,8 @@ func main() {
 			restrictUsers.POST("/forums/joins", userForumH.Create)
 			restrictUsers.GET("/careers/:id", userCareerHandler.GetById)
 
+			restrictUsers.GET("/articles", userArticleHandler.GetAll)
+			restrictUsers.GET("/articles/:id", userArticleHandler.GetById)
 			restrictUsers.POST("/articles/:id/comments", userArticleHandler.CreateComment)
 			restrictUsers.GET("/articles/:id/comments", userArticleHandler.GetAllComment)
 			restrictUsers.DELETE("/articles/:article_id/comments/:comment_id", userArticleHandler.DeleteComment)
