@@ -164,13 +164,15 @@ func main() {
 	topicHandler := TopicHandler.NewTopicHandler()
 
 	midtransServerKey := os.Getenv("MIDTRANS_SERVER_KEY")
+	midtransNotifHandler := os.Getenv("MIDTRANS_NOTIFICATION_HANDLER")
+	log.Println("====MIDTRANS NOTIF HANDLER =", midtransNotifHandler, "====")
 
 	userVoucherRepo := VoucherUserRepo.NewMysqltransactionRepository(db)
 	userVoucherUsecase := VoucherUserUsecase.NewtransactionUsecase(userVoucherRepo)
 	userVoucherHandler := VoucherUserHandler.NewVoucherHandler(userVoucherUsecase)
 
 	userTransactionRepo := TransactionUserRepo.NewMysqltransactionRepository(db)
-	userTransactionUsecase := TransactionUserUsecase.NewtransactionUsecase(midtransServerKey, googleUUID, userTransactionRepo)
+	userTransactionUsecase := TransactionUserUsecase.NewtransactionUsecase(midtransServerKey, googleUUID, userTransactionRepo, midtransNotifHandler)
 	userTransactionHandler := TransactionUserHandler.NewTransactionHandler(userTransactionUsecase)
 
 	e := echo.New()
