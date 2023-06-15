@@ -22,21 +22,24 @@ type TransactionUsecase interface {
 }
 
 type transactionUsecase struct {
-	repo          trRepo.MysqlTransactionRepository
-	serverKey     string
-	uuidGenerator helper.UuidGenerator
-	Counselor     counselorUC.CounselorUsecase
+	repo                 trRepo.MysqlTransactionRepository
+	serverKey            string
+	uuidGenerator        helper.UuidGenerator
+	Counselor            counselorUC.CounselorUsecase
+	paymentNotifCallback string
 }
 
 func NewtransactionUsecase(
 	inputServerKey string,
 	uuidGenerator helper.UuidGenerator,
 	trRepo trRepo.MysqlTransactionRepository,
+	notifUrl string,
 ) TransactionUsecase {
 	return &transactionUsecase{
-		serverKey:     inputServerKey,
-		uuidGenerator: uuidGenerator,
-		repo:          trRepo,
+		serverKey:            inputServerKey,
+		uuidGenerator:        uuidGenerator,
+		repo:                 trRepo,
+		paymentNotifCallback: notifUrl,
 	}
 }
 
@@ -44,6 +47,10 @@ func (u *transactionUsecase) SendTransaction(trRequest transaction.SendTransacti
 	// Initiate Snap client
 	var s = snap.Client{}
 	s.New(u.serverKey, midtrans.Sandbox) // sandbox
+
+	s.Options.SetPaymentOverrideNotification(u.paymentNotifCallback)
+
+	// generate transaction id
 	transactionId, err := u.uuidGenerator.GenerateUUID()
 	if err != nil {
 		return transaction.SendTransactionResponse{}, err
@@ -77,7 +84,7 @@ func (u *transactionUsecase) SendTransaction(trRequest transaction.SendTransacti
 	transactionData := entity.Transaction{
 		ID:                 transactionId,
 		UserId:             trRequest.UserCredential.ID,
-		DateId:             trRequest.CounselingDateID, 
+		DateId:             trRequest.CounselingDateID,
 		CounselorId:        trRequest.CounselorID,
 		CounselorTopic:     trTopic[0],
 		TimeId:             trRequest.CounselingTimeID,
@@ -101,7 +108,7 @@ func (u *transactionUsecase) SendTransaction(trRequest transaction.SendTransacti
 	if snapErr != nil {
 		return transaction.SendTransactionResponse{}, transaction.ErrorMidtrans
 	}
-	
+
 	res.TransactionID = transactionId
 	res.PaymentLink = snapResp.RedirectURL
 
