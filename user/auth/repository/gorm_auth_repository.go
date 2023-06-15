@@ -70,10 +70,6 @@ func (u *userGormMysqlRepo) GetById(id string) (entity.User, error) {
 func (u *userGormMysqlRepo) GetByUsernameAndEmail(username, email string) (entity.User, error) {
 	savedUser := entity.User{}
 	err := u.DB.Where("username = ? OR email = ?", username, email).First(&savedUser).Error
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return entity.User{}, userError.ErrDataNotFound
-	}
-	
 	if err != nil {
 		return entity.User{}, err
 	}

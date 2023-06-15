@@ -18,6 +18,7 @@ var (
 	ErrIdFormat          = errors.New("id must be a valid uuid")
 	ErrRequired          = errors.New("all fields are required")
 	ErrDataNotFound      = errors.New("data not found")
+	ErrRecordNotFound    = errors.New("record not found")
 
 	// conflict
 	ErrUserIsRegistered = errors.New("user is already registered")

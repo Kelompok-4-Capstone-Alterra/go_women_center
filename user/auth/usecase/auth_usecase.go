@@ -128,8 +128,9 @@ func(u *userUsecase) CheckUnique(email, username string) error {
 	if data.ID != "" {
 		return user.ErrUserIsRegistered
 	}
-	if err != user.ErrDataNotFound{
+	if err.Error() != user.ErrRecordNotFound.Error(){
 		return err
 	}
+
 	return nil
 }
