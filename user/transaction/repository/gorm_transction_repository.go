@@ -24,7 +24,6 @@ func NewMysqltransactionRepository(db *gorm.DB) MysqlTransactionRepository {
 }
 
 func (tr *mysqlTransactionRepository) CreateTransaction(transaction entity.Transaction) (entity.Transaction, error) {
-	// TODO: implement transaction
 	err := tr.DB.Create(&transaction).Error
 	if err != nil {
 		return entity.Transaction{}, err
