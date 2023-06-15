@@ -159,9 +159,12 @@ func (u *articleUsecase) Update(inputDetail article.UpdateRequest, inputImage *m
 
 	articleUpdate := entity.Article{
 		Title:       inputDetail.Title,
-		Topic:       constant.TOPICS[inputDetail.Topic],
 		Author:      inputDetail.Author,
 		Description: inputDetail.Description,
+	}
+
+	if topic, ok := constant.TOPICS[inputDetail.Topic]; ok {
+		articleUpdate.Topic = topic
 	}
 
 	if inputImage != nil {
