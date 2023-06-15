@@ -79,12 +79,12 @@ func (h *transactionHandler) GetAllTransaction(c echo.Context) error {
 		))
 	}
 
-	h.Usecase.GetAll()
+	data, err := h.Usecase.GetAll(user.ID)
 	
 	return c.JSON(http.StatusOK, helper.ResponseData(
 		"success get new transaction",
 		http.StatusOK,
-		nil,
+		data,
 	))
 }
 
