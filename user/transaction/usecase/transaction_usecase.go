@@ -40,7 +40,6 @@ func NewtransactionUsecase(
 	}
 }
 
-// send transaction to 
 func (u *transactionUsecase) SendTransaction(trRequest transaction.SendTransactionRequest) (transaction.SendTransactionResponse, error) {
 	// Initiate Snap client
 	var s = snap.Client{}
@@ -68,7 +67,11 @@ func (u *transactionUsecase) SendTransaction(trRequest transaction.SendTransacti
 
 	// Execute request create Snap transaction to Midtrans Snap API
 	res := transaction.SendTransactionResponse{}
-	snapResp, _ := s.CreateTransaction(req)
+	snapResp, snapErr := s.CreateTransaction(req)
+	if snapErr != nil {
+		return transaction.SendTransactionResponse{}, transaction.ErrorMidtrans
+	}
+	
 	res.TransactionID = transactionId
 	res.PaymentLink = snapResp.RedirectURL
 

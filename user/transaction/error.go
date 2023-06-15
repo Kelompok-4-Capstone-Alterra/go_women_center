@@ -8,4 +8,5 @@ var (
 	ErrorInvalidRequest error = errors.New("error invalid callback")
 	ErrorTransactionNotFound error = errors.New("transaction not found in db")
 	ErrorInvalidPaymentStatus error = errors.New("error invalid payment status")
+	ErrorMidtrans error = errors.New("error when sending payment to midtrans")
 )
