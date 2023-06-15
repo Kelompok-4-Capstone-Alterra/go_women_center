@@ -89,7 +89,7 @@ func (u *transactionUsecase) SendTransaction(trRequest transaction.SendTransacti
 		TimeId:             trRequest.CounselingTimeID,
 		TimeStart:          trRequest.CounselingTimeStart,
 		ConsultationMethod: trRequest.CounselingMethod,
-		Status:             transaction.Pending,
+		Status:             "waiting",
 		ValueVoucher:       trRequest.ValueVoucher,
 		GrossPrice:         trRequest.GrossPrice,
 		TotalPrice:         trRequest.TotalPrice,
@@ -97,6 +97,7 @@ func (u *transactionUsecase) SendTransaction(trRequest transaction.SendTransacti
 		Created_at:         time.Now(),
 	}
 
+	// TODO: implement repo create with rollback
 	data, err := u.repo.CreateTransaction(transactionData)
 	if err != nil {
 		return transaction.SendTransactionResponse{}, err
@@ -107,11 +108,20 @@ func (u *transactionUsecase) SendTransaction(trRequest transaction.SendTransacti
 	return res, nil
 }
 
-// catch callback res from midtrans
-// if status 200 then update status success
-// else then update status to canceled
+/*
+catch callback res from midtrans
+
+if status 200 then update status success
+
+else then status is the same
+*/
 func (u *transactionUsecase) UpdateStatus(transactionId string, transactionStatus string) error {
-	// TODO: fix status message
+	transactionStatus = "ongoing"
+
+	if transactionStatus != "settlement" {
+		return nil
+	}
+
 	savedTransaction, err := u.verifyById(transactionId)
 	if err != nil {
 		return err
@@ -119,7 +129,7 @@ func (u *transactionUsecase) UpdateStatus(transactionId string, transactionStatu
 
 	_, err = u.repo.UpdateStatusByData(savedTransaction, transactionStatus)
 	if err != nil {
-		return err
+		return transaction.ErrorInsertDB
 	}
 
 	return nil
@@ -136,7 +146,7 @@ func (u *transactionUsecase) verifyById(id string) (entity.Transaction, error) {
 
 // TODO: success only
 func (u *transactionUsecase) GetAll(userId string) ([]entity.Transaction, error) {
-	data, err := u.repo.GetAll(userId)
+	data, err := u.repo.GetAllSuccess(userId)
 	if err != nil {
 		return nil, err
 	}
