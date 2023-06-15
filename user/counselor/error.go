@@ -18,5 +18,6 @@ var (
 	ErrIdFormat             = errors.New("id must be a valid uuid")
 	ErrInvalidTopic         = errors.New("invalid topic")
 	ErrRequired 			= errors.New("all fields are required")
-	ErrInvalidSort 		= errors.New("invalid sort")
+	ErrRequiredTopic 		= errors.New("topic is required")
+	ErrInvalidSort 			= errors.New("invalid sort")
 )

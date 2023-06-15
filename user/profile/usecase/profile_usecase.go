@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"log"
-	"time"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
@@ -42,10 +41,6 @@ func(u *profileUsecase) GetById(id string) (profile.GetByIdResponse, error) {
 		PhoneNumber: userData.PhoneNumber,
 	}
 
-	if userData.BirthDate != nil {
-		profile.BirthDate = userData.BirthDate.Format(time.DateOnly)
-	}
-
 	return profile, nil
 }
 
@@ -61,41 +56,18 @@ func(u *profileUsecase) Update(input profile.UpdateRequest) error {
 	
 	userProfile := entity.User{
 		ID: input.ID,
-		Username: input.Username,
 		Name: input.Name,
-		Email: input.Email,
 		PhoneNumber: input.PhoneNumber,
 	}
-	
-	if input.BirthDate != "" {
-		log.Println(input.BirthDate)
-		birthDate, err := time.Parse(time.DateOnly, input.BirthDate)
-	
-		if err != nil {
-			log.Println(err.Error())
-			return profile.ErrBirthDateFormat
-		}
-		*userProfile.BirthDate = birthDate
-	}
 
-	// check if email or username already exist
-
-	if input.Email != "" && user.Email != input.Email {	
-		err := u.profileRepo.GetByEmail(input.Email)
-	
-		if err != nil {
-			log.Println(err.Error())
-			return profile.ErrEmailDuplicate
-		}
-	}
-
-	if input.Username != "" && user.Username != input.Username{
+	if input.Username != "" && (user.Username != input.Username) {
 		err := u.profileRepo.GetByUsername(input.Username)		
 	
-		if err != nil {
-			log.Println(err.Error())
+		if err == nil {
 			return profile.ErrUsernameDuplicate
 		}
+		
+		userProfile.Username = input.Username
 	}
 
 	if input.ProfilePicture != nil {

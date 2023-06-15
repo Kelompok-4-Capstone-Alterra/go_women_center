@@ -14,7 +14,6 @@ type User struct {
 	Password       string     `gorm:"type:varchar(64)"`
 	PhoneNumber    string     `gorm:"type:varchar(20)"`
 	ProfilePicture string     `gorm:"type:varchar(255)"`
-	BirthDate      *time.Time `gorm:"type:date"`
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 	DeletedAt      gorm.DeletedAt `gorm:"index"`

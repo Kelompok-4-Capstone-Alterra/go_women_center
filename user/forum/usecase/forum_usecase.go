@@ -34,7 +34,7 @@ func (fu ForumUsecase) GetAll(id_user, topic, popular, created, categories, myfo
 	var totalData int64
 
 	idCategories, _ := strconv.Atoi(categories)
-	categories = constant.TOPICS[idCategories]
+	categories = constant.TOPICS[idCategories][0]
 
 	if created == "asc" || created == "desc" {
 		forums, totalData, err = fu.ForumR.GetAllByCreated(id_user, topic, created, categories, myforum, offset, limit)
@@ -64,7 +64,7 @@ func (fu ForumUsecase) GetById(id, user_id string) (*response.ResponseForum, err
 
 func (fu ForumUsecase) Create(forum *entity.Forum) error {
 	topic, _ := strconv.Atoi(forum.Category)
-	forum.Category = constant.TOPICS[topic]
+	forum.Category = constant.TOPICS[topic][0]
 
 	err := fu.ForumR.Create(forum)
 	if err != nil {
