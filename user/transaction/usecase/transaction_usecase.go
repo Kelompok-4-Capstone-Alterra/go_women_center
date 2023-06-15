@@ -85,7 +85,7 @@ func (u *transactionUsecase) SendTransaction(trRequest transaction.SendTransacti
 		UserId:             trRequest.UserCredential.ID,
 		DateId:             trRequest.CounselingDateID, 
 		CounselorId:        trRequest.CounselorID,
-		CounselorTopic:     trTopic,
+		CounselorTopic:     trTopic[0],
 		TimeId:             trRequest.CounselingTimeID,
 		TimeStart:          trRequest.CounselingTimeStart,
 		ConsultationMethod: trRequest.CounselingMethod,
