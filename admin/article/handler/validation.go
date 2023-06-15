@@ -25,7 +25,7 @@ func isRequestValid(m interface{}) error {
 				return article.ErrEmailFormat
 			case "id":
 				return article.ErrIdFormat
-			case "sort_by":
+			case "sortby":
 				return article.ErrInvalidSort
 			}
 
