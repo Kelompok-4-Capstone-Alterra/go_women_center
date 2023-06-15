@@ -16,3 +16,8 @@ type ReadingList struct {
 	UpdatedAt           time.Time
 	DeletedAt           gorm.DeletedAt `gorm:"index"`
 }
+
+func (c *ReadingList) BeforeDelete(tx *gorm.DB) error {
+	tx.Model(&ReadingListArticle{}).Where("reading_list_id = ?", c.ID).Delete(&ReadingListArticle{})
+	return nil
+}

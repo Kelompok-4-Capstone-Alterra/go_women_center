@@ -27,16 +27,13 @@ func NewReadingListArticleHandler(ReadingListArticleU usecase.ReadingListArticle
 
 func (rlah ReadingListArticleHandler) Create(c echo.Context) error {
 	var user = c.Get("user").(*helper.JwtCustomUserClaims)
-	var createRequest []readingListArticle.CreateRequest
+	var createRequest readingListArticle.CreateRequest
 	c.Bind(&createRequest)
 
-	for i := 0; i < len(createRequest); i++ {
-		uuidWithHyphen := uuid.New()
-		createRequest[i].ID = uuidWithHyphen.String()
-		createRequest[i].UserId = user.ID
-	}
-
-	err := rlah.ReadingListArticleU.Create(createRequest)
+	uuidWithHyphen := uuid.New()
+	createRequest.ID = uuidWithHyphen.String()
+	createRequest.UserId = user.ID
+	err := rlah.ReadingListArticleU.Create(&createRequest)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
 	}

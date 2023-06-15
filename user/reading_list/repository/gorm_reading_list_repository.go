@@ -73,7 +73,7 @@ func (rlr mysqlReadingListRepository) Update(id, user_id string, readingListId *
 }
 
 func (rlr mysqlReadingListRepository) Delete(id, user_id string) error {
-	err := rlr.DB.Where("id = ? AND user_id = ? ", id, user_id).Delete(&entity.ReadingList{}).Error
+	err := rlr.DB.Unscoped().Where("id = ? AND user_id = ? ", id, user_id).Delete(&entity.ReadingList{}).Error
 	if err != nil {
 		return err
 	}
