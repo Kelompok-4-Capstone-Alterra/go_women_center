@@ -10,7 +10,8 @@ type Counselor struct {
 	Price          float64 `gorm:"type:float"`
 	Rating         float32 `gorm:"type:decimal(2,1)"`
 	Description    string
-	Reviews        []Review `gorm:"foreignkey:CounselorID"`
-	Dates          []Date `gorm:"foreignkey:CounselorID"`
-	Times 		   []Time `gorm:"foreignkey:CounselorID"`
+	Reviews        []Review      `gorm:"foreignkey:CounselorID"`
+	Dates          []Date        `gorm:"foreignkey:CounselorID"`
+	Times          []Time        `gorm:"foreignkey:CounselorID"`
+	Transactions   []Transaction `gorm:"foreignkey:CounselorID"`
 }
