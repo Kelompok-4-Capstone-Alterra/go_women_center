@@ -33,7 +33,13 @@ func (rlh ReadingListHandler) GetAll(c echo.Context) error {
 	var getAllParams readingList.GetAllRequest
 	c.Bind(&getAllParams)
 	getAllParams.UserId = user.ID
+
 	getAllParams.Page, getAllParams.Offset, getAllParams.Limit = helper.GetPaginateData(getAllParams.Page, getAllParams.Limit)
+
+	if err := isRequestValid(getAllParams); err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
+	}
+
 	reading_list, totalPages, err := rlh.ReadingListU.GetAll(getAllParams)
 
 	if err != nil {

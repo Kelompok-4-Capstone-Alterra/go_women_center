@@ -26,13 +26,11 @@ func NewReadingListUsecase(ReadingListR repository.ReadingListRepository) Readin
 }
 
 func (rlu ReadingListUsecase) GetAll(getAllParams readingList.GetAllRequest) ([]readingList.ReadingList, int, error) {
-	switch getAllParams.Sort {
+	switch getAllParams.SortBy {
 	case "oldest":
-		getAllParams.Sort = "reading_lists.created_at ASC"
+		getAllParams.SortBy = "reading_lists.created_at ASC"
 	case "newest":
-		getAllParams.Sort = "reading_lists.created_at DESC"
-	default:
-		getAllParams.Sort = "reading_lists.created_at"
+		getAllParams.SortBy = "reading_lists.created_at DESC"
 	}
 	readingLists, totalData, err := rlu.ReadingListR.GetAll(getAllParams)
 
