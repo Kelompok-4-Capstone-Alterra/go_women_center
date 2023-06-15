@@ -14,7 +14,7 @@ import (
 )
 
 type ArticleUsecase interface {
-	GetAll(search, userId, sort string) ([]article.GetAllResponse, error)
+	GetAll(search, userId, sortBy string) ([]article.GetAllResponse, error)
 	GetById(id string) (article.GetByResponse, error)
 	GetAllComment(id string) ([]article.CommentResponse, error)
 	CreateComment(input article.CreateCommentRequest) error
@@ -31,17 +31,17 @@ func NewArticleUsecase(ARepo repository.ArticleRepository, CommentRepo Comment.C
 	return &articleUsecase{articleRepo: ARepo, commentRepo: CommentRepo, userRepo: UserRepo}
 }
 
-func (u *articleUsecase) GetAll(search, userId, sort string) ([]article.GetAllResponse, error) {
-	switch sort {
+func (u *articleUsecase) GetAll(search, userId, sortBy string) ([]article.GetAllResponse, error) {
+	switch sortBy {
 	case "newest":
-		sort = "date DESC"
+		sortBy = "date DESC"
 	case "oldest":
-		sort = "date ASC"
+		sortBy = "date ASC"
 	case "most_viewed":
-		sort = "view_count DESC"
+		sortBy = "view_count DESC"
 	}
 
-	articles, err := u.articleRepo.GetAll(search, sort)
+	articles, err := u.articleRepo.GetAll(search, sortBy)
 	if err != nil {
 		log.Print(err.Error())
 		return []article.GetAllResponse{}, article.ErrInternalServerError

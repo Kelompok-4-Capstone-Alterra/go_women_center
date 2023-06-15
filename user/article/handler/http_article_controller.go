@@ -19,19 +19,29 @@ func NewArticleHandler(ArticleUsecase usecase.ArticleUsecase) *articleHandler {
 }
 
 func (h *articleHandler) GetAll(c echo.Context) error {
+	
 	var getAllReq article.GetAllRequest
-	var articles []article.GetAllResponse
+	
+	c.Bind(&getAllReq)
+
+	if err := isRequestValid(&getAllReq); err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
+	}
 
 	var id string
-
+	
 	user, ok := c.Get("user").(*helper.JwtCustomUserClaims)
+	
 	if !ok || user == nil {
 		id = ""
 	} else {
 		id = user.ID
 	}
+	
+	var articles []article.GetAllResponse
 
 	articles, err := h.ArticleUsecase.GetAll(getAllReq.Search, id, getAllReq.SortBy)
+
 	if err != nil {
 		return c.JSON(
 			http.StatusInternalServerError,

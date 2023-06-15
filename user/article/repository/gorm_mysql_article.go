@@ -6,7 +6,7 @@ import (
 )
 
 type ArticleRepository interface {
-	GetAll(search, sort string) ([]entity.Article, error)
+	GetAll(search, sortBy string) ([]entity.Article, error)
 	GetById(id string) (entity.Article, error)
 	Count() (int, error)
 	UpdateCount(id string, article entity.Article) error
@@ -21,11 +21,11 @@ func NewMysqlArticleRepository(db *gorm.DB) ArticleRepository {
 	return &mysqlArticleRepository{DB: db}
 }
 
-func (r *mysqlArticleRepository) GetAll(search, sort string) ([]entity.Article, error) {
+func (r *mysqlArticleRepository) GetAll(search, sortBy string) ([]entity.Article, error) {
 	var articles []entity.Article
 	err := r.DB.Model(&entity.Article{}).
 		Where("topic LIKE ? OR title LIKE ? OR author LIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%").
-		Order(sort).
+		Order(sortBy).
 		Find(&articles).Error
 
 	if err != nil {

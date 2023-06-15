@@ -3,7 +3,7 @@ package handler
 import (
 	"strings"
 
-	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/article"
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/article"
 	"github.com/go-playground/validator"
 )
 
@@ -25,6 +25,8 @@ func isRequestValid(m interface{}) error {
 				return article.ErrEmailFormat
 			case "id":
 				return article.ErrIdFormat
+			case "sortby":
+				return article.ErrInvalidSort
 			}
 
 		}

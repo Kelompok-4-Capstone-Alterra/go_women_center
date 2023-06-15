@@ -52,6 +52,10 @@ func (h *articleHandler) GetAll(c echo.Context) error {
 
 	c.Bind(&getAllReq)
 
+	if err := isRequestValid(&getAllReq); err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
+	}
+
 	page := getAllReq.Page
 	limit := getAllReq.Limit
 
