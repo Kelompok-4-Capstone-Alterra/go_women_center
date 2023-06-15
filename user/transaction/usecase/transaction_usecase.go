@@ -65,15 +65,7 @@ func (u *transactionUsecase) SendTransaction(trRequest transaction.SendTransacti
 		},
 	}
 
-	// Execute request create Snap transaction to Midtrans Snap API
 	res := transaction.SendTransactionResponse{}
-	snapResp, snapErr := s.CreateTransaction(req)
-	if snapErr != nil {
-		return transaction.SendTransactionResponse{}, transaction.ErrorMidtrans
-	}
-	
-	res.TransactionID = transactionId
-	res.PaymentLink = snapResp.RedirectURL
 
 	// check topic availability
 	trTopic, ok := constant.TOPICS[trRequest.CounselorTopicKey]
@@ -82,7 +74,6 @@ func (u *transactionUsecase) SendTransaction(trRequest transaction.SendTransacti
 	}
 
 	// initialize db data model
-	// TODO: check if transaction data implementation is correct
 	transactionData := entity.Transaction{
 		ID:                 transactionId,
 		UserId:             trRequest.UserCredential.ID,
@@ -100,11 +91,19 @@ func (u *transactionUsecase) SendTransaction(trRequest transaction.SendTransacti
 		Created_at:         time.Now(),
 	}
 
-	// TODO: implement repo create with rollback
 	data, err := u.repo.CreateTransaction(transactionData)
 	if err != nil {
 		return transaction.SendTransactionResponse{}, err
 	}
+
+	// Execute request create Snap transaction to Midtrans Snap API
+	snapResp, snapErr := s.CreateTransaction(req)
+	if snapErr != nil {
+		return transaction.SendTransactionResponse{}, transaction.ErrorMidtrans
+	}
+	
+	res.TransactionID = transactionId
+	res.PaymentLink = snapResp.RedirectURL
 
 	res.Data = data
 
@@ -147,7 +146,7 @@ func (u *transactionUsecase) verifyById(id string) (entity.Transaction, error) {
 	return savedTransaction, nil
 }
 
-// TODO: success only
+// success only
 func (u *transactionUsecase) GetAll(userId string) ([]entity.Transaction, error) {
 	data, err := u.repo.GetAllSuccess(userId)
 	if err != nil {
