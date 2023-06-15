@@ -58,6 +58,10 @@ import (
 	CareerUserRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/career/repository"
 	CareerUserUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/career/usecase"
 
+	VoucherUserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/voucher/handler"
+	VoucherUserRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/voucher/repository"
+	VoucherUserUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/voucher/usecase"
+
 	TransactionUserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/transaction/handler"
 	TransactionUserUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/transaction/usecase"
 	TransactionUserRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/transaction/repository"
@@ -161,6 +165,10 @@ func main() {
 
 	midtransServerKey := os.Getenv("MIDTRANS_SERVER_KEY")
 
+	userVoucherRepo := VoucherUserRepo.NewMysqltransactionRepository(db)
+	userVoucherUsecase := VoucherUserUsecase.NewtransactionUsecase(userVoucherRepo)
+	userVoucherHandler := VoucherUserHandler.NewVoucherHandler(userVoucherUsecase)
+
 	userTransactionRepo := TransactionUserRepo.NewMysqltransactionRepository(db)
 	userTransactionUsecase := TransactionUserUsecase.NewtransactionUsecase(midtransServerKey, googleUUID, userTransactionRepo)
 	userTransactionHandler := TransactionUserHandler.NewTransactionHandler(userTransactionUsecase)
@@ -211,6 +219,7 @@ func main() {
 		restrictUsers.POST("/forums/joins", userForumH.Create)
 		restrictUsers.GET("/careers/:id", userCareerHandler.GetById)
 		
+		restrictUsers.GET("/vouchers", userVoucherHandler.GetAll)
 		restrictUsers.GET("/transactions", userTransactionHandler.GetAllTransaction)
 		restrictUsers.POST("/transactions", userTransactionHandler.SendTransaction)
 	}
