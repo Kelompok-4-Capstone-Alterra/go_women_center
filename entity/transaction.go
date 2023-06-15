@@ -9,6 +9,7 @@ type Transaction struct {
 	ID                 string    `json:"id" gorm:"primarykey"`
 	UserId             string    `json:"user_id" gorm:"type:varchar(36);not null"`
 	CounselorID        string    `json:"counselor_id" gorm:"type:varchar(36);not null"`
+	Counselor          Counselor `json:"counselor_data"`
 	DateId             string    `json:"date_id" gorm:"type:varchar(36);not null"`
 	TimeId             string    `json:"time_id" gorm:"type:varchar(36);not null"`
 	CounselorTopic     string    `json:"counselor_topic" gorm:"type:varchar(50)"`

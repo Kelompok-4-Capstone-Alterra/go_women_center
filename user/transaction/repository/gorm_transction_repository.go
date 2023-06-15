@@ -2,7 +2,7 @@ package repository
 
 import (
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
-	
+
 	"gorm.io/gorm"
 )
 
@@ -33,7 +33,7 @@ func (tr *mysqlTransactionRepository) CreateTransaction(transaction entity.Trans
 
 func (tr *mysqlTransactionRepository) GetAllSuccess(userId string) ([]entity.Transaction, error) {
 	allUserTransaction := []entity.Transaction{}
-	err := tr.DB.Where("user_id = ? AND status != ?", userId, "pending").Find(&allUserTransaction).Error
+	err := tr.DB.Preload("Counselor").Where("user_id = ? AND status != ?", userId, "pending").Find(&allUserTransaction).Error
 	if err != nil {
 		return nil, err
 	}
@@ -60,8 +60,9 @@ func (tr *mysqlTransactionRepository) UpdateStatusByData(savedData entity.Transa
 
 	return savedData, nil
 }
+
 /*
-create transaction db data, return db instance with transaction 
+create transaction db data, return db instance with transaction
 
 call CommitCreate if payment success
 
