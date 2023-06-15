@@ -12,7 +12,7 @@ import (
 )
 
 type CounselorUsecase interface {
-	GetAll(search, topic, sortBy string, offset, limit int) ([]counselor.GetAllResponse, int, error)
+	GetAll(search, topic, sortBy string) ([]counselor.GetAllResponse, error)
 	GetById(id string) (counselor.GetByResponse, error)
 	GetAllReview(id string, offset, limit int) ([]counselor.GetAllReviewResponse, int, error)
 	CreateReview(input counselor.CreateReviewRequest) error
@@ -28,24 +28,24 @@ func NewCounselorUsecase(CounselorRepo Counselor.CounselorRepository, ReviewRepo
 	return &counselorUsecase{counselorRepo: CounselorRepo, reviewRepo: ReviewRepo, userRepo: UserRepo}
 }
 
-func(u *counselorUsecase) GetAll(search, topic, sortBy string, offset, limit int) ([]counselor.GetAllResponse, int, error) {
+func(u *counselorUsecase) GetAll(search, topic, sortBy string) ([]counselor.GetAllResponse, error) {
 
 	switch sortBy {
-	case "hight_price":
-		sortBy = "price DESC"
-	case "low_price":
-		sortBy = "price ASC"
-	default:
-		sortBy = "rating DESC"
+		case "highest_price":
+			sortBy = "price DESC"
+		case "lowest_price":
+			sortBy = "price ASC"
+		case "highest_rating":
+			sortBy = "rating DESC"
 	}
 
-	counselorsRes, totalData, err := u.counselorRepo.GetAll(search, topic, sortBy, offset, limit)
+	counselorsRes, err := u.counselorRepo.GetAll(search, topic, sortBy)
 	
 	if err != nil {
-		return nil, 0, counselor.ErrInternalServerError
+		return nil, counselor.ErrInternalServerError
 	}
 	
-	return counselorsRes, helper.GetTotalPages(int(totalData), limit), nil
+	return counselorsRes, nil
 }
 
 func(u *counselorUsecase) GetById(id string) (counselor.GetByResponse, error) {
