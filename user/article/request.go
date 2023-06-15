@@ -14,8 +14,11 @@ type DeleteCommentRequest struct {
 
 type GetAllCommentRequest struct {
 	ArticleID string `param:"id" validate:"required,uuid"`
-	Page      int    `query:"page"`
-	Limit     int    `query:"limit"`
+}
+
+type GetAllRequest struct {
+	Search string `query:"search"`
+	SortBy string `query:"sort_by" validate:"omitempty,oneof=newest oldest most_viewed"`
 }
 
 type UpdateCountRequest struct {

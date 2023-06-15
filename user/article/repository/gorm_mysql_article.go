@@ -6,11 +6,11 @@ import (
 )
 
 type ArticleRepository interface {
-	GetAll(search string, offset, limit int) ([]entity.Article, int64, error)
+	GetAll(search, sort string) ([]entity.Article, error)
 	GetById(id string) (entity.Article, error)
 	Count() (int, error)
 	UpdateCount(id string, article entity.Article) error
-	GetReadingListArticles() ([]entity.ReadingListArticle, error)
+	GetReadingListArticles(id string) ([]entity.ReadingListArticle, error)
 }
 
 type mysqlArticleRepository struct {
@@ -21,27 +21,24 @@ func NewMysqlArticleRepository(db *gorm.DB) ArticleRepository {
 	return &mysqlArticleRepository{DB: db}
 }
 
-func (r *mysqlArticleRepository) GetAll(search string, offset, limit int) ([]entity.Article, int64, error) {
+func (r *mysqlArticleRepository) GetAll(search, sort string) ([]entity.Article, error) {
 	var articles []entity.Article
-	var count int64
 	err := r.DB.Model(&entity.Article{}).
-		Where("topic LIKE ? OR title LIKE ? OR author LIKE ?",
-			"%"+search+"%", "%"+search+"%", "%"+search+"%").
-		Count(&count).
-		Offset(offset).
-		Limit(limit).
+		Where("topic LIKE ? OR title LIKE ? OR author LIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+		Order(sort).
 		Find(&articles).Error
 
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
 
-	return articles, count, nil
+	return articles, nil
 }
 
-func (r *mysqlArticleRepository) GetReadingListArticles() ([]entity.ReadingListArticle, error) {
+func (r *mysqlArticleRepository) GetReadingListArticles(id string) ([]entity.ReadingListArticle, error) {
 	var readingListArticles []entity.ReadingListArticle
 	err := r.DB.Model(&entity.ReadingListArticle{}).
+		Where("user_id LIKE ?", id).
 		Find(&readingListArticles).Error
 
 	if err != nil {
@@ -49,14 +46,6 @@ func (r *mysqlArticleRepository) GetReadingListArticles() ([]entity.ReadingListA
 	}
 	return readingListArticles, nil
 }
-
-// func getArticleIDs(articles []entity.Article) []string {
-// 	var ids []string
-// 	for _, article := range articles {
-// 		ids = append(ids, article.ID)
-// 	}
-// 	return ids
-// }
 
 func (r *mysqlArticleRepository) GetById(id string) (entity.Article, error) {
 	var article entity.Article

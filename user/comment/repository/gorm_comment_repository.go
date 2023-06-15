@@ -6,7 +6,7 @@ import (
 )
 
 type CommentRepository interface {
-	GetByArticleId(articleId string, offset, limit int) ([]entity.Comment, int64, error)
+	GetByArticleId(articleId string) ([]entity.Comment, error)
 	Save(comment entity.Comment) error
 	GetByUserIdAndArticleId(userId, articleId string) (entity.Comment, error)
 	GetByUserId(userId string) (entity.Comment, error)
@@ -22,22 +22,18 @@ func NewMysqlArticleRepository(db *gorm.DB) CommentRepository {
 	return &mysqlArticleRepository{DB: db}
 }
 
-func (r *mysqlArticleRepository) GetByArticleId(articleId string, offset, limit int) ([]entity.Comment, int64, error) {
+func (r *mysqlArticleRepository) GetByArticleId(articleId string) ([]entity.Comment, error) {
 	var comments []entity.Comment
-	var totalData int64
 	err := r.DB.
 		Model(&entity.Comment{}).
 		Where("article_id = ?", articleId).
-		Count(&totalData).
-		Offset(offset).
-		Limit(limit).
 		Find(&comments).Error
 
 	if err != nil {
-		return nil, totalData, err
+		return nil, err
 	}
 
-	return comments, totalData, nil
+	return comments, nil
 }
 
 func (r *mysqlArticleRepository) Save(comment entity.Comment) error {

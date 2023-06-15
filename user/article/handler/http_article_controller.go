@@ -19,30 +19,27 @@ func NewArticleHandler(ArticleUsecase usecase.ArticleUsecase) *articleHandler {
 }
 
 func (h *articleHandler) GetAll(c echo.Context) error {
+	var getAllReq article.GetAllRequest
+	var articles []article.GetAllResponse
 
-	page, _ := helper.StringToInt(c.QueryParam("page"))
-	limit, _ := helper.StringToInt(c.QueryParam("limit"))
+	var id string
 
-	page, offset, limit := helper.GetPaginateData(page, limit)
-	search := c.QueryParam("search")
-	articles, totalPages, err := h.ArticleUsecase.GetAll(search, offset, limit)
+	user, ok := c.Get("user").(*helper.JwtCustomUserClaims)
+	if !ok || user == nil {
+		id = ""
+	} else {
+		id = user.ID
+	}
 
+	articles, err := h.ArticleUsecase.GetAll(getAllReq.Search, id, getAllReq.SortBy)
 	if err != nil {
 		return c.JSON(
 			http.StatusInternalServerError,
 			helper.ResponseData(err.Error(), http.StatusInternalServerError, nil))
 	}
 
-	if page > totalPages {
-		return c.JSON(
-			http.StatusNotFound,
-			helper.ResponseData(article.ErrPageNotFound.Error(), http.StatusBadRequest, nil))
-	}
-
 	return c.JSON(http.StatusOK, helper.ResponseData("success get all article", http.StatusOK, echo.Map{
-		"articles":      articles,
-		"current_pages": page,
-		"total_pages":   totalPages,
+		"articles": articles,
 	}))
 }
 
@@ -81,9 +78,7 @@ func (h *articleHandler) GetAllComment(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
 	}
 
-	page, offset, limit := helper.GetPaginateData(getAllCommentReq.Page, getAllCommentReq.Limit, "mobile")
-
-	comments, totalData, err := h.ArticleUsecase.GetAllComment(getAllCommentReq.ArticleID, offset, limit)
+	comments, err := h.ArticleUsecase.GetAllComment(getAllCommentReq.ArticleID)
 
 	if err != nil {
 		status := http.StatusInternalServerError
@@ -96,16 +91,12 @@ func (h *articleHandler) GetAllComment(c echo.Context) error {
 		return c.JSON(status, helper.ResponseData(err.Error(), status, nil))
 	}
 
-	totalPages := helper.GetTotalPages(totalData, limit)
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, helper.ResponseData(err.Error(), http.StatusInternalServerError, nil))
 	}
 
 	return c.JSON(http.StatusOK, helper.ResponseData("success get all article comment", http.StatusOK, echo.Map{
-		"comments":      comments,
-		"current_pages": page,
-		"total_pages":   totalPages,
+		"comments": comments,
 	}))
 }
 

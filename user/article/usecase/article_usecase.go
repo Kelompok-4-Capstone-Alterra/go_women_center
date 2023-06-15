@@ -14,9 +14,9 @@ import (
 )
 
 type ArticleUsecase interface {
-	GetAll(search string, offset, limit int) ([]article.GetAllResponse, int, error)
+	GetAll(search, userId, sort string) ([]article.GetAllResponse, error)
 	GetById(id string) (article.GetByResponse, error)
-	GetAllComment(id string, offset, limit int) ([]article.CommentResponse, int, error)
+	GetAllComment(id string) ([]article.CommentResponse, error)
 	CreateComment(input article.CreateCommentRequest) error
 	DeleteComment(userId, articleId, commentId string) error
 }
@@ -31,18 +31,28 @@ func NewArticleUsecase(ARepo repository.ArticleRepository, CommentRepo Comment.C
 	return &articleUsecase{articleRepo: ARepo, commentRepo: CommentRepo, userRepo: UserRepo}
 }
 
-func (u *articleUsecase) GetAll(search string, offset, limit int) ([]article.GetAllResponse, int, error) {
-	articles, totalData, err := u.articleRepo.GetAll(search, offset, limit)
-	if err != nil {
-		log.Print(err.Error())
-		return []article.GetAllResponse{}, 0, article.ErrInternalServerError
+func (u *articleUsecase) GetAll(search, userId, sort string) ([]article.GetAllResponse, error) {
+	switch sort {
+	case "newest":
+		sort = "date DESC"
+	case "oldest":
+		sort = "date ASC"
+	case "most_viewed":
+		sort = "view_count DESC"
 	}
 
-	readingListArticles, err := u.GetReadingListArticles()
+	articles, err := u.articleRepo.GetAll(search, sort)
+	if err != nil {
+		log.Print(err.Error())
+		return []article.GetAllResponse{}, article.ErrInternalServerError
+	}
+
+	readingListArticles, err := u.GetReadingListArticles(userId)
+
 
 	if err != nil {
 		log.Print(err.Error())
-		return []article.GetAllResponse{}, 0, article.ErrInternalServerError
+		return []article.GetAllResponse{}, article.ErrInternalServerError
 	}
 
 	var articlesResponse = make([]article.GetAllResponse, len(articles))
@@ -69,7 +79,7 @@ func (u *articleUsecase) GetAll(search string, offset, limit int) ([]article.Get
 	}
 
 	if err := g.Wait(); err != nil {
-		return []article.GetAllResponse{}, 0, err
+		return []article.GetAllResponse{}, err
 	}
 
 	for i, articleData := range articlesResponse {
@@ -81,11 +91,12 @@ func (u *articleUsecase) GetAll(search string, offset, limit int) ([]article.Get
 		}
 	}
 
-	return articlesResponse, helper.GetTotalPages(int(totalData), limit), nil
+	return articlesResponse, nil
 }
 
-func (u *articleUsecase) GetReadingListArticles() ([]article.ReadingListArticleResponse, error) {
-	readingListArticles, err := u.articleRepo.GetReadingListArticles()
+func (u *articleUsecase) GetReadingListArticles(id string) ([]article.ReadingListArticleResponse, error) {
+
+	readingListArticles, err := u.articleRepo.GetReadingListArticles(id)
 	if err != nil {
 		log.Print(err.Error())
 		return []article.ReadingListArticleResponse{}, article.ErrInternalServerError
@@ -153,12 +164,6 @@ func (u *articleUsecase) CreateComment(inputComment article.CreateCommentRequest
 	if err != nil {
 		return article.ErrArticleNotFound
 	}
-	articles.CommentCount++
-
-	commentCount := entity.Article{
-		CommentCount: articles.CommentCount,
-	}
-	u.articleRepo.UpdateCount(articles.ID, commentCount)
 
 	uuid, _ := helper.NewGoogleUUID().GenerateUUID()
 
@@ -168,9 +173,14 @@ func (u *articleUsecase) CreateComment(inputComment article.CreateCommentRequest
 		UserID:    inputComment.UserID,
 		Comment:   inputComment.Comment,
 	}
+	articles.CommentCount++
+
+	commentCount := entity.Article{
+		CommentCount: articles.CommentCount,
+	}
+	u.articleRepo.UpdateCount(articles.ID, commentCount)
 
 	err = u.commentRepo.Save(newComment)
-
 	if err != nil {
 		return article.ErrInternalServerError
 	}
@@ -197,18 +207,17 @@ func (u *articleUsecase) UpdateCount(inputDetail article.UpdateCountRequest) err
 	return nil
 }
 
-func (u *articleUsecase) GetAllComment(id string, offset, limit int) ([]article.CommentResponse, int, error) {
-
+func (u *articleUsecase) GetAllComment(id string) ([]article.CommentResponse, error) {
 	// Check article
 	_, err := u.articleRepo.GetById(id)
 	if err != nil {
-		return []article.CommentResponse{}, 0, article.ErrArticleNotFound
+		return []article.CommentResponse{}, article.ErrArticleNotFound
 	}
 
-	comments, totalData, err := u.commentRepo.GetByArticleId(id, offset, limit)
+	comments, err := u.commentRepo.GetByArticleId(id)
 	if err != nil {
 		log.Print(err.Error())
-		return []article.CommentResponse{}, 0, article.ErrInternalServerError
+		return []article.CommentResponse{}, article.ErrInternalServerError
 	}
 
 	var commentsResponse = make([]article.CommentResponse, len(comments))
@@ -238,12 +247,10 @@ func (u *articleUsecase) GetAllComment(id string, offset, limit int) ([]article.
 	}
 
 	if err := g.Wait(); err != nil {
-		return []article.CommentResponse{}, 0, err
+		return []article.CommentResponse{}, err
 	}
 
-	totalPages := helper.GetTotalPages(int(totalData), limit)
-
-	return commentsResponse, totalPages, nil
+	return commentsResponse, nil
 }
 
 func (u *articleUsecase) DeleteComment(userId, articleId, commentId string) error {
@@ -257,8 +264,8 @@ func (u *articleUsecase) DeleteComment(userId, articleId, commentId string) erro
 	if err != nil {
 		return article.ErrArticleNotFound
 	}
-	articles.CommentCount--
 
+	articles.CommentCount--
 	commentCount := entity.Article{
 		CommentCount: articles.CommentCount,
 	}
