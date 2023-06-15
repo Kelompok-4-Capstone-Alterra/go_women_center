@@ -6,14 +6,14 @@ import (
 
 type SendTransactionRequest struct {
 	//TODO: check data type
-	UserCredential      *helper.JwtCustomUserClaims
-	CounselorID         string `json:"counselor_id"`
-	CounselorTopicKey   int    `json:"counselor_topic_key"`
-	CounselingDateID    string `json:"counselor_date_id"`
-	CounselingTimeID    string `json:"counselor_time_id"`
-	CounselingTimeStart string `json:"counseling_time_start"`
-	CounselingMethod    string `json:"counseling_method"`
-	ValueVoucher        int64  `json:"value_voucher"`
-	GrossPrice          int64  `json:"gross_price"`
-	TotalPrice          int64  `json:"total_price"`
+	UserCredential        *helper.JwtCustomUserClaims
+	CounselorID           string `json:"counselor_id" validate:"required,uuid"`
+	CounselorTopicKey     int    `json:"counselor_topic_key" validate:"required"`
+	ConsultationDateID    string `json:"consultation_date_id" validate:"required,uuid"`
+	ConsultationTimeID    string `json:"consultation_time_id" validate:"required,uuid"`
+	ConsultationTimeStart string `json:"consultation_time_start" validate:"required"`
+	ConsultationMethod    string `json:"consultation_method" validate:"required"`
+	ValueVoucher          int64  `json:"value_voucher" validate:"required"`
+	GrossPrice            int64  `json:"gross_price" validate:"required"`
+	TotalPrice            int64  `json:"total_price" validate:"required"`
 }
