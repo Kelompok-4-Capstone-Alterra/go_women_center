@@ -1,15 +1,12 @@
 package readingList
 
 type GetAllRequest struct {
-	IdUser     string
-	Topic      string `query:"topic"`
-	Created    string `query:"created"`
-	Popular    string `query:"popular"`
-	Categories int    `query:"categories"`
-	MyForum    string `query:"myforum"`
-	Page       int    `query:"page"`
-	Offset     int    `query:"offset"`
-	Limit      int    `query:"limit"`
+	UserId string
+	Name   string `query:"name"`
+	Sort   string `query:"sort"`
+	Page   int    `query:"page"`
+	Offset int    `query:"offset"`
+	Limit  int    `query:"limit"`
 }
 
 type CreateRequest struct {

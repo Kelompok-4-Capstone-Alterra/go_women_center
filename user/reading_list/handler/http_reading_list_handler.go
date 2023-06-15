@@ -2,7 +2,6 @@ package handler
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
 	readingList "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/reading_list"
@@ -31,24 +30,23 @@ func NewReadingListHandler(ReadingListU usecase.ReadingListUsecaseInterface) Rea
 
 func (rlh ReadingListHandler) GetAll(c echo.Context) error {
 	var user = c.Get("user").(*helper.JwtCustomUserClaims)
-	getName := c.QueryParam("name")
-	page, _ := strconv.Atoi(c.QueryParam("page"))
-	limit, _ := strconv.Atoi(c.QueryParam("limit"))
-
-	page, offset, limit := helper.GetPaginateData(page, limit)
-	reading_list, totalPages, err := rlh.ReadingListU.GetAll(user.ID, getName, offset, limit)
+	var getAllParams readingList.GetAllRequest
+	c.Bind(&getAllParams)
+	getAllParams.UserId = user.ID
+	getAllParams.Page, getAllParams.Offset, getAllParams.Limit = helper.GetPaginateData(getAllParams.Page, getAllParams.Limit)
+	reading_list, totalPages, err := rlh.ReadingListU.GetAll(getAllParams)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
 	}
 
-	if page > totalPages {
+	if getAllParams.Page > totalPages {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(readingList.ErrPageNotFound.Error(), http.StatusBadRequest, nil))
 	}
 
 	return c.JSON(http.StatusOK, helper.ResponseData("success to get all reading list data", http.StatusOK, echo.Map{
 		"reading_list":  reading_list,
-		"current_pages": page,
+		"current_pages": getAllParams.Page,
 		"total_pages":   totalPages,
 	}))
 }

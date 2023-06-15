@@ -8,7 +8,7 @@ import (
 )
 
 type ReadingListUsecaseInterface interface {
-	GetAll(id_user, name string, offset, limit int) ([]readingList.ReadingList, int, error)
+	GetAll(getAllParams readingList.GetAllRequest) ([]readingList.ReadingList, int, error)
 	GetById(id, user_id string) (*readingList.ReadingList, error)
 	Create(createForum *readingList.CreateRequest) error
 	Update(id, user_id string, readingList *readingList.UpdateRequest) error
@@ -25,14 +25,22 @@ func NewReadingListUsecase(ReadingListR repository.ReadingListRepository) Readin
 	}
 }
 
-func (rlu ReadingListUsecase) GetAll(id_user, name string, offset, limit int) ([]readingList.ReadingList, int, error) {
-	readingLists, totalData, err := rlu.ReadingListR.GetAll(id_user, name, offset, limit)
+func (rlu ReadingListUsecase) GetAll(getAllParams readingList.GetAllRequest) ([]readingList.ReadingList, int, error) {
+	switch getAllParams.Sort {
+	case "oldest":
+		getAllParams.Sort = "reading_lists.created_at ASC"
+	case "newest":
+		getAllParams.Sort = "reading_lists.created_at DESC"
+	default:
+		getAllParams.Sort = "reading_lists.created_at"
+	}
+	readingLists, totalData, err := rlu.ReadingListR.GetAll(getAllParams)
 
 	if err != nil {
 		return nil, 0, readingList.ErrFailedGetReadingList
 	}
 
-	totalPages := helper.GetTotalPages(int(totalData), limit)
+	totalPages := helper.GetTotalPages(int(totalData), getAllParams.Limit)
 	return readingLists, totalPages, nil
 }
 
