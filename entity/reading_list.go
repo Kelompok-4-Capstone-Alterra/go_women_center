@@ -2,8 +2,6 @@ package entity
 
 import (
 	"time"
-
-	"gorm.io/gorm"
 )
 
 type ReadingList struct {
@@ -14,10 +12,4 @@ type ReadingList struct {
 	ReadingListArticles []ReadingListArticle `gorm:"foreignKey:ReadingListId"`
 	CreatedAt           time.Time
 	UpdatedAt           time.Time
-	DeletedAt           gorm.DeletedAt `gorm:"index"`
-}
-
-func (c *ReadingList) BeforeDelete(tx *gorm.DB) error {
-	tx.Model(&ReadingListArticle{}).Where("reading_list_id = ?", c.ID).Delete(&ReadingListArticle{})
-	return nil
 }

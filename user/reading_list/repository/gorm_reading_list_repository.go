@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"fmt"
+
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	response "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/reading_list"
 	"gorm.io/gorm"
@@ -32,6 +34,7 @@ func (rlr mysqlReadingListRepository) GetAll(id_user, name string, offset, limit
 		Group("reading_lists.id").Count(&totalData).Offset(offset).Limit(limit).Preload("ReadingListArticles.Articles").Find(&readingList).Error
 
 	if err != nil {
+		fmt.Println(err)
 		return nil, totalData, err
 	}
 
@@ -73,9 +76,20 @@ func (rlr mysqlReadingListRepository) Update(id, user_id string, readingListId *
 }
 
 func (rlr mysqlReadingListRepository) Delete(id, user_id string) error {
-	err := rlr.DB.Unscoped().Where("id = ? AND user_id = ? ", id, user_id).Delete(&entity.ReadingList{}).Error
-	if err != nil {
-		return err
-	}
-	return nil
+	err := rlr.DB.Transaction(func(tx *gorm.DB) error {
+		err := tx.Model(&entity.ReadingListArticle{}).Unscoped().Delete(&entity.ReadingListArticle{}, "reading_list_id = ?", id).Error
+
+		if err != nil {
+			return err
+		}
+		err = tx.Model(&entity.ReadingList{}).Unscoped().Delete(&entity.ReadingList{}, "id = ?", id).Error
+
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	return err
 }

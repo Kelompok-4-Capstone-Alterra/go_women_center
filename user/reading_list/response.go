@@ -2,8 +2,6 @@ package readingList
 
 import (
 	"time"
-
-	"gorm.io/gorm"
 )
 
 type Article struct {
@@ -28,6 +26,5 @@ type ReadingList struct {
 	Description         string               `json:"description"`
 	ArticleTotal        int                  `json:"article_total"`
 	CreatedAt           time.Time            `json:"created_at"`
-	DeletedAt           gorm.DeletedAt       `gorm:"index" json:"-"`
 	ReadingListArticles []ReadingListArticle `gorm:"foreignKey:ReadingListId" json:"reading_list_articles"`
 }
