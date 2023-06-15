@@ -89,7 +89,7 @@ func (u *transactionUsecase) SendTransaction(trRequest transaction.SendTransacti
 		TimeId:             trRequest.CounselingTimeID,
 		TimeStart:          trRequest.CounselingTimeStart,
 		ConsultationMethod: trRequest.CounselingMethod,
-		Status:             "waiting",
+		Status:             "pending",
 		ValueVoucher:       trRequest.ValueVoucher,
 		GrossPrice:         trRequest.GrossPrice,
 		TotalPrice:         trRequest.TotalPrice,
@@ -116,11 +116,11 @@ if status 200 then update status success
 else then status is the same
 */
 func (u *transactionUsecase) UpdateStatus(transactionId string, transactionStatus string) error {
-	transactionStatus = "ongoing"
-
 	if transactionStatus != "settlement" {
 		return nil
 	}
+
+	transactionStatus = "ongoing"
 
 	savedTransaction, err := u.verifyById(transactionId)
 	if err != nil {

@@ -34,7 +34,7 @@ func (tr *mysqlTransactionRepository) CreateTransaction(transaction entity.Trans
 
 func (tr *mysqlTransactionRepository) GetAllSuccess(userId string) ([]entity.Transaction, error) {
 	allUserTransaction := []entity.Transaction{}
-	err := tr.DB.Where("user_id = ? AND status != ?", userId, "waiting").Find(&allUserTransaction).Error
+	err := tr.DB.Where("user_id = ? AND status != ?", userId, "pending").Find(&allUserTransaction).Error
 	if err != nil {
 		return nil, err
 	}
