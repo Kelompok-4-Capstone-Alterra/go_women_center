@@ -14,6 +14,7 @@ type UserUsecase interface {
 	VerifyEmail(email string) error
 	Login(loginRequest user.LoginUserRequest) (entity.User, error)
 	GetById(id string) (entity.User, error)
+	CheckUnique(email, username string) error
 }
 
 type userUsecase struct {
@@ -120,4 +121,15 @@ func(u *userUsecase) GetById(id string) (entity.User, error) {
 		return entity.User{}, user.ErrInternalServerError
 	}
 	return data, nil
+}
+
+func(u *userUsecase) CheckUnique(email, username string) error {
+	data, err := u.repo.GetByUsernameAndEmail(username, email)
+	if data.ID != "" {
+		return user.ErrUserIsRegistered
+	}
+	if err != user.ErrDataNotFound{
+		return err
+	}
+	return nil
 }
