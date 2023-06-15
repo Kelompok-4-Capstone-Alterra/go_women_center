@@ -12,13 +12,12 @@ var (
 	ErrInvalidCredential = errors.New("invalid credential")
 	ErrInvalidInput      = errors.New("invalid input")
 	ErrFailedEncrpyt     = errors.New("failed to encrypt credential")
-	ErrMaxOtpAttempt    = errors.New("max otp attempt")
+	ErrMaxOtpAttempt     = errors.New("max otp attempt")
 	ErrPasswordLength    = errors.New("password must be at least 8 characters")
-	ErrEmailFormat = errors.New("email must be a valid email")
-	ErrIdFormat = errors.New("id must be a valid uuid")
-	ErrRequired = errors.New("all fields are required")
-	
+	ErrEmailFormat       = errors.New("email must be a valid email")
+	ErrIdFormat          = errors.New("id must be a valid uuid")
+	ErrRequired          = errors.New("all fields are required")
+
 	// conflict
 	ErrUserIsRegistered = errors.New("user is already registered")
-
 )
