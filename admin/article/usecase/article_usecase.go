@@ -17,7 +17,7 @@ import (
 )
 
 type ArticleUsecase interface {
-	GetAll(search string, offset, limit int) ([]article.GetAllResponse, int, error)
+	GetAll(search, sort string, offset, limit int) ([]article.GetAllResponse, int, error)
 	GetTotalPages(limit int) (int, error)
 	GetById(id string) (article.GetByResponse, error)
 	GetAllComment(id string, offset, limit int) ([]article.CommentResponse, int, error)
@@ -38,8 +38,17 @@ func NewArticleUsecase(ARepo repository.ArticleRepository, CommentRepo Comment.C
 	return &articleUsecase{articleRepo: ARepo, commentRepo: CommentRepo, userRepo: UserRepo, image: Image}
 }
 
-func (u *articleUsecase) GetAll(search string, offset, limit int) ([]article.GetAllResponse, int, error) {
-	articles, totalData, err := u.articleRepo.GetAll(search, offset, limit)
+func (u *articleUsecase) GetAll(search, sort string, offset, limit int) ([]article.GetAllResponse, int, error) {
+	switch sort {
+	case "newest":
+		sort = "date DESC"
+	case "oldest":
+		sort = "date ASC"
+	case "most_viewed":
+		sort = "view_count DESC"
+	}
+
+	articles, totalData, err := u.articleRepo.GetAll(search, sort, offset, limit)
 	if err != nil {
 		log.Print(err.Error())
 		return []article.GetAllResponse{}, 0, article.ErrInternalServerError
@@ -71,7 +80,6 @@ func (u *articleUsecase) GetAll(search string, offset, limit int) ([]article.Get
 	if err := g.Wait(); err != nil {
 		return []article.GetAllResponse{}, 0, err
 	}
-
 
 	return articlesResponse, helper.GetTotalPages(int(totalData), limit), nil
 }
@@ -128,7 +136,7 @@ func (u *articleUsecase) Create(inputDetail article.CreateRequest, inputImage *m
 		Image:       path,
 	}
 
-	if topic, ok := constant.TOPICS[inputDetail.Topic]; ok{
+	if topic, ok := constant.TOPICS[inputDetail.Topic]; ok {
 		newArticle.Topic = topic
 	}
 
@@ -259,6 +267,7 @@ func (u *articleUsecase) DeleteComment(articleId, commentId string) error {
 	if err != nil {
 		return article.ErrArticleNotFound
 	}
+
 	articles.CommentCount--
 
 	commentCount := entity.Article{

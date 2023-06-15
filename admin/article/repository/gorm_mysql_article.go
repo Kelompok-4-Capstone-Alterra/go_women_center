@@ -6,7 +6,7 @@ import (
 )
 
 type ArticleRepository interface {
-	GetAll(search string, offset, limit int) ([]entity.Article, int64, error)
+	GetAll(search, sort string, offset, limit int) ([]entity.Article, int64, error)
 	GetById(id string) (entity.Article, error)
 	Create(article entity.Article) error
 	Update(id string, article entity.Article) error
@@ -23,7 +23,8 @@ func NewMysqlArticleRepository(db *gorm.DB) ArticleRepository {
 	return &mysqlArticleRepository{DB: db}
 }
 
-func (r *mysqlArticleRepository) GetAll(search string, offset, limit int) ([]entity.Article, int64, error) {
+func (r *mysqlArticleRepository) GetAll(search, sort string, offset, limit int) ([]entity.Article, int64, error) {
+	//TODO: ADD SORT OLDEST AND NEWEST
 	var article []entity.Article
 	var count int64
 	err := r.DB.Model(&entity.Article{}).
@@ -32,6 +33,7 @@ func (r *mysqlArticleRepository) GetAll(search string, offset, limit int) ([]ent
 		Count(&count).
 		Offset(offset).
 		Limit(limit).
+		Order(sort).
 		Find(&article).Error
 
 	if err != nil {

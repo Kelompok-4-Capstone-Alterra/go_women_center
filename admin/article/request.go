@@ -19,6 +19,13 @@ type UpdateRequest struct {
 	Image       *multipart.FileHeader `form:"image" validate:"omitempty"`
 }
 
+type GetAllRequest struct {
+	Page   int    `query:"page"`
+	Limit  int    `query:"limit"`
+	Search string `query:"search"`
+	SortBy string `query:"sort_by" validate:"omitempty,oneof=newest oldest most_viewed"`
+}
+
 type GetAllCommentRequest struct {
 	ArticleID string `param:"id" validate:"required,uuid"`
 	Page      int    `query:"page"`

@@ -48,12 +48,14 @@ func (h *articleHandler) Create(c echo.Context) error {
 
 func (h *articleHandler) GetAll(c echo.Context) error {
 
-	page, _ := helper.StringToInt(c.QueryParam("page"))
-	limit, _ := helper.StringToInt(c.QueryParam("limit"))
+	var getAllReq article.GetAllRequest
+
+	page := getAllReq.Page
+	limit := getAllReq.Limit
 
 	page, offset, limit := helper.GetPaginateData(page, limit)
-	search := c.QueryParam("search")
-	articles, totalPages, err := h.ArticleUsecase.GetAll(search, offset, limit)
+
+	articles, totalPages, err := h.ArticleUsecase.GetAll(getAllReq.Search, getAllReq.SortBy, offset, limit)
 
 	if err != nil {
 		return c.JSON(
