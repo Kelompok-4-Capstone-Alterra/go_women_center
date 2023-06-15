@@ -98,6 +98,7 @@ func(i *image) UploadImageToS3(fh *multipart.FileHeader) (string, error) {
 		Bucket: aws.String(i.bucket),
 		Key:    aws.String(newFileName),
 		Body:   file,
+		ContentType: aws.String(fh.Header.Get("Content-Type")),
 	})
 
 	if err != nil {
