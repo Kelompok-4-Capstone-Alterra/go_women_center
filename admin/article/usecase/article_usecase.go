@@ -41,9 +41,9 @@ func NewArticleUsecase(ARepo repository.ArticleRepository, CommentRepo Comment.C
 func (u *articleUsecase) GetAll(search, sort string, offset, limit int) ([]article.GetAllResponse, int, error) {
 	switch sort {
 	case "newest":
-		sort = "date DESC"
+		sort = "created_at DESC"
 	case "oldest":
-		sort = "date ASC"
+		sort = "created_at ASC"
 	case "most_viewed":
 		sort = "view_count DESC"
 	}

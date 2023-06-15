@@ -50,6 +50,8 @@ func (h *articleHandler) GetAll(c echo.Context) error {
 
 	var getAllReq article.GetAllRequest
 
+	c.Bind(&getAllReq)
+
 	page := getAllReq.Page
 	limit := getAllReq.Limit
 
