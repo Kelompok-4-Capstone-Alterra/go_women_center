@@ -80,6 +80,13 @@ func (h *transactionHandler) GetAllTransaction(c echo.Context) error {
 	}
 
 	data, err := h.Usecase.GetAll(user.ID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
+			err.Error(),
+			http.StatusInternalServerError,
+			nil,
+		))
+	}
 	
 	return c.JSON(http.StatusOK, helper.ResponseData(
 		"success get new transaction",
@@ -108,7 +115,7 @@ func (h *transactionHandler) MidtransNotification(c echo.Context) error {
 	transactionId, ok := notifMap["order_id"].(string)
 	if !ok {
 		log.Println("error at trans_id")
-		return c.JSON(http.StatusInternalServerError, transaction.ErrorTransactionNotFound)
+		return c.JSON(http.StatusOK, transaction.ErrorTransactionNotFound)
 	}
 
 	log.Println(transactionId)
@@ -117,7 +124,7 @@ func (h *transactionHandler) MidtransNotification(c echo.Context) error {
 	err = h.Usecase.UpdateStatus(transactionId, transactionStatus)
 	if err != nil {
 		log.Println(err.Error())
-		return c.JSON(http.StatusInternalServerError, transaction.ErrorTransactionNotFound)
+		return c.JSON(http.StatusOK, transaction.ErrorTransactionNotFound)
 	}
 
 	return c.JSON(http.StatusOK, nil)
