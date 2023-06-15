@@ -44,9 +44,27 @@ func (h *transactionHandler) SendTransaction(c echo.Context) error {
 	}
 	err = c.Bind(&request)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(
 			err.Error(),
-			http.StatusInternalServerError,
+			http.StatusBadRequest,
+			nil,
+		))
+	}
+
+	err = isRequestValid(request)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(
+			err.Error(),
+			http.StatusBadRequest,
+			nil,
+		))
+	}
+
+	err = isValidTopic(request)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(
+			err.Error(),
+			http.StatusBadRequest,
 			nil,
 		))
 	}
@@ -89,7 +107,7 @@ func (h *transactionHandler) GetAllTransaction(c echo.Context) error {
 	}
 	
 	return c.JSON(http.StatusOK, helper.ResponseData(
-		"success get new transaction",
+		"success get transaction",
 		http.StatusOK,
 		data,
 	))
