@@ -25,6 +25,7 @@ func NewMysqlReadingListRepository(db *gorm.DB) ReadingListRepository {
 }
 
 func (rlr mysqlReadingListRepository) GetAll(getAllParams readingList.GetAllRequest) ([]readingList.ReadingList, int64, error) {
+	fmt.Println(getAllParams.Name)
 	var dataReadingList []readingList.ReadingList
 	var totalData int64
 
