@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"log"
 	"strings"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor"
@@ -18,7 +17,11 @@ func isRequestValid(m interface{}) error {
 			field := strings.ToLower(err.Field())
 
 			if err.Tag() == "required" {
-				log.Println(field)
+
+				if field == "topic" {
+					return counselor.ErrRequiredTopic
+				}
+				
 				return counselor.ErrRequired
 			}
 
@@ -33,6 +36,8 @@ func isRequestValid(m interface{}) error {
 				return counselor.ErrIdFormat
 			case "topic":
 				return counselor.ErrInvalidTopic
+			case "sortby":
+				return counselor.ErrInvalidSort
 			}
 			
 

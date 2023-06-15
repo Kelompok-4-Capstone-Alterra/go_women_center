@@ -2,7 +2,6 @@ package handler
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/users"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/users/usecase"
@@ -44,13 +43,18 @@ func (h *UserHandler) GetById(c echo.Context) error {
 }
 
 func (h *UserHandler) GetAll(c echo.Context) error {
-	page, _ :=  strconv.Atoi(c.QueryParam("page"))
-	limit, _ := strconv.Atoi(c.QueryParam("limit"))
-	search := c.QueryParam("search")
+	
+	var req users.GetAllRequest
 
-	page, offset, limit := helper.GetPaginateData(page, limit)
+	c.Bind(&req)
 
-	usersRes, totalPages, err := h.usecase.GetAll(search, offset, limit)
+	if err := isRequestValid(req); err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(),http.StatusBadRequest, nil))
+	}
+
+	page, offset, limit := helper.GetPaginateData(req.Page, req.Limit)
+
+	usersRes, totalPages, err := h.usecase.GetAll(req.Search, req.SortBy, offset, limit)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, helper.ResponseData(err.Error(),http.StatusInternalServerError, nil))

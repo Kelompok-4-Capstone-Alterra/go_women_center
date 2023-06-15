@@ -21,7 +21,8 @@ func(h *topicHandler) GetAll(c echo.Context) error{
 	for i := 1; i <= len(constant.TOPICS); i++{
 		topic := topic.GetAllResponse{
 			ID: i,
-			Name: constant.TOPICS[i],
+			Name: constant.TOPICS[i][0],
+			Image: constant.TOPICS[i][1],
 		}
 		topicsRes = append(topicsRes, topic)
 	}

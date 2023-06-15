@@ -8,7 +8,6 @@ var (
 
 	// not found
 	ErrCounselorNotFound = errors.New("counselor not found")
-	ErrPageNotFound = errors.New("page not found")
 
 	// bad request
 	ErrProfilePictureFormat = errors.New("profile picture must be an image and png/jpg/jpeg format")
@@ -18,5 +17,6 @@ var (
 	ErrIdFormat             = errors.New("id must be a valid uuid")
 	ErrInvalidTopic         = errors.New("invalid topic")
 	ErrRequired 			= errors.New("all fields are required")
-	ErrInvalidSort 		= errors.New("invalid sort")
+	ErrRequiredTopic 		= errors.New("topic is required")
+	ErrInvalidSort 			= errors.New("invalid sort")
 )
