@@ -169,6 +169,7 @@ func main() {
 	})
 
 	e.GET("/topics", topicHandler.GetAll)
+	e.POST("/verify/unique", userAuthHandler.VerifyUniqueCredential)
 	e.POST("/verify", userAuthHandler.VerifyEmailHandler)
 	e.POST("/register", userAuthHandler.RegisterHandler)
 	e.POST("/login", userAuthHandler.LoginHandler)

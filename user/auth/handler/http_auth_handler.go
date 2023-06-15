@@ -84,6 +84,41 @@ func (h *userHandler) getUserInfo(state, code string) (user.UserOauthInfo, error
 	return UserInfo, nil
 }
 
+func (h *userHandler) VerifyUniqueCredential(c echo.Context) error {
+	verifyRequest := user.VerifyUniqueCredentialRequest{}
+	err := c.Bind(&verifyRequest)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
+			err.Error(),
+			http.StatusInternalServerError,
+			nil,
+		))
+	}
+
+	if err := isRequestValid(verifyRequest); err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(
+			err.Error(),
+			http.StatusBadRequest,
+			nil,
+		))
+	}
+
+	err = h.Usecase.CheckUnique(verifyRequest.Email, verifyRequest.Username)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(
+			err.Error(),
+			http.StatusBadRequest,
+			nil,
+		))
+	}
+
+	return c.JSON(http.StatusOK, helper.ResponseData(
+		"credential is available",
+		http.StatusOK,
+		nil,
+	))
+}
+
 func (h *userHandler) VerifyEmailHandler(c echo.Context) error { // TODO: rename with suffix handler
 	emailRequest := user.VerifyEmailRequest{}
 	err := c.Bind(&emailRequest)
@@ -105,7 +140,6 @@ func (h *userHandler) VerifyEmailHandler(c echo.Context) error { // TODO: rename
 
 	err = h.Usecase.VerifyEmail(emailRequest.Email)
 	if err != nil {
-
 		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
 			err.Error(), //TODO: write better error message
 			http.StatusInternalServerError,
