@@ -17,6 +17,7 @@ var (
 	ErrEmailFormat       = errors.New("email must be a valid email")
 	ErrIdFormat          = errors.New("id must be a valid uuid")
 	ErrRequired          = errors.New("all fields are required")
+	ErrDataNotFound      = errors.New("data not found")
 
 	// conflict
 	ErrUserIsRegistered = errors.New("user is already registered")
