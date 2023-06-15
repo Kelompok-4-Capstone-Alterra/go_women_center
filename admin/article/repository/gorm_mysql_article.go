@@ -71,7 +71,7 @@ func (r *mysqlArticleRepository) Update(id string, article entity.Article) error
 
 func (r *mysqlArticleRepository) Delete(id string) error {
 
-	err := r.DB.Delete(&entity.Article{}, "id = ?", id).Error
+	err := r.DB.Unscoped().Delete(&entity.Article{}, "id = ?", id).Error
 
 	if err != nil {
 		return err

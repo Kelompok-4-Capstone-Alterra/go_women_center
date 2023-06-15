@@ -79,7 +79,7 @@ func (r *mysqlCareerRepository) Update(id string, career entity.Career) error {
 
 func (r *mysqlCareerRepository) Delete(id string) error {
 
-	err := r.DB.Delete(&entity.Career{}, "id = ?", id).Error
+	err := r.DB.Unscoped().Delete(&entity.Career{}, "id = ?", id).Error
 
 	if err != nil {
 		return err

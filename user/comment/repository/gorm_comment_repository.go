@@ -84,7 +84,7 @@ func (r *mysqlArticleRepository) GetByUserId(userId string) (entity.Comment, err
 
 func (r *mysqlArticleRepository) Delete(id string) error {
 
-	err := r.DB.Delete(&entity.Comment{}, "id = ?", id).Error
+	err := r.DB.Unscoped().Delete(&entity.Comment{}, "id = ?", id).Error
 
 	if err != nil {
 		return err
