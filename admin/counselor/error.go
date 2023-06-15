@@ -26,4 +26,5 @@ var (
 	ErrInvalidTopic = errors.New("invalid topic")
 	ErrRequiredTopic 		= errors.New("topic is required")
 	ErrRequired = errors.New("all fields are required")
+	ErrInvalidSort 			= errors.New("invalid sort")
 )

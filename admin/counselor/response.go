@@ -1,11 +1,11 @@
 package counselor
 
 type GetAllResponse struct {
-	ID       string `json:"id"`
-	Name     string `json:"name"`
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Topic    string `json:"topic"`
+	ID        string `json:"id"`
+	Name      string `json:"name"`
+	Username  string `json:"username"`
+	Email     string `json:"email"`
+	Topic     string `json:"topic"`
 }
 
 type GetByResponse struct {

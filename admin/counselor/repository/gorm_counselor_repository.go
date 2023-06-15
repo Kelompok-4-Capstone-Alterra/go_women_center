@@ -7,7 +7,7 @@ import (
 )
 
 type CounselorRepository interface {
-	GetAll(search string, offset, limit int) ([]counselor.GetAllResponse, int64, error)
+	GetAll(search, sortBy string, offset, limit int) ([]counselor.GetAllResponse, int64, error)
 	GetById(id string) (counselor.GetByResponse, error)
 	GetByEmail(email string) (counselor.GetByResponse, error)
 	GetByUsername(username string) (counselor.GetByResponse, error)
@@ -24,7 +24,7 @@ func NewMysqlCounselorRepository(db *gorm.DB) CounselorRepository{
 	return &mysqlCounselorRepository{DB: db}
 }
 
-func(r *mysqlCounselorRepository) GetAll(search string, offset, limit int) ([]counselor.GetAllResponse, int64, error) {
+func(r *mysqlCounselorRepository) GetAll(search, sortBy string, offset, limit int) ([]counselor.GetAllResponse, int64, error) {
 	var counselor []counselor.GetAllResponse
 
 	var totalData int64
@@ -33,6 +33,7 @@ func(r *mysqlCounselorRepository) GetAll(search string, offset, limit int) ([]co
 		Where("name LIKE ? OR topic LIKE ? OR username LIKE ? OR email LIKE ?",
 		"%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Count(&totalData).
+		Order(sortBy).
 		Offset(offset).Limit(limit).Find(&counselor).Error
 
 	if err != nil {
