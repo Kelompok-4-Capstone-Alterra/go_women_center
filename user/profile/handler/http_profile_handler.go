@@ -54,10 +54,12 @@ func(h *ProfileHandler) Update(c echo.Context) error {
 		status := http.StatusInternalServerError
 
 		switch err {
-		case profile.ErrUserNotFound:
+			case profile.ErrUserNotFound:
+				status = http.StatusNotFound
+			case profile.ErrUsernameDuplicate:
+				status = http.StatusConflict
 			case
-				profile.ErrProfilePictureFormat,
-				profile.ErrBirthDateFormat:
+				profile.ErrProfilePictureFormat:
 				status = http.StatusBadRequest
 		}
 
