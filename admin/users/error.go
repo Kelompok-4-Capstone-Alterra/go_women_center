@@ -12,4 +12,6 @@ var (
 	ErrIdRequired = errors.New("id is required")
 
 	ErrPageNotFound = errors.New("page not found")
+
+	ErrInvalidSort = errors.New("invalid sort by")
 )
