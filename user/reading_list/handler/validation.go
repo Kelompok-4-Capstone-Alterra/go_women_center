@@ -28,7 +28,7 @@ func isRequestValid(m interface{}) error {
 			}
 
 			switch field {
-			case "sort_by":
+			case "sortby":
 				return readingList.ErrInvalidSort
 			}
 

@@ -230,11 +230,6 @@ func main() {
 	restrictAdmin := e.Group("/admin", adminAuthMidd.JWTAdmin())
 
 	{
-		restrictAdmin.GET("/profile", func(c echo.Context) error {
-			admin := c.Get("admin").(*helper.JwtCustomAdminClaims)
-			return c.JSON(http.StatusOK, admin)
-		})
-
 		restrictAdmin.GET("/counselors", adminCounselorHandler.GetAll)
 		restrictAdmin.POST("/counselors", adminCounselorHandler.Create)
 		restrictAdmin.GET("/counselors/:id", adminCounselorHandler.GetById)
