@@ -25,4 +25,5 @@ var (
 var (
 	// scuffed db error handling
 	ErrDuplicateKey error = errors.New("duplicated key not allowed")
+	ErrRecordNotFound error = errors.New("record not found")
 )
