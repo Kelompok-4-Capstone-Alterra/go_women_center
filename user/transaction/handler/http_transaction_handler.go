@@ -105,7 +105,7 @@ func (h *transactionHandler) GetAllTransaction(c echo.Context) error {
 			nil,
 		))
 	}
-	
+
 	return c.JSON(http.StatusOK, helper.ResponseData(
 		"success get transaction",
 		http.StatusOK,
@@ -115,7 +115,7 @@ func (h *transactionHandler) GetAllTransaction(c echo.Context) error {
 
 func (h *transactionHandler) MidtransNotification(c echo.Context) error {
 	notifMap := make(map[string]interface{})
-	
+
 	err := json.
 		NewDecoder(c.Request().Body).
 		Decode(&notifMap)
