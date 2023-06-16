@@ -67,6 +67,10 @@ import (
 	TransactionUserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/transaction/handler"
 	TransactionUserRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/transaction/repository"
 	TransactionUserUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/transaction/usecase"
+
+	TransactionAdminHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/transaction/handler"
+	TransactionAdminRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/transaction/repository"
+	TransactionAdminUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/transaction/usecase"
 )
 
 func main() {
@@ -179,6 +183,10 @@ func main() {
 	userTransactionUsecase := TransactionUserUsecase.NewtransactionUsecase(midtransServerKey, googleUUID, userTransactionRepo, midtransNotifHandler, userCounselorRepo, userScheduleRepo, userVoucherRepo)
 	userTransactionHandler := TransactionUserHandler.NewTransactionHandler(userTransactionUsecase)
 
+	adminTransactionRepo := TransactionAdminRepo.NewMysqltransactionRepository(db)
+	adminTransactionUsecase := TransactionAdminUsecase.NewtransactionUsecase(adminTransactionRepo)
+	adminTransactionHandler := TransactionAdminHandler.NewTransactionHandler(adminTransactionUsecase)
+
 	e := echo.New()
 
 	// middleware
@@ -260,6 +268,8 @@ func main() {
 		restrictAdmin.DELETE("/users/:id", adminUsersHandler.Delete)
 
 		restrictAdmin.DELETE("/forums/:id", forumAdminH.Delete)
+
+		restrictAdmin.GET("/transactions", adminTransactionHandler.GetAll)
 	}
 
 	// ssl
