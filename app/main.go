@@ -228,6 +228,7 @@ func main() {
 		restrictUsers.GET("/vouchers", userVoucherHandler.GetAll)
 		restrictUsers.GET("/transactions", userTransactionHandler.GetAllTransaction)
 		restrictUsers.POST("/transactions", userTransactionHandler.SendTransaction)
+		restrictUsers.GET("/transactions/:id", userTransactionHandler.GetTransactionDetail)
 		restrictUsers.POST("/transactions/join", userTransactionHandler.UserJoinHandler)
 	}
 

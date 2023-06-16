@@ -22,6 +22,7 @@ type TransactionUsecase interface {
 	SendTransaction(transactionRequest transaction.SendTransactionRequest) (code int, res transaction.SendTransactionResponse, err error)
 	UpdateStatus(transactionId string, transactionStatus string) error
 	GetAll(userId string) ([]entity.Transaction, error)
+	GetTransactionDetail(userId, transactionId string) (code int, res entity.Transaction, err error)
 	UserJoinNotification(transactionId string) error
 }
 
@@ -203,6 +204,33 @@ func (u *transactionUsecase) SendTransaction(trRequest transaction.SendTransacti
 	return http.StatusOK, res, nil
 }
 
+// success only
+func (u *transactionUsecase) GetAll(userId string) ([]entity.Transaction, error) {
+	data, err := u.repo.GetAllSuccess(userId)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+// after payment to check status
+func (u *transactionUsecase) GetTransactionDetail(userId, transactionId string) (code int, res entity.Transaction, err error) {
+	data, err := u.repo.GetById(transactionId)
+	
+	if err != nil {
+		if err.Error() == transaction.ErrRecordNotFound.Error() {
+			return http.StatusBadRequest, entity.Transaction{}, err
+		}
+		return http.StatusInternalServerError, entity.Transaction{}, err
+	}
+
+	if data.UserId != userId {
+		return http.StatusUnauthorized, entity.Transaction{}, transaction.ErrInvalidUserCredential
+	}
+
+	return http.StatusOK, data, nil
+}
+
 /*
 catch callback res from midtrans
 
@@ -230,24 +258,6 @@ func (u *transactionUsecase) UpdateStatus(transactionId string, transactionStatu
 	return nil
 }
 
-// check status after payment
-func (u *transactionUsecase) verifyById(id string) (entity.Transaction, error) {
-	savedTransaction, err := u.repo.GetById(id)
-	if err != nil {
-		return entity.Transaction{}, err
-	}
-	return savedTransaction, nil
-}
-
-// success only
-func (u *transactionUsecase) GetAll(userId string) ([]entity.Transaction, error) {
-	data, err := u.repo.GetAllSuccess(userId)
-	if err != nil {
-		return nil, err
-	}
-	return data, nil
-}
-
 // user join the consultation
 func (u *transactionUsecase) UserJoinNotification(transactionId string) error {
 	err := u.repo.UpdateStatusById(transactionId, "completed")
@@ -256,4 +266,13 @@ func (u *transactionUsecase) UserJoinNotification(transactionId string) error {
 		return err
 	}
 	return nil
+}
+
+// check status after payment
+func (u *transactionUsecase) verifyById(id string) (entity.Transaction, error) {
+	savedTransaction, err := u.repo.GetById(id)
+	if err != nil {
+		return entity.Transaction{}, err
+	}
+	return savedTransaction, nil
 }

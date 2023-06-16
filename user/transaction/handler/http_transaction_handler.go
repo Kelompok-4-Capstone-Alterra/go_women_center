@@ -113,6 +113,36 @@ func (h *transactionHandler) GetAllTransaction(c echo.Context) error {
 	))
 }
 
+func (h *transactionHandler) GetTransactionDetail(c echo.Context) error {
+	// get jwt token and check for validity
+	user := c.Get("user").(*helper.JwtCustomUserClaims)
+	err := user.Valid()
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, helper.ResponseData(
+			err.Error(),
+			http.StatusUnauthorized,
+			nil,
+		))
+	}
+
+	transactionId := c.Param("id")
+
+	code, data, err := h.Usecase.GetTransactionDetail(user.ID, transactionId)
+	if err != nil {
+		return c.JSON(code, helper.ResponseData(
+			err.Error(),
+			code,
+			nil,
+		))
+	}
+
+	return c.JSON(code, helper.ResponseData(
+		"success get transaction",
+		code,
+		data,
+	))
+}
+
 func (h *transactionHandler) UserJoinHandler(c echo.Context) error {
 	// get jwt token and check for validity
 	user := c.Get("user").(*helper.JwtCustomUserClaims)
