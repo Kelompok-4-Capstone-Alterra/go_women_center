@@ -20,6 +20,7 @@ type User struct {
 	Reviews        []Review       `gorm:"foreignKey:UserID;references:ID"`
 	Forums         []Forum        `gorm:"foreignKey:UserId"`
 	UserForums     []UserForum    `gorm:"foreignKey:UserId"`
+	ReadingLists   []ReadingList  `gorm:"foreignKey:UserId"`
 }
 
 type OTP struct {

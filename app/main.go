@@ -57,6 +57,14 @@ import (
 	CareerUserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/career/handler"
 	CareerUserRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/career/repository"
 	CareerUserUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/career/usecase"
+
+	ReadingListHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/reading_list/handler"
+	ReadingListRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/reading_list/repository"
+	ReadingListUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/reading_list/usecase"
+
+	ReadingListArticleHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/reading_list_article/handler"
+	ReadingListArticleRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/reading_list_article/repository"
+	ReadingListArticleUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/reading_list_article/usecase"
 )
 
 func main() {
@@ -113,7 +121,6 @@ func main() {
 	userCounselorUsecase := CounselorUserUsecase.NewCounselorUsecase(userCounselorRepo, userReviewRepo, userAuthRepo)
 	userCounselorHandler := CounselorUserHandler.NewCounselorHandler(userCounselorUsecase)
 
-
 	userRepo := UserProfileRepo.NewMysqlUserRepository(db)
 	userUsecase := UserProfileUsecase.NewProfileUsecase(userRepo, image, encryptor)
 	userHandler := UserProfileHandler.NewProfileHandler(userUsecase)
@@ -133,7 +140,7 @@ func main() {
 	adminCareerRepo := CareerAdminRepository.NewMysqlCareerRepository(db)
 	adminCareerUsecase := CareerAdminUsecase.NewCareerUsecase(adminCareerRepo, image)
 	adminCareerHandler := CareerAdminHandler.NewCareerHandler(adminCareerUsecase)
-	
+
 	adminUsersRepo := UsersAdminRepository.NewMysqlUserRepository(db)
 	adminUsersUsecase := UsersAdminUsecase.NewUserUsecase(adminUsersRepo)
 	adminUsersHandler := UsersAdminHandler.NewUserHandler(adminUsersUsecase)
@@ -153,6 +160,14 @@ func main() {
 	userForumR := UserForumAdminRepository.NewMysqlUserForumRepository(db)
 	userForumU := UserForumAdminUsecase.NewUserForumUsecase(userForumR)
 	userForumH := UserForumAdminHandler.NewUserForumHandler(userForumU)
+
+	ReadingListR := ReadingListRepository.NewMysqlReadingListRepository(db)
+	ReadingListU := ReadingListUsecase.NewReadingListUsecase(ReadingListR)
+	ReadingListH := ReadingListHandler.NewReadingListHandler(ReadingListU)
+
+	ReadingListArticleR := ReadingListArticleRepository.NewMysqlReadingListArticleRepository(db)
+	ReadingListArticleU := ReadingListArticleUsecase.NewReadingListArticleUsecase(ReadingListArticleR)
+	ReadingListArticleH := ReadingListArticleHandler.NewReadingListArticleHandler(ReadingListArticleU)
 
 	topicHandler := TopicHandler.NewTopicHandler()
 
@@ -185,7 +200,7 @@ func main() {
 
 	restrictUsers := e.Group("/users", userAuthMidd.JWTUser(), userAuthMidd.CheckUser(userAuthUsecase))
 
-	{	
+	{
 		restrictUsers.GET("/profile", userHandler.GetById)
 		restrictUsers.PUT("/profile", userHandler.Update)
 		restrictUsers.PUT("/profile/password", userHandler.UpdatePassword)
@@ -200,12 +215,21 @@ func main() {
 		restrictUsers.DELETE("/forums/:id", forumH.Delete)
 		restrictUsers.POST("/forums/joins", userForumH.Create)
 		restrictUsers.GET("/careers/:id", userCareerHandler.GetById)
+
+		restrictUsers.GET("/reading-lists", ReadingListH.GetAll)
+		restrictUsers.GET("/reading-lists/:id", ReadingListH.GetById)
+		restrictUsers.POST("/reading-lists", ReadingListH.Create)
+		restrictUsers.PUT("/reading-lists/:id", ReadingListH.Update)
+		restrictUsers.DELETE("/reading-lists/:id", ReadingListH.Delete)
+
+		restrictUsers.POST("/reading-lists/save", ReadingListArticleH.Create)
+		restrictUsers.DELETE("/reading-lists/save/:id", ReadingListArticleH.Delete)
+
 	}
 
 	restrictAdmin := e.Group("/admin", adminAuthMidd.JWTAdmin())
 
 	{
-
 		restrictAdmin.GET("/counselors", adminCounselorHandler.GetAll)
 		restrictAdmin.POST("/counselors", adminCounselorHandler.Create)
 		restrictAdmin.GET("/counselors/:id", adminCounselorHandler.GetById)
@@ -229,7 +253,6 @@ func main() {
 
 		restrictAdmin.DELETE("/forums/:id", forumAdminH.Delete)
 	}
-
 
 	// ssl
 	e.Logger.Fatal(e.StartTLS(":8080", "./ssl/certificate.crt", "./ssl/private.key"))
