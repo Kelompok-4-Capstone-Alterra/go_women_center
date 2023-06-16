@@ -56,22 +56,6 @@ func (u *transactionUsecase) SendTransaction(trRequest transaction.SendTransacti
 		return transaction.SendTransactionResponse{}, err
 	}
 
-	// Initiate Snap request param
-	// using total price as grossamt
-	req := &snap.Request{
-		TransactionDetails: midtrans.TransactionDetails{
-			OrderID:  transactionId,
-			GrossAmt: trRequest.TotalPrice,
-		},
-		CreditCard: &snap.CreditCardDetails{
-			Secure: true,
-		},
-		CustomerDetail: &midtrans.CustomerDetails{
-			FName: trRequest.UserCredential.Username,
-			Email: trRequest.UserCredential.Email,
-		},
-	}
-
 	res := transaction.SendTransactionResponse{}
 
 	// check topic availability
@@ -101,6 +85,22 @@ func (u *transactionUsecase) SendTransaction(trRequest transaction.SendTransacti
 	data, err := u.repo.CreateTransaction(transactionData)
 	if err != nil {
 		return transaction.SendTransactionResponse{}, err
+	}
+
+	// Initiate Snap request param
+	// using total price as grossamt
+	req := &snap.Request{
+		TransactionDetails: midtrans.TransactionDetails{
+			OrderID:  transactionId,
+			GrossAmt: trRequest.TotalPrice,
+		},
+		CreditCard: &snap.CreditCardDetails{
+			Secure: true,
+		},
+		CustomerDetail: &midtrans.CustomerDetails{
+			FName: trRequest.UserCredential.Username,
+			Email: trRequest.UserCredential.Email,
+		},
 	}
 
 	// Execute request create Snap transaction to Midtrans Snap API
