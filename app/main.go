@@ -58,6 +58,16 @@ import (
 	CareerUserRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/career/repository"
 	CareerUserUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/career/usecase"
 
+	ArticleAdminHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/article/handler"
+	ArticleAdminRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/article/repository"
+	ArticleAdminUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/article/usecase"
+	CommentAdminRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/comment/repository"
+
+	ArticleUserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/article/handler"
+	ArticleUserRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/article/repository"
+	ArticleUserUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/article/usecase"
+	CommentUserRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/comment/repository"
+
 	ReadingListHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/reading_list/handler"
 	ReadingListRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/reading_list/repository"
 	ReadingListUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/reading_list/usecase"
@@ -95,7 +105,7 @@ func main() {
 		"smtp.gmail.com",
 		os.Getenv("CONFIG_AUTH_EMAIL"),
 		os.Getenv("CONFIG_AUTH_PASSWORD"),
-		"Women Center <ivanhilmideran@gmail.com>", //TODO: set email to the proper one
+		"Women Center <averilprimayuda@gmail.com>", //TODO: set email to the proper one
 	)
 
 	db := dbconf.InitDB()
@@ -129,6 +139,11 @@ func main() {
 	userCareerUsecase := CareerUserUsecase.NewCareerUsecase(userCareerRepo)
 	userCareerHandler := CareerUserHandler.NewCareerHandler(userCareerUsecase)
 
+	userArticleRepo := ArticleUserRepository.NewMysqlArticleRepository(db)
+	userCommentRepo := CommentUserRepository.NewMysqlArticleRepository(db)
+	userArticleUsecase := ArticleUserUsecase.NewArticleUsecase(userArticleRepo, userCommentRepo, userAuthRepo)
+	userArticleHandler := ArticleUserHandler.NewArticleHandler(userArticleUsecase)
+
 	adminAuthRepo := AdminAuthRepo.NewAdminRepo(db)
 	adminAuthUsecase := AdminAuthUsecase.NewAuthUsecase(adminAuthRepo, encryptor)
 	adminAuthHandler := AdminAuthHandler.NewAuthHandler(adminAuthUsecase, jwtConf)
@@ -160,6 +175,11 @@ func main() {
 	userForumR := UserForumAdminRepository.NewMysqlUserForumRepository(db)
 	userForumU := UserForumAdminUsecase.NewUserForumUsecase(userForumR)
 	userForumH := UserForumAdminHandler.NewUserForumHandler(userForumU)
+
+	adminCommentRepo := CommentAdminRepository.NewMysqlArticleRepository(db)
+	adminArticleRepo := ArticleAdminRepository.NewMysqlArticleRepository(db)
+	adminArticleUsecase := ArticleAdminUsecase.NewArticleUsecase(adminArticleRepo, adminCommentRepo, userAuthRepo, image)
+	adminArticleHandler := ArticleAdminHandler.NewArticleHandler(adminArticleUsecase)
 
 	ReadingListR := ReadingListRepository.NewMysqlReadingListRepository(db)
 	ReadingListU := ReadingListUsecase.NewReadingListUsecase(ReadingListR)
@@ -196,66 +216,90 @@ func main() {
 	{
 		users.GET("/counselors", userCounselorHandler.GetAll)
 		users.GET("/careers", userCareerHandler.GetAll)
+		users.GET("/public/articles", userArticleHandler.GetAll)
+		users.GET("/public/articles/:id", userArticleHandler.GetById)
 	}
 
-	restrictUsers := e.Group("/users", userAuthMidd.JWTUser(), userAuthMidd.CheckUser(userAuthUsecase))
-
+	restrictUsers := e.Group("/users", userAuthMidd.JWTUser())
 	{
-		restrictUsers.GET("/profile", userHandler.GetById)
-		restrictUsers.PUT("/profile", userHandler.Update)
-		restrictUsers.PUT("/profile/password", userHandler.UpdatePassword)
-		restrictUsers.GET("/counselors/:id", userCounselorHandler.GetById)
-		restrictUsers.POST("/counselors/:id/reviews", userCounselorHandler.CreateReview)
-		restrictUsers.GET("/counselors/:id/reviews", userCounselorHandler.GetAllReview)
+		restrictUsers.GET("/profile", func(c echo.Context) error {
+			user := c.Get("user").(*helper.JwtCustomUserClaims)
+			return c.JSON(http.StatusOK, user)
+		})
 
-		restrictUsers.GET("/forums", forumH.GetAll)
-		restrictUsers.GET("/forums/:id", forumH.GetById)
-		restrictUsers.POST("/forums", forumH.Create)
-		restrictUsers.PUT("/forums/:id", forumH.Update)
-		restrictUsers.DELETE("/forums/:id", forumH.Delete)
-		restrictUsers.POST("/forums/joins", userForumH.Create)
-		restrictUsers.GET("/careers/:id", userCareerHandler.GetById)
+		restrictUsers := e.Group("/users", userAuthMidd.JWTUser(), userAuthMidd.CheckUser(userAuthUsecase))
 
-		restrictUsers.GET("/reading-lists", ReadingListH.GetAll)
-		restrictUsers.GET("/reading-lists/:id", ReadingListH.GetById)
-		restrictUsers.POST("/reading-lists", ReadingListH.Create)
-		restrictUsers.PUT("/reading-lists/:id", ReadingListH.Update)
-		restrictUsers.DELETE("/reading-lists/:id", ReadingListH.Delete)
+		{
+			restrictUsers.GET("/profile", userHandler.GetById)
+			restrictUsers.PUT("/profile", userHandler.Update)
+			restrictUsers.PUT("/profile/password", userHandler.UpdatePassword)
+			restrictUsers.GET("/counselors/:id", userCounselorHandler.GetById)
+			restrictUsers.POST("/counselors/:id/reviews", userCounselorHandler.CreateReview)
+			restrictUsers.GET("/counselors/:id/reviews", userCounselorHandler.GetAllReview)
 
-		restrictUsers.POST("/reading-lists/save", ReadingListArticleH.Create)
-		restrictUsers.DELETE("/reading-lists/save/:id", ReadingListArticleH.Delete)
+			restrictUsers.GET("/forums", forumH.GetAll)
+			restrictUsers.GET("/forums/:id", forumH.GetById)
+			restrictUsers.POST("/forums", forumH.Create)
+			restrictUsers.PUT("/forums/:id", forumH.Update)
+			restrictUsers.DELETE("/forums/:id", forumH.Delete)
+			restrictUsers.POST("/forums/joins", userForumH.Create)
+			restrictUsers.GET("/careers/:id", userCareerHandler.GetById)
 
+      restrictUsers.GET("/reading-lists", ReadingListH.GetAll)
+      restrictUsers.GET("/reading-lists/:id", ReadingListH.GetById)
+      restrictUsers.POST("/reading-lists", ReadingListH.Create)
+      restrictUsers.PUT("/reading-lists/:id", ReadingListH.Update)
+      restrictUsers.DELETE("/reading-lists/:id", ReadingListH.Delete)
+
+      restrictUsers.POST("/reading-lists/save", ReadingListArticleH.Create)
+      restrictUsers.DELETE("/reading-lists/save/:id", ReadingListArticleH.Delete)
+      
+			restrictUsers.GET("/articles", userArticleHandler.GetAll)
+			restrictUsers.GET("/articles/:id", userArticleHandler.GetById)
+			restrictUsers.POST("/articles/:id/comments", userArticleHandler.CreateComment)
+			restrictUsers.GET("/articles/:id/comments", userArticleHandler.GetAllComment)
+			restrictUsers.DELETE("/articles/:article_id/comments/:comment_id", userArticleHandler.DeleteComment)
+		}
+
+		restrictAdmin := e.Group("/admin", adminAuthMidd.JWTAdmin())
+
+		{
+
+			restrictAdmin.GET("/counselors", adminCounselorHandler.GetAll)
+			restrictAdmin.POST("/counselors", adminCounselorHandler.Create)
+			restrictAdmin.GET("/counselors/:id", adminCounselorHandler.GetById)
+			restrictAdmin.PUT("/counselors/:id", adminCounselorHandler.Update)
+			restrictAdmin.DELETE("/counselors/:id", adminCounselorHandler.Delete)
+
+			restrictAdmin.POST("/counselors/:id/schedules", adminScheduleHandler.Create)
+			restrictAdmin.GET("/counselors/:id/schedules", adminScheduleHandler.GetByCounselorId)
+			restrictAdmin.DELETE("/counselors/:id/schedules", adminScheduleHandler.Delete)
+			restrictAdmin.PUT("/counselors/:id/schedules", adminScheduleHandler.Update)
+
+			restrictAdmin.GET("/careers", adminCareerHandler.GetAll)
+			restrictAdmin.POST("/careers", adminCareerHandler.Create)
+			restrictAdmin.GET("/careers/:id", adminCareerHandler.GetById)
+			restrictAdmin.PUT("/careers/:id", adminCareerHandler.Update)
+			restrictAdmin.DELETE("/careers/:id", adminCareerHandler.Delete)
+
+			restrictAdmin.GET("/articles", adminArticleHandler.GetAll)
+			restrictAdmin.POST("/articles", adminArticleHandler.Create)
+			restrictAdmin.GET("/articles/:id", adminArticleHandler.GetById)
+			restrictAdmin.PUT("/articles/:id", adminArticleHandler.Update)
+			restrictAdmin.DELETE("/articles/:id", adminArticleHandler.Delete)
+			restrictAdmin.GET("/articles/:id/comments", adminArticleHandler.GetAllComment)
+			restrictAdmin.DELETE("/articles/:article_id/comments/:comment_id", adminArticleHandler.DeleteComment)
+
+			restrictAdmin.GET("/users", adminUsersHandler.GetAll)
+			restrictAdmin.GET("/users/:id", adminUsersHandler.GetById)
+			restrictAdmin.DELETE("/users/:id", adminUsersHandler.Delete)
+
+			restrictAdmin.DELETE("/forums/:id", forumAdminH.Delete)
+
+		}
+
+		// ssl
+		e.Logger.Fatal(e.StartTLS(":8080", "./ssl/certificate.crt", "./ssl/private.key"))
+
+		// e.Logger.Fatal(e.Start(":8080"))
 	}
-
-	restrictAdmin := e.Group("/admin", adminAuthMidd.JWTAdmin())
-
-	{
-		restrictAdmin.GET("/counselors", adminCounselorHandler.GetAll)
-		restrictAdmin.POST("/counselors", adminCounselorHandler.Create)
-		restrictAdmin.GET("/counselors/:id", adminCounselorHandler.GetById)
-		restrictAdmin.PUT("/counselors/:id", adminCounselorHandler.Update)
-		restrictAdmin.DELETE("/counselors/:id", adminCounselorHandler.Delete)
-
-		restrictAdmin.POST("/counselors/:id/schedules", adminScheduleHandler.Create)
-		restrictAdmin.GET("/counselors/:id/schedules", adminScheduleHandler.GetByCounselorId)
-		restrictAdmin.DELETE("/counselors/:id/schedules", adminScheduleHandler.Delete)
-		restrictAdmin.PUT("/counselors/:id/schedules", adminScheduleHandler.Update)
-
-		restrictAdmin.GET("/careers", adminCareerHandler.GetAll)
-		restrictAdmin.POST("/careers", adminCareerHandler.Create)
-		restrictAdmin.GET("/careers/:id", adminCareerHandler.GetById)
-		restrictAdmin.PUT("/careers/:id", adminCareerHandler.Update)
-		restrictAdmin.DELETE("/careers/:id", adminCareerHandler.Delete)
-
-		restrictAdmin.GET("/users", adminUsersHandler.GetAll)
-		restrictAdmin.GET("/users/:id", adminUsersHandler.GetById)
-		restrictAdmin.DELETE("/users/:id", adminUsersHandler.Delete)
-
-		restrictAdmin.DELETE("/forums/:id", forumAdminH.Delete)
-	}
-
-	// ssl
-	e.Logger.Fatal(e.StartTLS(":8080", "./ssl/certificate.crt", "./ssl/private.key"))
-
-	// e.Logger.Fatal(e.Start(":8080"))
-}
