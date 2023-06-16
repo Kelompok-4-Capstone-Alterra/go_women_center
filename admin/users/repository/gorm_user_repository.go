@@ -8,7 +8,7 @@ import (
 
 type UserRepository interface {
 	GetById(id string) (users.GetByIdResponse, error)
-	GetAll(search string, offset, limit int) ([]users.GetAllResponse, int64, error)
+	GetAll(search, sortBy string, offset, limit int) ([]users.GetAllResponse, int64, error)
 	Delete(id string) error
 }
 
@@ -26,12 +26,12 @@ func (r *mysqlUserRepository) GetById(id string) (users.GetByIdResponse, error) 
 	return userRes, err
 }
 
-func (r *mysqlUserRepository) GetAll(search string, offset, limit int) ([]users.GetAllResponse, int64, error) {
+func (r *mysqlUserRepository) GetAll(search, sortBy string, offset, limit int) ([]users.GetAllResponse, int64, error) {
 	var usersRes []users.GetAllResponse
 	var totalData int64
 	err := r.DB.Model(&entity.User{}).
-		Select("id, name, email, username").
 		Where("name LIKE ? OR email LIKE ? OR username LIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+		Order(sortBy).
 		Count(&totalData).
 		Offset(offset).
 		Limit(limit).

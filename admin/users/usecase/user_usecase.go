@@ -10,7 +10,7 @@ import (
 
 type UserUsecase interface {
 	GetById(id string) (users.GetByIdResponse, error)
-	GetAll(search string, offset, limit int) ([]users.GetAllResponse, int, error)
+	GetAll(search, sort_by string, offset, limit int) ([]users.GetAllResponse, int, error)
 	Delete(id string) error
 }
 
@@ -35,9 +35,16 @@ func (u *userUsecase) GetById(id string) (users.GetByIdResponse, error) {
 	return userRes, nil
 }
 
-func (u *userUsecase) GetAll(search string, offset, limit int) ([]users.GetAllResponse, int,error) {
+func (u *userUsecase) GetAll(search, sortBy string, offset, limit int) ([]users.GetAllResponse, int,error) {
 
-	usersRes, totalData, err := u.userRepository.GetAll(search, offset, limit)
+	switch sortBy {
+		case "oldest":
+			sortBy = "created_at ASC"
+		case "newest":
+			sortBy = "created_at DESC"
+	}
+
+	usersRes, totalData, err := u.userRepository.GetAll(search, sortBy, offset, limit)
 	
 	if err != nil {
 		log.Println(err.Error())

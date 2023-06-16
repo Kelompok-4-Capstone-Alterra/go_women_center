@@ -24,5 +24,7 @@ var (
 	ErrRatingFormat = errors.New("rating must be a number between 1-5")
 	ErrIdFormat = errors.New("id must be a valid uuid")
 	ErrInvalidTopic = errors.New("invalid topic")
+	ErrRequiredTopic 		= errors.New("topic is required")
 	ErrRequired = errors.New("all fields are required")
+	ErrInvalidSort 			= errors.New("invalid sort")
 )

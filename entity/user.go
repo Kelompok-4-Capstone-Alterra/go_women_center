@@ -14,13 +14,13 @@ type User struct {
 	Password       string     `gorm:"type:varchar(64)"`
 	PhoneNumber    string     `gorm:"type:varchar(20)"`
 	ProfilePicture string     `gorm:"type:varchar(255)"`
-	BirthDate      *time.Time `gorm:"type:date"`
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 	DeletedAt      gorm.DeletedAt `gorm:"index"`
 	Reviews        []Review       `gorm:"foreignKey:UserID;references:ID"`
 	Forums         []Forum        `gorm:"foreignKey:UserId"`
 	UserForums     []UserForum    `gorm:"foreignKey:UserId"`
+	ReadingLists   []ReadingList  `gorm:"foreignKey:UserId"`
 }
 
 type OTP struct {

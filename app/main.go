@@ -67,6 +67,14 @@ import (
 	ArticleUserRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/article/repository"
 	ArticleUserUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/article/usecase"
 	CommentUserRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/comment/repository"
+
+	ReadingListHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/reading_list/handler"
+	ReadingListRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/reading_list/repository"
+	ReadingListUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/reading_list/usecase"
+
+	ReadingListArticleHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/reading_list_article/handler"
+	ReadingListArticleRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/reading_list_article/repository"
+	ReadingListArticleUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/reading_list_article/usecase"
 )
 
 func main() {
@@ -173,6 +181,14 @@ func main() {
 	adminArticleUsecase := ArticleAdminUsecase.NewArticleUsecase(adminArticleRepo, adminCommentRepo, userAuthRepo, image)
 	adminArticleHandler := ArticleAdminHandler.NewArticleHandler(adminArticleUsecase)
 
+	ReadingListR := ReadingListRepository.NewMysqlReadingListRepository(db)
+	ReadingListU := ReadingListUsecase.NewReadingListUsecase(ReadingListR)
+	ReadingListH := ReadingListHandler.NewReadingListHandler(ReadingListU)
+
+	ReadingListArticleR := ReadingListArticleRepository.NewMysqlReadingListArticleRepository(db)
+	ReadingListArticleU := ReadingListArticleUsecase.NewReadingListArticleUsecase(ReadingListArticleR)
+	ReadingListArticleH := ReadingListArticleHandler.NewReadingListArticleHandler(ReadingListArticleU)
+
 	topicHandler := TopicHandler.NewTopicHandler()
 
 	e := echo.New()
@@ -188,6 +204,7 @@ func main() {
 	})
 
 	e.GET("/topics", topicHandler.GetAll)
+	e.POST("/verify/unique", userAuthHandler.VerifyUniqueCredential)
 	e.POST("/verify", userAuthHandler.VerifyEmailHandler)
 	e.POST("/register", userAuthHandler.RegisterHandler)
 	e.POST("/login", userAuthHandler.LoginHandler)
@@ -228,6 +245,15 @@ func main() {
 			restrictUsers.POST("/forums/joins", userForumH.Create)
 			restrictUsers.GET("/careers/:id", userCareerHandler.GetById)
 
+      restrictUsers.GET("/reading-lists", ReadingListH.GetAll)
+      restrictUsers.GET("/reading-lists/:id", ReadingListH.GetById)
+      restrictUsers.POST("/reading-lists", ReadingListH.Create)
+      restrictUsers.PUT("/reading-lists/:id", ReadingListH.Update)
+      restrictUsers.DELETE("/reading-lists/:id", ReadingListH.Delete)
+
+      restrictUsers.POST("/reading-lists/save", ReadingListArticleH.Create)
+      restrictUsers.DELETE("/reading-lists/save/:id", ReadingListArticleH.Delete)
+      
 			restrictUsers.GET("/articles", userArticleHandler.GetAll)
 			restrictUsers.GET("/articles/:id", userArticleHandler.GetById)
 			restrictUsers.POST("/articles/:id/comments", userArticleHandler.CreateComment)
@@ -277,4 +303,3 @@ func main() {
 
 		// e.Logger.Fatal(e.Start(":8080"))
 	}
-}

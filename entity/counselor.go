@@ -1,6 +1,10 @@
 package entity
 
-import "gorm.io/gorm"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type Counselor struct {
 	ID             string  `gorm:"primary_key;type:varchar(36);uniqueindex;not null"`
@@ -16,5 +20,5 @@ type Counselor struct {
 	Dates          []Date `gorm:"foreignkey:CounselorID"`
 	Times 		   []Time `gorm:"foreignkey:CounselorID"`
 	DeletedAt 	   gorm.DeletedAt
-  
+	CreatedAt      time.Time
 }

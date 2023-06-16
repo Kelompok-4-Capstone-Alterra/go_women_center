@@ -3,7 +3,7 @@ package handler
 import (
 	"strings"
 
-	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/users"
+	readingList "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/reading_list"
 	"github.com/go-playground/validator"
 )
 
@@ -17,16 +17,19 @@ func isRequestValid(m interface{}) error {
 			field := strings.ToLower(err.Field())
 
 			if err.Tag() == "required" {
+
 				if field == "id" {
-					return users.ErrIdRequired
+					return readingList.ErrRequiredId
+				} else if field == "user_id" {
+					return readingList.ErrRequiredUserId
 				}
+
+				return readingList.ErrRequired
 			}
 
 			switch field {
-			case "id":
-				return users.ErrIdFormat
 			case "sortby":
-				return users.ErrInvalidSort
+				return readingList.ErrInvalidSort
 			}
 
 		}
