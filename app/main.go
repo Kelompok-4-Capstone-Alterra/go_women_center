@@ -270,6 +270,7 @@ func main() {
 		restrictAdmin.DELETE("/forums/:id", forumAdminH.Delete)
 
 		restrictAdmin.GET("/transactions", adminTransactionHandler.GetAll)
+		restrictAdmin.PUT("/transactions/link", adminTransactionHandler.SendLink)
 	}
 
 	// ssl

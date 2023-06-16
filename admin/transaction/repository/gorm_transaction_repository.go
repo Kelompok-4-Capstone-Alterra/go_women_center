@@ -7,6 +7,7 @@ import (
 
 type MysqlTransactionRepository interface {
 	GetAll() ([]entity.Transaction, error)
+	UpdateById(id string, link string) error
 }
 
 type mysqlTransactionRepository struct {
@@ -26,4 +27,26 @@ func (tr *mysqlTransactionRepository) GetAll() ([]entity.Transaction, error) {
 		return nil, err
 	}
 	return transactionData, nil
+}
+
+func (tr *mysqlTransactionRepository) UpdateById(id string, link string) error {
+	result := tr.DB.Debug().
+		Model(&entity.Transaction{}).
+		Where("id = ?", id).
+		Updates(entity.Transaction{
+			Status: "waiting",
+			Link:   link,
+		})
+
+	updated := result.RowsAffected
+	if updated < 1 {
+		return gorm.ErrEmptySlice
+	}
+
+	err := result.Error
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
