@@ -113,6 +113,62 @@ func (h *transactionHandler) GetAllTransaction(c echo.Context) error {
 	))
 }
 
+func (h *transactionHandler) UserJoinHandler(c echo.Context) error {
+	// get jwt token and check for validity
+	user := c.Get("user").(*helper.JwtCustomUserClaims)
+	err := user.Valid()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
+			err.Error(),
+			http.StatusInternalServerError,
+			nil,
+		))
+	}
+	
+	req := transaction.UserJoinHandlerRequest{}
+	err = c.Bind(&req)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(
+			err.Error(),
+			http.StatusBadRequest,
+			nil,
+		))
+	}
+
+	err = isRequestValid(req)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(
+			err.Error(),
+			http.StatusBadRequest,
+			nil,
+		))
+	}
+
+	err = isValidUserId(req.UserId, user)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, helper.ResponseData(
+			err.Error(),
+			http.StatusUnauthorized,
+			nil,
+		))
+	}
+
+	err = h.Usecase.UserJoinNotification(req.TransactionId)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
+			err.Error(),
+			http.StatusInternalServerError,
+			nil,
+		))
+	}
+
+	return c.JSON(http.StatusOK, helper.ResponseData(
+		"success update status",
+		http.StatusOK,
+		nil,
+	))
+}
+
 func (h *transactionHandler) MidtransNotification(c echo.Context) error {
 	notifMap := make(map[string]interface{})
 

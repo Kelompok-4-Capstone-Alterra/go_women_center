@@ -21,6 +21,7 @@ type TransactionUsecase interface {
 	SendTransaction(transactionRequest transaction.SendTransactionRequest) (code int, res transaction.SendTransactionResponse, err error)
 	UpdateStatus(transactionId string, transactionStatus string) error
 	GetAll(userId string) ([]entity.Transaction, error)
+	UserJoinNotification(transactionId string) error
 }
 
 type transactionUsecase struct {
@@ -194,4 +195,14 @@ func (u *transactionUsecase) GetAll(userId string) ([]entity.Transaction, error)
 		return nil, err
 	}
 	return data, nil
+}
+
+// user join the consultation
+func (u *transactionUsecase) UserJoinNotification(transactionId string) error {
+	err := u.repo.UpdateStatusById(transactionId, "completed")
+	// TODO: better error handling
+	if err != nil {
+		return err
+	}
+	return nil
 }

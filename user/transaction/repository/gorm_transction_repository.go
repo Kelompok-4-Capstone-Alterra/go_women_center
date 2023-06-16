@@ -11,6 +11,7 @@ type MysqlTransactionRepository interface {
 	GetAllSuccess(userId string) ([]entity.Transaction, error)
 	GetById(id string) (entity.Transaction, error)
 	UpdateStatusByData(savedData entity.Transaction, newStatus string) (entity.Transaction, error)
+	UpdateStatusById(id string, newStatus string) (error)
 }
 
 type mysqlTransactionRepository struct {
@@ -59,6 +60,22 @@ func (tr *mysqlTransactionRepository) UpdateStatusByData(savedData entity.Transa
 	}
 
 	return savedData, nil
+}
+
+func (tr *mysqlTransactionRepository) UpdateStatusById(id string, newStatus string) (error) {
+	result := tr.DB.Debug().Model(&entity.Transaction{}).Where("id = ?", id).Update("status", newStatus)
+	
+	updated := result.RowsAffected
+	if updated < 1 {
+		return gorm.ErrEmptySlice
+	}
+
+	err := result.Error
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 /*
