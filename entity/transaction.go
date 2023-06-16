@@ -6,12 +6,12 @@ import (
 
 type Transaction struct {
 	// TODO: string length fix
-	ID                 string    `json:"id" gorm:"primarykey"`
+	DateId             string    `json:"date_id" gorm:"primaryKey;not null"`
+	TimeId             string    `json:"time_id" gorm:"primaryKey;not null"`
+	ID                 string    `json:"id" gorm:"index:,unique"`
 	UserId             string    `json:"user_id" gorm:"type:varchar(36);not null"`
 	CounselorID        string    `json:"counselor_id" gorm:"type:varchar(36);not null"`
 	Counselor          Counselor `json:"counselor_data"`
-	DateId             string    `json:"date_id" gorm:"type:varchar(36);not null"`
-	TimeId             string    `json:"time_id" gorm:"type:varchar(36);not null"`
 	CounselorTopic     string    `json:"counselor_topic" gorm:"type:varchar(50)"`
 	Link               string    `json:"link" ` // link meeting
 	TimeStart          string    `json:"time_start" gorm:"type:time(0);not null"`
