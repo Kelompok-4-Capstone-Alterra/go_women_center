@@ -137,7 +137,7 @@ func (u *articleUsecase) Create(inputDetail article.CreateRequest, inputImage *m
 	}
 
 	if topic, ok := constant.TOPICS[inputDetail.Topic]; ok {
-		newArticle.Topic = topic
+		newArticle.Topic = topic[0]
 	}
 
 	err = u.articleRepo.Create(newArticle)
@@ -164,7 +164,7 @@ func (u *articleUsecase) Update(inputDetail article.UpdateRequest, inputImage *m
 	}
 
 	if topic, ok := constant.TOPICS[inputDetail.Topic]; ok {
-		articleUpdate.Topic = topic
+		articleUpdate.Topic = topic[0]
 	}
 
 	if inputImage != nil {
