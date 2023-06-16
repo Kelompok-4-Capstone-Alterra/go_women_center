@@ -62,9 +62,11 @@ import (
 	VoucherUserRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/voucher/repository"
 	VoucherUserUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/voucher/usecase"
 
+	UserScheduleRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/schedule/repository"
+
 	TransactionUserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/transaction/handler"
-	TransactionUserUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/transaction/usecase"
 	TransactionUserRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/transaction/repository"
+	TransactionUserUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/transaction/usecase"
 )
 
 func main() {
@@ -171,8 +173,10 @@ func main() {
 	userVoucherUsecase := VoucherUserUsecase.NewtransactionUsecase(userVoucherRepo)
 	userVoucherHandler := VoucherUserHandler.NewVoucherHandler(userVoucherUsecase)
 
+	userScheduleRepo := UserScheduleRepo.NewMysqlScheduleRepository(db)
+
 	userTransactionRepo := TransactionUserRepo.NewMysqltransactionRepository(db)
-	userTransactionUsecase := TransactionUserUsecase.NewtransactionUsecase(midtransServerKey, googleUUID, userTransactionRepo, midtransNotifHandler)
+	userTransactionUsecase := TransactionUserUsecase.NewtransactionUsecase(midtransServerKey, googleUUID, userTransactionRepo, midtransNotifHandler, userScheduleRepo)
 	userTransactionHandler := TransactionUserHandler.NewTransactionHandler(userTransactionUsecase)
 
 	e := echo.New()

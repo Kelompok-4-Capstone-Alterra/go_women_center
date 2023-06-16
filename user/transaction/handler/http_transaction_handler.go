@@ -69,11 +69,11 @@ func (h *transactionHandler) SendTransaction(c echo.Context) error {
 		))
 	}
 
-	data, err := h.Usecase.SendTransaction(request)
+	code, data, err := h.Usecase.SendTransaction(request)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
+		return c.JSON(code, helper.ResponseData(
 			err.Error(),
-			http.StatusInternalServerError,
+			code,
 			nil,
 		))
 	}

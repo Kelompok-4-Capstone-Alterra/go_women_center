@@ -3,12 +3,14 @@ package usecase
 import (
 	// "log"
 
+	"net/http"
 	"time"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/constant"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
 	counselorUC "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor/usecase"
+	scheduleRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/schedule/repository"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/transaction"
 	trRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/transaction/repository"
 	"github.com/midtrans/midtrans-go"
@@ -16,7 +18,7 @@ import (
 )
 
 type TransactionUsecase interface {
-	SendTransaction(transactionRequest transaction.SendTransactionRequest) (transaction.SendTransactionResponse, error)
+	SendTransaction(transactionRequest transaction.SendTransactionRequest) (code int, res transaction.SendTransactionResponse, err error)
 	UpdateStatus(transactionId string, transactionStatus string) error
 	GetAll(userId string) ([]entity.Transaction, error)
 }
@@ -27,6 +29,7 @@ type transactionUsecase struct {
 	uuidGenerator        helper.UuidGenerator
 	Counselor            counselorUC.CounselorUsecase
 	paymentNotifCallback string
+	scheduleRepo         scheduleRepo.ScheduleRepository
 }
 
 func NewtransactionUsecase(
@@ -34,16 +37,18 @@ func NewtransactionUsecase(
 	uuidGenerator helper.UuidGenerator,
 	trRepo trRepo.MysqlTransactionRepository,
 	notifUrl string,
+	scheduleRepo scheduleRepo.ScheduleRepository,
 ) TransactionUsecase {
 	return &transactionUsecase{
 		serverKey:            inputServerKey,
 		uuidGenerator:        uuidGenerator,
 		repo:                 trRepo,
 		paymentNotifCallback: notifUrl,
+		scheduleRepo:         scheduleRepo,
 	}
 }
 
-func (u *transactionUsecase) SendTransaction(trRequest transaction.SendTransactionRequest) (transaction.SendTransactionResponse, error) {
+func (u *transactionUsecase) SendTransaction(trRequest transaction.SendTransactionRequest) (int, transaction.SendTransactionResponse, error) {
 	// Initiate Snap client
 	var s = snap.Client{}
 	s.New(u.serverKey, midtrans.Sandbox) // sandbox
@@ -53,7 +58,9 @@ func (u *transactionUsecase) SendTransaction(trRequest transaction.SendTransacti
 	// generate transaction id
 	transactionId, err := u.uuidGenerator.GenerateUUID()
 	if err != nil {
-		return transaction.SendTransactionResponse{}, err
+		return http.StatusInternalServerError,
+		transaction.SendTransactionResponse{},
+		err
 	}
 
 	res := transaction.SendTransactionResponse{}
@@ -61,7 +68,25 @@ func (u *transactionUsecase) SendTransaction(trRequest transaction.SendTransacti
 	// check topic availability
 	trTopic, ok := constant.TOPICS[trRequest.CounselorTopicKey]
 	if !ok {
-		return transaction.SendTransactionResponse{}, transaction.ErrorInvalidGenre
+		return http.StatusBadRequest,
+		transaction.SendTransactionResponse{},
+		transaction.ErrorInvalidTopic
+	}
+
+	// check date availability
+	_, err = u.scheduleRepo.GetDateById(trRequest.ConsultationDateID)
+	if err != nil {
+		return http.StatusBadRequest,
+		transaction.SendTransactionResponse{},
+		transaction.ErrDateNotFound
+	}
+
+	// check time availability
+	_, err = u.scheduleRepo.GetTimeById(trRequest.ConsultationTimeID)
+	if err != nil {
+		return http.StatusBadRequest,
+		transaction.SendTransactionResponse{},
+		transaction.ErrTimeNotFound
 	}
 
 	// initialize db data model
@@ -84,7 +109,14 @@ func (u *transactionUsecase) SendTransaction(trRequest transaction.SendTransacti
 
 	data, err := u.repo.CreateTransaction(transactionData)
 	if err != nil {
-		return transaction.SendTransactionResponse{}, err
+		if err.Error() == transaction.ErrDuplicateKey.Error() {
+			return http.StatusBadRequest,
+			transaction.SendTransactionResponse{},
+			transaction.ErrScheduleUnavailable
+		}
+		return http.StatusInternalServerError,
+		transaction.SendTransactionResponse{},
+		err
 	}
 
 	// Initiate Snap request param
@@ -106,7 +138,9 @@ func (u *transactionUsecase) SendTransaction(trRequest transaction.SendTransacti
 	// Execute request create Snap transaction to Midtrans Snap API
 	snapResp, snapErr := s.CreateTransaction(req)
 	if snapErr != nil {
-		return transaction.SendTransactionResponse{}, transaction.ErrorMidtrans
+		return http.StatusInternalServerError,
+		transaction.SendTransactionResponse{},
+		transaction.ErrorMidtrans
 	}
 
 	res.TransactionID = transactionId
@@ -114,7 +148,7 @@ func (u *transactionUsecase) SendTransaction(trRequest transaction.SendTransacti
 
 	res.Data = data
 
-	return res, nil
+	return http.StatusOK, res, nil
 }
 
 /*
