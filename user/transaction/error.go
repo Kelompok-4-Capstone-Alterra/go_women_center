@@ -15,6 +15,7 @@ var (
 	ErrDateNotFound              error = errors.New("date not found")
 	ErrTimeNotFound              error = errors.New("time not found")
 	ErrScheduleUnavailable       error = errors.New("schedule is unavailable")
+	ErrInvalidUserCredential       error = errors.New("invalid user credential")
 )
 
 var (
