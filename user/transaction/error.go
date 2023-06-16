@@ -3,7 +3,7 @@ package transaction
 import "errors"
 
 var (
-	ErrorInvalidGenre            error = errors.New("invalid genre code")
+	ErrorInvalidTopic            error = errors.New("invalid topic code")
 	ErrorInsertDB                error = errors.New("error inserting new data to db")
 	ErrorInvalidRequest          error = errors.New("error invalid callback")
 	ErrorTransactionNotFound     error = errors.New("transaction not found in db")
@@ -12,4 +12,12 @@ var (
 	ErrRequired                  error = errors.New("all fields are required")
 	ErrInvalidUUID               error = errors.New("invalid uuid format")
 	ErrInvalidConsultationMethod error = errors.New("invalid consultation method")
+	ErrDateNotFound              error = errors.New("date not found")
+	ErrTimeNotFound              error = errors.New("time not found")
+	ErrScheduleUnavailable       error = errors.New("schedule is unavailable")
+)
+
+var (
+	// scuffed db error handling
+	ErrDuplicateKey error = errors.New("duplicated key not allowed")
 )
