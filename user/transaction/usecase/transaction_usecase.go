@@ -9,10 +9,11 @@ import (
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/constant"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
-	counselorUC "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor/usecase"
+	counselorRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor/repository"
 	scheduleRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/schedule/repository"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/transaction"
 	trRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/transaction/repository"
+	voucherRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/voucher/repository"
 	"github.com/midtrans/midtrans-go"
 	"github.com/midtrans/midtrans-go/snap"
 )
@@ -28,9 +29,10 @@ type transactionUsecase struct {
 	repo                 trRepo.MysqlTransactionRepository
 	serverKey            string
 	uuidGenerator        helper.UuidGenerator
-	Counselor            counselorUC.CounselorUsecase
 	paymentNotifCallback string
+	counselorRepo        counselorRepo.CounselorRepository
 	scheduleRepo         scheduleRepo.ScheduleRepository
+	voucherRepo          voucherRepo.MysqlVoucherRepository
 }
 
 func NewtransactionUsecase(
@@ -38,14 +40,18 @@ func NewtransactionUsecase(
 	uuidGenerator helper.UuidGenerator,
 	trRepo trRepo.MysqlTransactionRepository,
 	notifUrl string,
+	cRepo            counselorRepo.CounselorRepository,
 	scheduleRepo scheduleRepo.ScheduleRepository,
+	voucherRepo voucherRepo.MysqlVoucherRepository,
 ) TransactionUsecase {
 	return &transactionUsecase{
 		serverKey:            inputServerKey,
 		uuidGenerator:        uuidGenerator,
 		repo:                 trRepo,
 		paymentNotifCallback: notifUrl,
+		counselorRepo: 		  cRepo,
 		scheduleRepo:         scheduleRepo,
+		voucherRepo:          voucherRepo,
 	}
 }
 
@@ -60,8 +66,8 @@ func (u *transactionUsecase) SendTransaction(trRequest transaction.SendTransacti
 	transactionId, err := u.uuidGenerator.GenerateUUID()
 	if err != nil {
 		return http.StatusInternalServerError,
-		transaction.SendTransactionResponse{},
-		err
+			transaction.SendTransactionResponse{},
+			err
 	}
 
 	res := transaction.SendTransactionResponse{}
@@ -70,24 +76,62 @@ func (u *transactionUsecase) SendTransaction(trRequest transaction.SendTransacti
 	trTopic, ok := constant.TOPICS[trRequest.CounselorTopicKey]
 	if !ok {
 		return http.StatusBadRequest,
-		transaction.SendTransactionResponse{},
-		transaction.ErrorInvalidTopic
+			transaction.SendTransactionResponse{},
+			transaction.ErrorInvalidTopic
 	}
 
 	// check date availability
 	_, err = u.scheduleRepo.GetDateById(trRequest.ConsultationDateID)
 	if err != nil {
 		return http.StatusBadRequest,
-		transaction.SendTransactionResponse{},
-		transaction.ErrDateNotFound
+			transaction.SendTransactionResponse{},
+			transaction.ErrDateNotFound
 	}
 
 	// check time availability
 	_, err = u.scheduleRepo.GetTimeById(trRequest.ConsultationTimeID)
 	if err != nil {
 		return http.StatusBadRequest,
+			transaction.SendTransactionResponse{},
+			transaction.ErrTimeNotFound
+	}
+
+	// implement voucher
+	voucherValue := int64(0)
+	if trRequest.VoucherId != "" {
+		
+		// TODO: check voucher availability
+		savedVoucher, err := u.voucherRepo.GetById(trRequest.UserCredential.ID, trRequest.VoucherId)
+		if err != nil {
+			return http.StatusBadRequest,
+			transaction.SendTransactionResponse{},
+			transaction.ErrVoucherNotFound
+		}
+
+		// TODO: validate voucher exp date
+		timeNow := time.Now()
+		if timeNow.After(savedVoucher.ExpDate) {
+			return http.StatusBadRequest,
+			transaction.SendTransactionResponse{},
+			transaction.ErrVoucherExpired
+		}
+
+		voucherValue = savedVoucher.Value
+	}
+
+
+	// TODO: get gross price from counselor data
+	savedCounselor, err := u.counselorRepo.GetById(trRequest.CounselorID)	
+	if err != nil {
+		return http.StatusBadRequest,
 		transaction.SendTransactionResponse{},
-		transaction.ErrTimeNotFound
+		transaction.ErrCounselorNotFound
+	}
+
+	// TODO: calculate total price
+	totalPrice := int64(savedCounselor.Price) - voucherValue
+	if totalPrice < 0 {
+		totalPrice = 0
 	}
 
 	// initialize db data model
@@ -101,23 +145,23 @@ func (u *transactionUsecase) SendTransaction(trRequest transaction.SendTransacti
 		TimeStart:          trRequest.ConsultationTimeStart,
 		ConsultationMethod: trRequest.ConsultationMethod,
 		Status:             "pending",
-		ValueVoucher:       trRequest.ValueVoucher,
-		GrossPrice:         trRequest.GrossPrice,
-		TotalPrice:         trRequest.TotalPrice,
+		ValueVoucher:       voucherValue,
+		GrossPrice:         int64(savedCounselor.Price),
+		TotalPrice:         totalPrice,
 		IsReviewed:         false,
 		Created_at:         time.Now(),
 	}
 
-	data, err := u.repo.CreateTransaction(transactionData)
+	_, err = u.repo.CreateTransaction(transactionData)
 	if err != nil {
 		if err.Error() == transaction.ErrDuplicateKey.Error() {
 			return http.StatusBadRequest,
-			transaction.SendTransactionResponse{},
-			transaction.ErrScheduleUnavailable
+				transaction.SendTransactionResponse{},
+				transaction.ErrScheduleUnavailable
 		}
 		return http.StatusInternalServerError,
-		transaction.SendTransactionResponse{},
-		err
+			transaction.SendTransactionResponse{},
+			err
 	}
 
 	// Initiate Snap request param
@@ -125,7 +169,7 @@ func (u *transactionUsecase) SendTransaction(trRequest transaction.SendTransacti
 	req := &snap.Request{
 		TransactionDetails: midtrans.TransactionDetails{
 			OrderID:  transactionId,
-			GrossAmt: trRequest.TotalPrice,
+			GrossAmt: totalPrice,
 		},
 		CreditCard: &snap.CreditCardDetails{
 			Secure: true,
@@ -140,14 +184,21 @@ func (u *transactionUsecase) SendTransaction(trRequest transaction.SendTransacti
 	snapResp, snapErr := s.CreateTransaction(req)
 	if snapErr != nil {
 		return http.StatusInternalServerError,
-		transaction.SendTransactionResponse{},
-		transaction.ErrorMidtrans
+			transaction.SendTransactionResponse{},
+			transaction.ErrorMidtrans
 	}
 
 	res.TransactionID = transactionId
 	res.PaymentLink = snapResp.RedirectURL
+	res.Data = transactionData
 
-	res.Data = data
+	// TODO: delete voucher if implemented
+	_, err = u.voucherRepo.DeleteById(trRequest.UserCredential.ID, trRequest.VoucherId)
+	if err != nil {
+		return http.StatusInternalServerError,
+			transaction.SendTransactionResponse{},
+			transaction.ErrDeletingVoucher
+	}
 
 	return http.StatusOK, res, nil
 }

@@ -176,7 +176,7 @@ func main() {
 	userScheduleRepo := UserScheduleRepo.NewMysqlScheduleRepository(db)
 
 	userTransactionRepo := TransactionUserRepo.NewMysqltransactionRepository(db)
-	userTransactionUsecase := TransactionUserUsecase.NewtransactionUsecase(midtransServerKey, googleUUID, userTransactionRepo, midtransNotifHandler, userScheduleRepo)
+	userTransactionUsecase := TransactionUserUsecase.NewtransactionUsecase(midtransServerKey, googleUUID, userTransactionRepo, midtransNotifHandler, userCounselorRepo, userScheduleRepo, userVoucherRepo)
 	userTransactionHandler := TransactionUserHandler.NewTransactionHandler(userTransactionUsecase)
 
 	e := echo.New()

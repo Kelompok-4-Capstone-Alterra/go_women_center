@@ -15,7 +15,11 @@ var (
 	ErrDateNotFound              error = errors.New("date not found")
 	ErrTimeNotFound              error = errors.New("time not found")
 	ErrScheduleUnavailable       error = errors.New("schedule is unavailable")
-	ErrInvalidUserCredential       error = errors.New("invalid user credential")
+	ErrInvalidUserCredential     error = errors.New("invalid user credential")
+	ErrVoucherNotFound           error = errors.New("voucher not found")
+	ErrVoucherExpired            error = errors.New("voucher unavailable")
+	ErrCounselorNotFound         error = errors.New("counselor not found")
+	ErrDeletingVoucher           error = errors.New("error deleting voucher")
 )
 
 var (
