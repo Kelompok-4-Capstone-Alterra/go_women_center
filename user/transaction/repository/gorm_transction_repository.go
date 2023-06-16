@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"time"
+
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 
 	"gorm.io/gorm"
@@ -12,6 +14,7 @@ type MysqlTransactionRepository interface {
 	GetById(id string) (entity.Transaction, error)
 	UpdateStatusByData(savedData entity.Transaction, newStatus string) (entity.Transaction, error)
 	UpdateStatusById(id string, newStatus string) (error)
+	GetOccuringTransactionToday() ([]entity.Transaction, error)
 }
 
 type mysqlTransactionRepository struct {
@@ -76,6 +79,19 @@ func (tr *mysqlTransactionRepository) UpdateStatusById(id string, newStatus stri
 	}
 
 	return nil
+}
+
+// TODO: get all transaction for today
+func (tr *mysqlTransactionRepository) GetOccuringTransactionToday() ([]entity.Transaction, error) {
+	todayTransactions := []entity.Transaction{}
+	timeY, timeM, timeD := time.Now().Date()
+	timeStart := time.Date(timeY, timeM, timeD, 0, 0, 0, 0, time.Local)
+	timeEnd := time.Date(timeY, timeM, timeD, 23, 59, 59, 0, time.Local)
+	err := tr.DB.Where("created_at BETWEEN ? AND ?", timeStart, timeEnd).Find(&todayTransactions).Error
+	if err != nil {
+		return nil, err
+	}
+	return todayTransactions, nil
 }
 
 /*
