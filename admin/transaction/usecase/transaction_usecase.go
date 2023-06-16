@@ -42,7 +42,7 @@ func (tu *transactionUsecase) SendLink(req transaction.SendLinkRequest) (int, er
 	err := tu.repo.UpdateById(req.TransactionId, req.Link)
 	if err != nil {
 		if err.Error() == transaction.ErrEmptySlice.Error() {
-			return http.StatusBadRequest, err
+			return http.StatusBadRequest, transaction.ErrUpdate
 		}
 		return http.StatusInternalServerError, err
 	}
