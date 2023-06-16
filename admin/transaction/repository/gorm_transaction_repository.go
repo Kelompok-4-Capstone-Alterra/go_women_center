@@ -7,7 +7,7 @@ import (
 
 type MysqlTransactionRepository interface {
 	GetAll() ([]entity.Transaction, error)
-	UpdateById(id string, link string) error
+	UpdateById(id, link, status string) error
 }
 
 type mysqlTransactionRepository struct {
@@ -29,12 +29,12 @@ func (tr *mysqlTransactionRepository) GetAll() ([]entity.Transaction, error) {
 	return transactionData, nil
 }
 
-func (tr *mysqlTransactionRepository) UpdateById(id string, link string) error {
+func (tr *mysqlTransactionRepository) UpdateById(id, link, status string) error {
 	result := tr.DB.Debug().
 		Model(&entity.Transaction{}).
 		Where("id = ?", id).
 		Updates(entity.Transaction{
-			Status: "waiting",
+			Status: status,
 			Link:   link,
 		})
 

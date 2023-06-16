@@ -11,6 +11,7 @@ import (
 type TransactionUsecase interface {
 	GetAll() (code int, data []entity.Transaction, err error)
 	SendLink(req transaction.SendLinkRequest) (code int, err error)
+	CancelTransaction(req transaction.CancelTransactionRequest) (int, error)
 }
 
 type transactionUsecase struct {
@@ -39,7 +40,18 @@ func (tu *transactionUsecase) GetAll() (int, []entity.Transaction, error) {
 }
 
 func (tu *transactionUsecase) SendLink(req transaction.SendLinkRequest) (int, error) {
-	err := tu.repo.UpdateById(req.TransactionId, req.Link)
+	err := tu.repo.UpdateById(req.TransactionId, req.Link, "waiting")
+	if err != nil {
+		if err.Error() == transaction.ErrEmptySlice.Error() {
+			return http.StatusBadRequest, transaction.ErrUpdate
+		}
+		return http.StatusInternalServerError, err
+	}
+	return http.StatusOK, nil
+}
+
+func (tu *transactionUsecase) CancelTransaction(req transaction.CancelTransactionRequest) (int, error) {
+	err := tu.repo.UpdateById(req.TransactionId, "-", "canceled")
 	if err != nil {
 		if err.Error() == transaction.ErrEmptySlice.Error() {
 			return http.StatusBadRequest, transaction.ErrUpdate

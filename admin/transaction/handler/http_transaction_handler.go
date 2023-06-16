@@ -68,3 +68,32 @@ func (th *transactionHandler) SendLink(c echo.Context) error {
 		nil,
 	))
 }
+
+func (th *transactionHandler) CancelTransaction (c echo.Context) error {
+	req := transaction.CancelTransactionRequest{}
+	err := c.Bind(&req)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(
+			err.Error(),
+			http.StatusBadRequest,
+			nil,
+		))
+	}
+
+	// TODO: validate req
+
+	code, err := th.Usecase.CancelTransaction(req)
+	if err != nil {
+		return c.JSON(code, helper.ResponseData(
+			err.Error(),
+			code,
+			nil,
+		))
+	}
+
+	return c.JSON(code, helper.ResponseData(
+		"success canceling transaction",
+		code,
+		nil,
+	))
+}

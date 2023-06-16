@@ -271,6 +271,7 @@ func main() {
 
 		restrictAdmin.GET("/transactions", adminTransactionHandler.GetAll)
 		restrictAdmin.PUT("/transactions/link", adminTransactionHandler.SendLink)
+		restrictAdmin.PUT("/transactions/cancel", adminTransactionHandler.CancelTransaction)
 	}
 
 	// ssl
