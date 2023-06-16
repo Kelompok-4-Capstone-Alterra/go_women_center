@@ -83,15 +83,16 @@ func (tr *mysqlTransactionRepository) UpdateStatusById(id string, newStatus stri
 
 // TODO: get all transaction for today
 func (tr *mysqlTransactionRepository) GetOccuringTransactionToday() ([]entity.Transaction, error) {
-	todayTransactions := []entity.Transaction{}
-	timeY, timeM, timeD := time.Now().Date()
-	timeStart := time.Date(timeY, timeM, timeD, 0, 0, 0, 0, time.Local)
-	timeEnd := time.Date(timeY, timeM, timeD, 23, 59, 59, 0, time.Local)
-	err := tr.DB.Where("created_at BETWEEN ? AND ?", timeStart, timeEnd).Find(&todayTransactions).Error
+	currentTime := time.Now()
+    currentDate := currentTime.Format(time.DateOnly)
+
+    var transactions []entity.Transaction
+    err := tr.DB.Model(&entity.Transaction{}).Where("DATE(created_at) = ?", currentDate).Find(&transactions).Error
 	if err != nil {
 		return nil, err
 	}
-	return todayTransactions, nil
+
+	return transactions, nil
 }
 
 /*
