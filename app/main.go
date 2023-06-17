@@ -33,6 +33,10 @@ import (
 	UserProfileRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/profile/repository"
 	UserProfileUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/profile/usecase"
 
+	UserScheduleHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/schedule/handler"
+	UserScheduleRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/schedule/repository"
+	UserScheduleUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/schedule/usecase"
+
 	ForumUserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum/handler"
 	ForumUserRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum/repository"
 	ForumUserUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum/usecase"
@@ -145,9 +149,14 @@ func main() {
 	userCounselorUsecase := CounselorUserUsecase.NewCounselorUsecase(userCounselorRepo, userReviewRepo, userAuthRepo)
 	userCounselorHandler := CounselorUserHandler.NewCounselorHandler(userCounselorUsecase)
 
+	userScheduleRepo := UserScheduleRepo.NewMysqlScheduleRepository(db)
+	userScheduleUseCase := UserScheduleUsecase.NewScheduleUsecase(userScheduleRepo)
+	userScheduleHandler := UserScheduleHandler.NewScheduleHandler(userScheduleUseCase)
+
 	userRepo := UserProfileRepo.NewMysqlUserRepository(db)
 	userUsecase := UserProfileUsecase.NewProfileUsecase(userRepo, image, encryptor)
 	userHandler := UserProfileHandler.NewProfileHandler(userUsecase)
+	
 
 	userCareerRepo := CareerUserRepository.NewMysqlCareerRepository(db)
 	userCareerUsecase := CareerUserUsecase.NewCareerUsecase(userCareerRepo)
@@ -256,7 +265,28 @@ func main() {
 		users.GET("/public/articles/:id", userArticleHandler.GetById)
 	}
 
-	restrictUsers := e.Group("/users", userAuthMidd.JWTUser())
+	restrictUsers := e.Group("/users", userAuthMidd.JWTUser(), userAuthMidd.CheckUser(userAuthUsecase))
+
+	{	
+		restrictUsers.GET("/profile", userHandler.GetById)
+		restrictUsers.PUT("/profile", userHandler.Update)
+		restrictUsers.PUT("/profile/password", userHandler.UpdatePassword)
+		restrictUsers.GET("/counselors/:id", userCounselorHandler.GetById)
+		restrictUsers.POST("/counselors/:id/reviews", userCounselorHandler.CreateReview)
+		restrictUsers.GET("/counselors/:id/reviews", userCounselorHandler.GetAllReview)
+		restrictUsers.GET("/counselors/:id/schedules", userScheduleHandler.GetCurrSchedule)
+
+		restrictUsers.GET("/forums", forumH.GetAll)
+		restrictUsers.GET("/forums/:id", forumH.GetById)
+		restrictUsers.POST("/forums", forumH.Create)
+		restrictUsers.PUT("/forums/:id", forumH.Update)
+		restrictUsers.DELETE("/forums/:id", forumH.Delete)
+		restrictUsers.POST("/forums/joins", userForumH.Create)
+		restrictUsers.GET("/careers/:id", userCareerHandler.GetById)
+	}
+
+	restrictAdmin := e.Group("/admin", adminAuthMidd.JWTAdmin())
+
 	{
 		restrictUsers.GET("/profile", func(c echo.Context) error {
 			user := c.Get("user").(*helper.JwtCustomUserClaims)
