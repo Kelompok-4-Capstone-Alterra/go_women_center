@@ -6,7 +6,7 @@ import (
 )
 
 type MysqlTransactionRepository interface {
-	GetAll() ([]entity.Transaction, error)
+	GetAll(search, sortBy string, offset, limit int) ([]entity.Transaction, int64, error)
 	GetById(id string) (entity.Transaction, error)
 	UpdateById(id, link, status string) (entity.Transaction, error)
 }
@@ -21,13 +21,24 @@ func NewMysqltransactionRepository(db *gorm.DB) MysqlTransactionRepository {
 	}
 }
 
-func (tr *mysqlTransactionRepository) GetAll() ([]entity.Transaction, error) {
+func (tr *mysqlTransactionRepository) GetAll(search, sortBy string, offset, limit int) ([]entity.Transaction, int64, error) {
 	transactionData := []entity.Transaction{}
-	err := tr.DB.Find(&transactionData).Error
+	count := int64(0)
+	err := tr.DB.
+		Model(&entity.Transaction{}).
+		Where("counselor_topic LIKE ?",
+			"%"+search+"%").
+		Count(&count).
+		Offset(offset).
+		Limit(limit).
+		Order(sortBy).
+		Find(&transactionData).Error
+
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	return transactionData, nil
+
+	return transactionData, count, nil
 }
 
 func (tr *mysqlTransactionRepository) GetById(id string) (entity.Transaction, error) {

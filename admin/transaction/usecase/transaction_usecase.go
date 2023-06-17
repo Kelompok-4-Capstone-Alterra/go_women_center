@@ -8,10 +8,11 @@ import (
 	trRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/transaction/repository"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
+	// "golang.org/x/sync/errgroup"
 )
 
 type TransactionUsecase interface {
-	GetAll() (code int, data []entity.Transaction, err error)
+	GetAll(search, sortBy string, offset, limit int) (code int, totalPages int, data []entity.Transaction, err error)
 	SendLink(req transaction.SendLinkRequest) (code int, err error)
 	CancelTransaction(req transaction.CancelTransactionRequest) (int, error)
 }
@@ -34,15 +35,25 @@ func NewtransactionUsecase(
 	}
 }
 
-func (tu *transactionUsecase) GetAll() (int, []entity.Transaction, error) {
+func (tu *transactionUsecase) GetAll(search, sortBy string, offset, limit int) (int, int, []entity.Transaction, error) {
 	// TODO: pagination
-	data, err := tu.repo.GetAll()
+	switch sortBy {
+	case "newest":
+		sortBy = "created_at DESC"
+	case "oldest":
+		sortBy = "created_at ASC"
+	}
+
+	data, totalData, err := tu.repo.GetAll(search, sortBy, offset, limit)
 	if err != nil {
 		return http.StatusInternalServerError,
+			0,
 			nil,
 			err
 	}
+
 	return http.StatusOK,
+		helper.GetTotalPages(int(totalData), limit),
 		data,
 		nil
 }

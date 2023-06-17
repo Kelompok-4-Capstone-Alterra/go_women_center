@@ -24,7 +24,19 @@ func NewTransactionHandler(transactionUsecase usecase.TransactionUsecase) *trans
 }
 
 func (th *transactionHandler) GetAll(c echo.Context) error {
-	code, data, err := th.Usecase.GetAll()
+	getAllReq := transaction.GetAllRequest{}
+	err := c.Bind(&getAllReq)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(
+			err.Error(),
+			http.StatusBadRequest,
+			nil,
+		))
+	}
+
+	page, offset, limit := helper.GetPaginateData(getAllReq.Page, getAllReq.Limit)
+
+	code, totalPages, data, err := th.Usecase.GetAll(getAllReq.Search, getAllReq.SortBy, offset, limit)
 	if err != nil {
 		return c.JSON(code, helper.ResponseData(
 			err.Error(),
@@ -33,11 +45,11 @@ func (th *transactionHandler) GetAll(c echo.Context) error {
 		))
 	}
 
-	return c.JSON(code, helper.ResponseData(
-		"success",
-		code,
-		data,
-	))
+	return c.JSON(http.StatusOK, helper.ResponseData("success get all article", http.StatusOK, echo.Map{
+		"current_pages": page,
+		"total_pages":   totalPages,
+		"transaction":   data,
+	}))
 }
 
 func (th *transactionHandler) SendLink(c echo.Context) error {
@@ -61,7 +73,7 @@ func (th *transactionHandler) SendLink(c echo.Context) error {
 			nil,
 		))
 	}
-	
+
 	return c.JSON(code, helper.ResponseData(
 		"success sending link",
 		code,
@@ -69,7 +81,7 @@ func (th *transactionHandler) SendLink(c echo.Context) error {
 	))
 }
 
-func (th *transactionHandler) CancelTransaction (c echo.Context) error {
+func (th *transactionHandler) CancelTransaction(c echo.Context) error {
 	req := transaction.CancelTransactionRequest{}
 	err := c.Bind(&req)
 	if err != nil {
