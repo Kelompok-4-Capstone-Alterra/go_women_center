@@ -9,8 +9,3 @@ type Date struct {
 	CounselorID  string        `gorm:"type:varchar(36);not null"`
 	Date         time.Time     `gorm:"type:date"`
 }
-
-func (s *Date) BeforeDelete(tx *gorm.DB) error {
-	tx.Model(&Time{}).Where("date_id = ?", s.ID).Delete(&Time{})
-	return nil
-}
