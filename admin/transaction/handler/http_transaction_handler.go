@@ -45,7 +45,7 @@ func (th *transactionHandler) GetAll(c echo.Context) error {
 		))
 	}
 
-	return c.JSON(http.StatusOK, helper.ResponseData("success get all article", http.StatusOK, echo.Map{
+	return c.JSON(http.StatusOK, helper.ResponseData("success get all transaction", http.StatusOK, echo.Map{
 		"current_pages": page,
 		"total_pages":   totalPages,
 		"transaction":   data,

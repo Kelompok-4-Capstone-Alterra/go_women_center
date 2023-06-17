@@ -1,10 +1,11 @@
 package counselor
 
 type CreateReviewRequest struct {
-	CounselorID string `param:"id" validate:"required,uuid"`
-	UserID      string
-	Rating      float32 `form:"rating" validate:"required,number,min=1,max=5"`
-	Review      string  `form:"review" validate:"omitempty"`
+	TransactionID string `json:"transaction_id" validate:"required,uuid"`
+	CounselorID   string `param:"id" validate:"required,uuid"`
+	UserID        string
+	Rating        float32 `json:"rating" validate:"required,number,min=1,max=5"`
+	Review        string  `json:"review" validate:"omitempty"`
 }
 
 type GetAllRequest struct {

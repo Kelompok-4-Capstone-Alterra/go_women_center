@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/constant"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
 	counselorRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor/repository"
@@ -73,14 +72,6 @@ func (u *transactionUsecase) SendTransaction(trRequest transaction.SendTransacti
 
 	res := transaction.SendTransactionResponse{}
 
-	// check topic availability
-	trTopic, ok := constant.TOPICS[trRequest.CounselorTopicKey]
-	if !ok {
-		return http.StatusBadRequest,
-			transaction.SendTransactionResponse{},
-			transaction.ErrorInvalidTopic
-	}
-
 	// check date availability
 	_, err = u.scheduleRepo.GetDateById(trRequest.ConsultationDateID)
 	if err != nil {
@@ -141,7 +132,6 @@ func (u *transactionUsecase) SendTransaction(trRequest transaction.SendTransacti
 		UserId:             trRequest.UserCredential.ID,
 		DateId:             trRequest.ConsultationDateID,
 		CounselorID:        trRequest.CounselorID,
-		CounselorTopic:     trTopic[0],
 		TimeId:             trRequest.ConsultationTimeID,
 		TimeStart:          trRequest.ConsultationTimeStart,
 		ConsultationMethod: trRequest.ConsultationMethod,

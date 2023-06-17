@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"time"
+
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor"
 	"gorm.io/gorm"
@@ -23,8 +25,15 @@ func(r *mysqlCounselorRepository) GetAll(search, topic, sortBy string) ([]counse
 
 	var counselors []counselor.GetAllResponse
 	var totalData int64
-	err := r.DB.Model(&entity.Counselor{}).
+
+	currentTime := time.Now()
+	currentDate := currentTime.Format(time.DateOnly)
+
+	// get counselor that have date/schedule today
+	err := r.DB.Table("counselors").
 		Where("topic = ? AND name LIKE ?", topic, "%"+search+"%").
+		Joins("INNER JOIN dates ON dates.counselor_id = counselors.id").
+		Where("dates.date = ?", currentDate).
 		Count(&totalData).
 		Order(sortBy).
 		Find(&counselors).Error

@@ -8,6 +8,7 @@ import (
 	User "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth/repository"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor"
 	Counselor "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor/repository"
+	Transaction "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/transaction/repository"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -22,10 +23,16 @@ type counselorUsecase struct {
 	counselorRepo Counselor.CounselorRepository
 	reviewRepo Counselor.ReviewRepository
 	userRepo User.UserRepository
+	transRepo Transaction.MysqlTransactionRepository
 }
 
-func NewCounselorUsecase(CounselorRepo Counselor.CounselorRepository, ReviewRepo Counselor.ReviewRepository, UserRepo User.UserRepository) CounselorUsecase {
-	return &counselorUsecase{counselorRepo: CounselorRepo, reviewRepo: ReviewRepo, userRepo: UserRepo}
+func NewCounselorUsecase(
+		CounselorRepo Counselor.CounselorRepository,
+		ReviewRepo Counselor.ReviewRepository,
+		UserRepo User.UserRepository,
+		TransactionRepo Transaction.MysqlTransactionRepository,
+	) CounselorUsecase {
+	return &counselorUsecase{CounselorRepo, ReviewRepo, UserRepo, TransactionRepo}
 }
 
 func(u *counselorUsecase) GetAll(search, topic, sortBy string) ([]counselor.GetAllResponse, error) {
@@ -64,36 +71,37 @@ func(u *counselorUsecase) CreateReview(inputReview counselor.CreateReviewRequest
 	_, err := u.counselorRepo.GetById(inputReview.CounselorID)
 
 	if err != nil {
-		return counselor.ErrCounselorNotFound
+		if err.Error() == "record not found" {
+			return counselor.ErrCounselorNotFound
+		}
+		return counselor.ErrInternalServerError
 	}
-	
+
+	transaction, err := u.transRepo.GetById(inputReview.TransactionID)
+
+	if err != nil {
+		if err.Error() == "record not found" {
+			return counselor.ErrTransactionNotFound
+		}
+		return counselor.ErrInternalServerError
+	}
+
+	if transaction.IsReviewed {
+		log.Println("review already exist")
+		return counselor.ErrReviewAlreadyExist
+	}
+
+	uuid, _ := helper.NewGoogleUUID().GenerateUUID()
+
 	newReview := entity.Review{
+		ID: uuid,
 		CounselorID: inputReview.CounselorID,
 		UserID: inputReview.UserID,
 		Rating: inputReview.Rating,
 		Review: inputReview.Review,
 	}
 	
-	// Check if user already give review
-	
-	oldReview, err := u.reviewRepo.GetByUserIdAndCounselorId(inputReview.UserID, inputReview.CounselorID)
-
-	if err == nil {
-		
-		// Update review
-		newReview.ID = oldReview.ID
-		
-	}else {
-
-		// Create new review
-		uuid, _ := helper.NewGoogleUUID().GenerateUUID()
-		newReview.ID = uuid
-	}
-
-	newReview.Rating = inputReview.Rating
-	newReview.Review = inputReview.Review
-
-	err = u.reviewRepo.Save(newReview)
+	err = u.reviewRepo.Create(inputReview.TransactionID, newReview)
 	
 	if err != nil {
 		return counselor.ErrInternalServerError
@@ -108,14 +116,14 @@ func(u *counselorUsecase) GetAllReview(id string, offset, limit int) ([]counselo
 	_, err := u.counselorRepo.GetById(id)
 
 	if err != nil {
-		return []counselor.GetAllReviewResponse{}, 0, counselor.ErrCounselorNotFound
+		return nil, 0, counselor.ErrCounselorNotFound
 	}
 	
 	reviews, totalData, err := u.reviewRepo.GetByCounselorId(id, offset, limit)
 
 	if err != nil {
 		log.Print(err.Error())
-		return []counselor.GetAllReviewResponse{}, 0, counselor.ErrInternalServerError
+		return nil, 0, counselor.ErrInternalServerError
 	}
 
 	var reviewsRes = make([]counselor.GetAllReviewResponse, len(reviews))
@@ -131,11 +139,11 @@ func(u *counselorUsecase) GetAllReview(id string, offset, limit int) ([]counselo
 			}
 			reviewRes := counselor.GetAllReviewResponse{
 				ID: review.ID,
-				ProfilePicture: user.ProfilePicture,
+				UserProfile: user.ProfilePicture,
 				Username: user.Username,
 				Rating: review.Rating,
 				Review: review.Review,
-				CreatedAt: review.CreatedAt.Format("2006-01-02 15:04:05"),
+				CreatedAt: review.CreatedAt,
 			}
 			reviewsRes[i] = reviewRes
 
@@ -144,7 +152,7 @@ func(u *counselorUsecase) GetAllReview(id string, offset, limit int) ([]counselo
 	}	
 
 	if err := g.Wait(); err != nil {
-		return []counselor.GetAllReviewResponse{}, 0, err
+		return nil, 0, err
 	}
 
 	totalPages := helper.GetTotalPages(int(totalData), limit)

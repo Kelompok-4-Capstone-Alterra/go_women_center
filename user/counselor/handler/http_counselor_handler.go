@@ -93,6 +93,10 @@ func (h *counselorHandler) GetAllReview(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, helper.ResponseData(err.Error(), http.StatusInternalServerError, nil))
 	}
 
+	if page > totalPages {
+		return c.JSON(http.StatusNotFound, helper.ResponseData(counselor.ErrPageNotFound.Error(), http.StatusNotFound, nil))
+	}
+
 	return c.JSON(http.StatusOK, helper.ResponseData("success get all counselor review", http.StatusOK, echo.Map{
 		"reviews":       reviews,
 		"current_pages": page,
@@ -120,8 +124,10 @@ func (h *counselorHandler) CreateReview(c echo.Context) error {
 		status := http.StatusInternalServerError
 
 		switch err {
-		case counselor.ErrCounselorNotFound:
-			status = http.StatusNotFound
+			case 
+				counselor.ErrTransactionNotFound,
+				counselor.ErrCounselorNotFound:
+				status = http.StatusNotFound
 		}
 
 		return c.JSON(status, helper.ResponseData(err.Error(), status, nil))

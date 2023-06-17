@@ -13,11 +13,11 @@ type GetAllResponse struct {
 
 type GetAllReviewResponse struct {
 	ID             string  `json:"id"`
-	ProfilePicture string  `json:"profile_picture"`
+	UserProfile    string  `json:"user_profile"`
 	Username       string  `json:"username"`
 	Rating         float32 `json:"rating"`
 	Review         string  `json:"review"`
-	CreatedAt      string  `json:"created_at"`
+	CreatedAt      time.Time  `json:"created_at"`
 }
 
 type TimeResponse struct {
