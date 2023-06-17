@@ -60,6 +60,8 @@ func (dbc *DBconf) InitDB() *gorm.DB {
 	db.AutoMigrate(&entity.Comment{})
 	db.AutoMigrate(&entity.ReadingListArticle{})
 	db.AutoMigrate(&entity.Career{})
+	db.AutoMigrate(&entity.Voucher{})
+	db.AutoMigrate(&entity.Transaction{})
 
 	return db
 }

@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
-	"os"
+    "os"
 
 	AdminAuthHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/auth/handler"
 	adminAuthMidd "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/auth/handler/middleware"
@@ -57,6 +57,20 @@ import (
 	CareerUserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/career/handler"
 	CareerUserRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/career/repository"
 	CareerUserUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/career/usecase"
+
+	VoucherUserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/voucher/handler"
+	VoucherUserRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/voucher/repository"
+	VoucherUserUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/voucher/usecase"
+
+	UserScheduleRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/schedule/repository"
+
+	TransactionUserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/transaction/handler"
+	TransactionUserRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/transaction/repository"
+	TransactionUserUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/transaction/usecase"
+
+	TransactionAdminHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/transaction/handler"
+	TransactionAdminRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/transaction/repository"
+	TransactionAdminUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/transaction/usecase"
 
 	ArticleAdminHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/article/handler"
 	ArticleAdminRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/article/repository"
@@ -191,6 +205,25 @@ func main() {
 
 	topicHandler := TopicHandler.NewTopicHandler()
 
+	midtransServerKey := os.Getenv("MIDTRANS_SERVER_KEY")
+	midtransNotifHandler := os.Getenv("MIDTRANS_NOTIFICATION_HANDLER")
+	log.Println("====MIDTRANS NOTIF HANDLER =", midtransNotifHandler, "====")
+
+	userVoucherRepo := VoucherUserRepo.NewMysqltransactionRepository(db)
+	userVoucherUsecase := VoucherUserUsecase.NewtransactionUsecase(userVoucherRepo)
+	userVoucherHandler := VoucherUserHandler.NewVoucherHandler(userVoucherUsecase)
+
+	userScheduleRepo := UserScheduleRepo.NewMysqlScheduleRepository(db)
+
+	userTransactionRepo := TransactionUserRepo.NewMysqltransactionRepository(db)
+	userTransactionUsecase := TransactionUserUsecase.NewtransactionUsecase(midtransServerKey, googleUUID, userTransactionRepo, midtransNotifHandler, userCounselorRepo, userScheduleRepo, userVoucherRepo)
+	userTransactionHandler := TransactionUserHandler.NewTransactionHandler(userTransactionUsecase)
+
+	adminTransactionRepo := TransactionAdminRepo.NewMysqltransactionRepository(db)
+	adminVoucherRepo := TransactionAdminRepo.NewMysqlVoucherRepository(db)
+	adminTransactionUsecase := TransactionAdminUsecase.NewtransactionUsecase(adminTransactionRepo, adminVoucherRepo, googleUUID)
+	adminTransactionHandler := TransactionAdminHandler.NewTransactionHandler(adminTransactionUsecase)
+
 	e := echo.New()
 
 	// middleware
@@ -202,6 +235,9 @@ func main() {
 	e.GET("/healthcheck", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, "hello")
 	})
+
+	// payment callback
+	e.POST("/transaction/callback", userTransactionHandler.MidtransNotification)
 
 	e.GET("/topics", topicHandler.GetAll)
 	e.POST("/verify/unique", userAuthHandler.VerifyUniqueCredential)
@@ -228,7 +264,6 @@ func main() {
 		})
 
 		restrictUsers := e.Group("/users", userAuthMidd.JWTUser(), userAuthMidd.CheckUser(userAuthUsecase))
-
 		{
 			restrictUsers.GET("/profile", userHandler.GetById)
 			restrictUsers.PUT("/profile", userHandler.Update)
@@ -245,26 +280,30 @@ func main() {
 			restrictUsers.POST("/forums/joins", userForumH.Create)
 			restrictUsers.GET("/careers/:id", userCareerHandler.GetById)
 
-      restrictUsers.GET("/reading-lists", ReadingListH.GetAll)
-      restrictUsers.GET("/reading-lists/:id", ReadingListH.GetById)
-      restrictUsers.POST("/reading-lists", ReadingListH.Create)
-      restrictUsers.PUT("/reading-lists/:id", ReadingListH.Update)
-      restrictUsers.DELETE("/reading-lists/:id", ReadingListH.Delete)
+			restrictUsers.GET("/reading-lists", ReadingListH.GetAll)
+			restrictUsers.GET("/reading-lists/:id", ReadingListH.GetById)
+			restrictUsers.POST("/reading-lists", ReadingListH.Create)
+			restrictUsers.PUT("/reading-lists/:id", ReadingListH.Update)
+			restrictUsers.DELETE("/reading-lists/:id", ReadingListH.Delete)
 
-      restrictUsers.POST("/reading-lists/save", ReadingListArticleH.Create)
-      restrictUsers.DELETE("/reading-lists/save/:id", ReadingListArticleH.Delete)
+			restrictUsers.POST("/reading-lists/save", ReadingListArticleH.Create)
+			restrictUsers.DELETE("/reading-lists/save/:id", ReadingListArticleH.Delete)
       
 			restrictUsers.GET("/articles", userArticleHandler.GetAll)
 			restrictUsers.GET("/articles/:id", userArticleHandler.GetById)
 			restrictUsers.POST("/articles/:id/comments", userArticleHandler.CreateComment)
 			restrictUsers.GET("/articles/:id/comments", userArticleHandler.GetAllComment)
 			restrictUsers.DELETE("/articles/:article_id/comments/:comment_id", userArticleHandler.DeleteComment)
+
+			restrictUsers.GET("/vouchers", userVoucherHandler.GetAll)
+			restrictUsers.GET("/transactions", userTransactionHandler.GetAllTransaction)
+			restrictUsers.POST("/transactions", userTransactionHandler.SendTransaction)
+			restrictUsers.GET("/transactions/:id", userTransactionHandler.GetTransactionDetail)
+			restrictUsers.POST("/transactions/join", userTransactionHandler.UserJoinHandler)
 		}
 
 		restrictAdmin := e.Group("/admin", adminAuthMidd.JWTAdmin())
-
 		{
-
 			restrictAdmin.GET("/counselors", adminCounselorHandler.GetAll)
 			restrictAdmin.POST("/counselors", adminCounselorHandler.Create)
 			restrictAdmin.GET("/counselors/:id", adminCounselorHandler.GetById)
@@ -296,6 +335,9 @@ func main() {
 
 			restrictAdmin.DELETE("/forums/:id", forumAdminH.Delete)
 
+			restrictAdmin.GET("/transactions", adminTransactionHandler.GetAll)
+			restrictAdmin.PUT("/transactions/link", adminTransactionHandler.SendLink)
+			restrictAdmin.PUT("/transactions/cancel", adminTransactionHandler.CancelTransaction)
 		}
 
 		// ssl

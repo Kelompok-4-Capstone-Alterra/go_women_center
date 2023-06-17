@@ -7,19 +7,21 @@ import (
 )
 
 type User struct {
-	ID             string     `gorm:"type:varchar(36);primaryKey;uniqueindex;not null"`
-	Username       string     `gorm:"type:varchar(150);uniqueindex;not null"`
-	Name           string     `gorm:"type:varchar(150);not null"`
-	Email          string     `gorm:"type:varchar(150);uniqueindex;not null"`
-	Password       string     `gorm:"type:varchar(64)"`
-	PhoneNumber    string     `gorm:"type:varchar(20)"`
-	ProfilePicture string     `gorm:"type:varchar(255)"`
+	ID             string `gorm:"type:varchar(36);primaryKey;uniqueindex;not null"`
+	Username       string `gorm:"type:varchar(150);uniqueindex;not null"`
+	Name           string `gorm:"type:varchar(150);not null"`
+	Email          string `gorm:"type:varchar(150);uniqueindex;not null"`
+	Password       string `gorm:"type:varchar(64)"`
+	PhoneNumber    string `gorm:"type:varchar(20)"`
+	ProfilePicture string `gorm:"type:varchar(255)"`
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 	DeletedAt      gorm.DeletedAt `gorm:"index"`
 	Reviews        []Review       `gorm:"foreignKey:UserID;references:ID"`
 	Forums         []Forum        `gorm:"foreignKey:UserId"`
 	UserForums     []UserForum    `gorm:"foreignKey:UserId"`
+	Transactions   []Transaction  `gorm:"foreignKey:UserId"`
+	Vouchers       []Voucher      `gorm:"foreignKey:UserId"`
 	ReadingLists   []ReadingList  `gorm:"foreignKey:UserId"`
 }
 
