@@ -5,7 +5,6 @@ import (
 )
 
 type SendTransactionRequest struct {
-	//TODO: check data type
 	UserCredential        *helper.JwtCustomUserClaims
 	CounselorID           string `json:"counselor_id" validate:"required,uuid"`
 	CounselorTopicKey     int    `json:"counselor_topic_key" validate:"required"`

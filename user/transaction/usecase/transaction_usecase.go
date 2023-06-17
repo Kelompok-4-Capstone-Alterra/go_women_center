@@ -101,7 +101,7 @@ func (u *transactionUsecase) SendTransaction(trRequest transaction.SendTransacti
 	voucherValue := int64(0)
 	if trRequest.VoucherId != "" {
 		
-		// TODO: check voucher availability
+		// check voucher availability
 		savedVoucher, err := u.voucherRepo.GetById(trRequest.UserCredential.ID, trRequest.VoucherId)
 		if err != nil {
 			return http.StatusBadRequest,
@@ -109,7 +109,7 @@ func (u *transactionUsecase) SendTransaction(trRequest transaction.SendTransacti
 			transaction.ErrVoucherNotFound
 		}
 
-		// TODO: validate voucher exp date
+		// validate voucher exp date
 		timeNow := time.Now()
 		if timeNow.After(savedVoucher.ExpDate) {
 			return http.StatusBadRequest,
@@ -121,7 +121,7 @@ func (u *transactionUsecase) SendTransaction(trRequest transaction.SendTransacti
 	}
 
 
-	// TODO: get gross price from counselor data
+	// get gross price from counselor data
 	savedCounselor, err := u.counselorRepo.GetById(trRequest.CounselorID)	
 	if err != nil {
 		return http.StatusBadRequest,
@@ -129,7 +129,7 @@ func (u *transactionUsecase) SendTransaction(trRequest transaction.SendTransacti
 		transaction.ErrCounselorNotFound
 	}
 
-	// TODO: calculate total price
+	// calculate total price
 	totalPrice := int64(savedCounselor.Price) - voucherValue
 	if totalPrice < 0 {
 		totalPrice = 0
@@ -193,7 +193,7 @@ func (u *transactionUsecase) SendTransaction(trRequest transaction.SendTransacti
 	res.PaymentLink = snapResp.RedirectURL
 	res.Data = transactionData
 
-	// TODO: delete voucher if implemented
+	// delete voucher if implemented
 	_, err = u.voucherRepo.DeleteById(trRequest.UserCredential.ID, trRequest.VoucherId)
 	if err != nil {
 		return http.StatusInternalServerError,
@@ -261,7 +261,7 @@ func (u *transactionUsecase) UpdateStatus(transactionId string, transactionStatu
 // user join the consultation
 func (u *transactionUsecase) UserJoinNotification(transactionId string) error {
 	err := u.repo.UpdateStatusById(transactionId, "completed")
-	// TODO: better error handling
+	// better error handling
 	if err != nil {
 		return err
 	}

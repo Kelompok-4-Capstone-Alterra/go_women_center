@@ -24,7 +24,6 @@ func NewMysqltransactionRepository(db *gorm.DB) MysqlVoucherRepository {
 }
 
 func (tr *mysqlVoucherRepository) GetAll(userId string) ([]entity.Voucher, error) {
-	// TODO: move time to usecase
 	timeNow := time.Now()
 	allUserVoucher := []entity.Voucher{}
 	err := tr.DB.Where("user_id = ? AND exp_date > ?", userId, timeNow).Find(&allUserVoucher).Error

@@ -81,7 +81,7 @@ func (tr *mysqlTransactionRepository) UpdateStatusById(id string, newStatus stri
 	return nil
 }
 
-// TODO: get all transaction for today
+// get all transaction for today
 func (tr *mysqlTransactionRepository) GetOccuringTransactionToday() ([]entity.Transaction, error) {
 	currentTime := time.Now()
     currentDate := currentTime.Format(time.DateOnly)
