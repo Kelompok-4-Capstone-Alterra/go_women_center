@@ -184,7 +184,8 @@ func main() {
 	userTransactionHandler := TransactionUserHandler.NewTransactionHandler(userTransactionUsecase)
 
 	adminTransactionRepo := TransactionAdminRepo.NewMysqltransactionRepository(db)
-	adminTransactionUsecase := TransactionAdminUsecase.NewtransactionUsecase(adminTransactionRepo)
+	adminVoucherRepo := TransactionAdminRepo.NewMysqlVoucherRepository(db)
+	adminTransactionUsecase := TransactionAdminUsecase.NewtransactionUsecase(adminTransactionRepo, adminVoucherRepo, googleUUID)
 	adminTransactionHandler := TransactionAdminHandler.NewTransactionHandler(adminTransactionUsecase)
 
 	e := echo.New()

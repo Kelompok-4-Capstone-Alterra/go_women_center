@@ -7,7 +7,8 @@ import (
 
 type MysqlTransactionRepository interface {
 	GetAll() ([]entity.Transaction, error)
-	UpdateById(id, link, status string) error
+	GetById(id string) (entity.Transaction, error)
+	UpdateById(id, link, status string) (entity.Transaction, error)
 }
 
 type mysqlTransactionRepository struct {
@@ -29,24 +30,35 @@ func (tr *mysqlTransactionRepository) GetAll() ([]entity.Transaction, error) {
 	return transactionData, nil
 }
 
-func (tr *mysqlTransactionRepository) UpdateById(id, link, status string) error {
+func (tr *mysqlTransactionRepository) GetById(id string) (entity.Transaction, error) {
+	transactionData := entity.Transaction{}
+	err := tr.DB.Where("id = ?", id).First(&transactionData).Error
+	if err != nil {
+		return entity.Transaction{}, err
+	}
+	return transactionData, nil
+}
+
+func (tr *mysqlTransactionRepository) UpdateById(id, link, status string) (entity.Transaction, error) {
+	updatedData := entity.Transaction{
+		Status: status,
+		Link:   link,
+	}
+
 	result := tr.DB.Debug().
 		Model(&entity.Transaction{}).
 		Where("id = ?", id).
-		Updates(entity.Transaction{
-			Status: status,
-			Link:   link,
-		})
+		Updates(&updatedData)
 
 	updated := result.RowsAffected
 	if updated < 1 {
-		return gorm.ErrEmptySlice
+		return entity.Transaction{}, gorm.ErrEmptySlice
 	}
 
 	err := result.Error
 	if err != nil {
-		return err
+		return entity.Transaction{}, err
 	}
 
-	return nil
+	return updatedData, nil
 }
