@@ -41,8 +41,6 @@ func(r *mysqlReviewRepository) GetByCounselorId(counselorId string, offset, limi
 
 func (r *mysqlReviewRepository) Create(transactionId string, review entity.Review) error{
 
-
-
 	err := r.DB.Transaction(func(tx *gorm.DB) error {
 
 		err := tx.Create(&review).Error

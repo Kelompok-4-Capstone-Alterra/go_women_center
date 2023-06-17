@@ -32,7 +32,7 @@ func NewCounselorUsecase(
 		UserRepo User.UserRepository,
 		TransactionRepo Transaction.MysqlTransactionRepository,
 	) CounselorUsecase {
-	return &counselorUsecase{counselorRepo: CounselorRepo, reviewRepo: ReviewRepo, userRepo: UserRepo}
+	return &counselorUsecase{CounselorRepo, ReviewRepo, UserRepo, TransactionRepo}
 }
 
 func(u *counselorUsecase) GetAll(search, topic, sortBy string) ([]counselor.GetAllResponse, error) {
@@ -77,9 +77,7 @@ func(u *counselorUsecase) CreateReview(inputReview counselor.CreateReviewRequest
 		return counselor.ErrInternalServerError
 	}
 
-	var transaction entity.Transaction
-
-	_, err = u.transRepo.GetById(inputReview.TransactionID)
+	transaction, err := u.transRepo.GetById(inputReview.TransactionID)
 
 	if err != nil {
 		if err.Error() == "record not found" {
