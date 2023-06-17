@@ -2,7 +2,6 @@ package handler
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor/usecase"
@@ -21,13 +20,17 @@ func NewCounselorHandler(CUcase usecase.CounselorUsecase) *counselorHandler {
 
 func (h *counselorHandler) GetAll(c echo.Context) error {
 
-	page, _ := strconv.Atoi(c.QueryParam("page"))
-	limit, _ := strconv.Atoi(c.QueryParam("limit"))
-	search := c.QueryParam("search")
+	var req counselor.GetAllRequest
 
-	page, offset, limit := helper.GetPaginateData(page, limit)
+	c.Bind(&req)
 
-	counselors, totalPages, err := h.CUscase.GetAll(search, offset, limit)
+	if err := isRequestValid(req); err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
+	}
+
+	page, offset, limit := helper.GetPaginateData(req.Page, req.Limit)
+
+	counselors, totalPages, err := h.CUscase.GetAll(req.Search, req.SortBy, offset, limit)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, helper.ResponseData(err.Error(), http.StatusInternalServerError, nil))

@@ -9,7 +9,7 @@ import (
 )
 
 type CounselorUsecase interface {
-	GetAll(search string, offset, limit int) ([]counselor.GetAllResponse, int, error)
+	GetAll(search, sortBy string, offset, limit int) ([]counselor.GetAllResponse, int, error)
 	GetById(id string) (counselor.GetByResponse, error)
 	Create(input counselor.CreateRequest) error
 	Update(input counselor.UpdateRequest) error
@@ -25,9 +25,16 @@ func NewCounselorUsecase(CRepo repository.CounselorRepository, Image helper.Imag
 	return &counselorUsecase{CounselorRepo: CRepo, Image: Image}
 }
 
-func(u *counselorUsecase) GetAll(search string, offset, limit int) ([]counselor.GetAllResponse, int, error) {
+func(u *counselorUsecase) GetAll(search, sortBy string, offset, limit int) ([]counselor.GetAllResponse, int, error) {
 	
-	counselors, totalData, err := u.CounselorRepo.GetAll(search, offset, limit)
+	switch sortBy {
+		case "oldest":
+			sortBy = "created_at ASC"
+		case "newest":
+			sortBy = "created_at DESC"
+	}
+
+	counselors, totalData, err := u.CounselorRepo.GetAll(search, sortBy, offset, limit)
 
 	if err != nil {
 		return nil, 0, counselor.ErrInternalServerError

@@ -15,7 +15,7 @@ func isRequestValid(m interface{}) error {
 	if err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
 			field := strings.ToLower(err.Field())
-
+			
 			if err.Tag() == "required" {
 
 				if field == "topic" {
@@ -36,7 +36,7 @@ func isRequestValid(m interface{}) error {
 					return counselor.ErrRatingFormat
 				case "topic":
 					return counselor.ErrInvalidTopic
-				case "sort_by":
+				case "sortby":
 					return counselor.ErrInvalidSort
 			}
 

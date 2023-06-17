@@ -22,6 +22,7 @@ type User struct {
 	UserForums     []UserForum    `gorm:"foreignKey:UserId"`
 	Transactions   []Transaction  `gorm:"foreignKey:UserId"`
 	Vouchers       []Voucher      `gorm:"foreignKey:UserId"`
+	ReadingLists   []ReadingList  `gorm:"foreignKey:UserId"`
 }
 
 type OTP struct {

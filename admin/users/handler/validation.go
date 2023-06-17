@@ -25,6 +25,8 @@ func isRequestValid(m interface{}) error {
 			switch field {
 			case "id":
 				return users.ErrIdFormat
+			case "sortby":
+				return users.ErrInvalidSort
 			}
 
 		}

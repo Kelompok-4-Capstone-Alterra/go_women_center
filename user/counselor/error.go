@@ -8,7 +8,6 @@ var (
 
 	// not found
 	ErrCounselorNotFound = errors.New("counselor not found")
-	ErrPageNotFound = errors.New("page not found")
 
 	// bad request
 	ErrProfilePictureFormat = errors.New("profile picture must be an image and png/jpg/jpeg format")

@@ -13,6 +13,11 @@ type LoginUserRequest struct {
 	Password string `json:"password" validate:"required"`
 }
 
+type VerifyUniqueCredentialRequest struct {
+	Email    string `json:"email" validate:"required,email"`
+	Username string `json:"username" validate:"required"`
+}
+
 type VerifyEmailRequest struct {
 	Email string `json:"email" validate:"required,email"`
 }
