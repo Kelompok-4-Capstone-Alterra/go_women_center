@@ -7,7 +7,7 @@ import (
 
 type ReviewRepository interface {
 	GetByCounselorId(counselorId string, offset, limit int) ([]entity.Review, int64, error)
-	Save(review entity.Review) error
+	Create(transactionId string, review entity.Review) error
 	GetByUserIdAndCounselorId(userId, counselorId string) (entity.Review, error)
 	GetByUserId(userId string) (entity.Review, error)
 }
@@ -39,13 +39,21 @@ func(r *mysqlReviewRepository) GetByCounselorId(counselorId string, offset, limi
 	return reviews, totalData ,nil
 }
 
-func(r *mysqlReviewRepository) Save(review entity.Review) error {
+func (r *mysqlReviewRepository) Create(transactionId string, review entity.Review) error{
+
+
 
 	err := r.DB.Transaction(func(tx *gorm.DB) error {
 
+		err := tx.Create(&review).Error
+
+		if err != nil {
+			return err
+		}
+		
 		var avgRating float32
 
-		err := tx.Model(&entity.Review{}).Where("counselor_id = ?", review.CounselorID).Select("AVG(rating)").Scan(&avgRating).Error
+		err = tx.Model(&entity.Review{}).Where("counselor_id = ?", review.CounselorID).Select("AVG(rating)").Scan(&avgRating).Error
 		
 		if err != nil {
 			return err
@@ -56,8 +64,8 @@ func(r *mysqlReviewRepository) Save(review entity.Review) error {
 		if err != nil {
 			return err
 		}
-
-		err = tx.Save(&review).Error
+		
+		err = tx.Model(&entity.Transaction{}).Where("id = ?", transactionId).Update("is_reviewed", true).Error
 
 		if err != nil {
 			return err

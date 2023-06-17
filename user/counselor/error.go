@@ -8,6 +8,7 @@ var (
 
 	// not found
 	ErrCounselorNotFound = errors.New("counselor not found")
+	ErrPageNotFound 	= errors.New("page not found")
 
 	// bad request
 	ErrProfilePictureFormat = errors.New("profile picture must be an image and png/jpg/jpeg format")
@@ -19,4 +20,6 @@ var (
 	ErrRequired 			= errors.New("all fields are required")
 	ErrRequiredTopic 		= errors.New("topic is required")
 	ErrInvalidSort 			= errors.New("invalid sort")
+	ErrReviewAlreadyExist 	= errors.New("review already exist")
+	ErrTransactionNotFound 	= errors.New("transaction not found")
 )
