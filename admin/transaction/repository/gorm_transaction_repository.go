@@ -25,8 +25,17 @@ func (tr *mysqlTransactionRepository) GetAll(search, sortBy string, offset, limi
 	transactionData := []entity.Transaction{}
 	count := int64(0)
 	err := tr.DB.
+		Debug().
 		Model(&entity.Transaction{}).
-		Where("counselor_topic LIKE ?",
+		Where(
+			"counselor_topic LIKE ? OR consultation_method LIKE ? OR date_id LIKE ? OR time_id LIKE ? OR id LIKE ? OR user_id LIKE ? OR counselor_id LIKE ? OR status LIKE ?",
+			"%"+search+"%",
+			"%"+search+"%",
+			"%"+search+"%",
+			"%"+search+"%",
+			"%"+search+"%",
+			"%"+search+"%",
+			"%"+search+"%",
 			"%"+search+"%").
 		Count(&count).
 		Offset(offset).
