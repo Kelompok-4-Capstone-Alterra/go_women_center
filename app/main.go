@@ -33,9 +33,9 @@ import (
 	UserProfileRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/profile/repository"
 	UserProfileUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/profile/usecase"
 
+	UserScheduleHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/schedule/handler"
 	UserScheduleRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/schedule/repository"
-	// UserScheduleHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/schedule/handler"
-	// UserScheduleUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/schedule/usecase"
+	UserScheduleUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/schedule/usecase"
 
 	ForumUserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum/handler"
 	ForumUserRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum/repository"
@@ -141,10 +141,6 @@ func main() {
 	userAuthUsecase := UserAuthUsecase.NewUserUsecase(userAuthRepo, googleUUID, &mailConf, otpRepo, otpGenerator, encryptor)
 	userAuthHandler := UserAuthHandler.NewUserHandler(userAuthUsecase, googleOauthConfig, jwtConf)
 
-	userScheduleRepo := UserScheduleRepo.NewMysqlScheduleRepository(db)
-	// userScheduleUseCase := UserScheduleUsecase.NewScheduleUsecase(userScheduleRepo)
-	// userScheduleHandler := UserScheduleHandler.NewScheduleHandler(userScheduleUseCase)
-
 	userRepo := UserProfileRepo.NewMysqlUserRepository(db)
 	userUsecase := UserProfileUsecase.NewProfileUsecase(userRepo, image, encryptor)
 	userHandler := UserProfileHandler.NewProfileHandler(userUsecase)
@@ -214,10 +210,14 @@ func main() {
 	userVoucherHandler := VoucherUserHandler.NewVoucherHandler(userVoucherUsecase)
 
 	userCounselorRepo := CounselorUserRepo.NewMysqlCounselorRepository(db)
+	userScheduleRepo := UserScheduleRepo.NewMysqlScheduleRepository(db)
 
 	userTransactionRepo := TransactionUserRepo.NewMysqltransactionRepository(db)
 	userTransactionUsecase := TransactionUserUsecase.NewtransactionUsecase(midtransServerKey, googleUUID, userTransactionRepo, midtransNotifHandler, userCounselorRepo, userScheduleRepo, userVoucherRepo)
 	userTransactionHandler := TransactionUserHandler.NewTransactionHandler(userTransactionUsecase)
+
+	userScheduleUseCase := UserScheduleUsecase.NewScheduleUsecase(userScheduleRepo, userTransactionRepo)
+	userScheduleHandler := UserScheduleHandler.NewScheduleHandler(userScheduleUseCase)
 
 	userReviewRepo := CounselorUserRepo.NewMysqlReviewRepository(db)
 	userCounselorUsecase := CounselorUserUsecase.NewCounselorUsecase(userCounselorRepo, userReviewRepo, userAuthRepo, userTransactionRepo)
@@ -270,7 +270,7 @@ func main() {
 		restrictUsers.GET("/counselors/:id", userCounselorHandler.GetById)
 		restrictUsers.POST("/counselors/:id/reviews", userCounselorHandler.CreateReview)
 		restrictUsers.GET("/counselors/:id/reviews", userCounselorHandler.GetAllReview)
-		// restrictUsers.GET("/counselors/:id/schedules", userScheduleHandler.GetCurrSchedule)
+		restrictUsers.GET("/counselors/:id/schedules", userScheduleHandler.GetCurrSchedule)
 
 		restrictUsers.GET("/forums", forumH.GetAll)
 		restrictUsers.GET("/forums/:id", forumH.GetById)

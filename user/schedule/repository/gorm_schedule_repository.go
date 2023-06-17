@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"log"
 	"time"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
@@ -9,7 +8,6 @@ import (
 )
 
 type ScheduleRepository interface {
-	GetTransactionByCounselorId(counselorId string) ([]entity.Transaction, error)
 	GetCurDateByCounselorId(counselorId string) (entity.Date, error)
 	GetTimeByCounselorId(counselorId string) ([]entity.Time, error)
 	GetDateById(id string) (entity.Date, error)
@@ -22,24 +20,6 @@ type mysqlScheduleRepository struct {
 
 func NewMysqlScheduleRepository(db *gorm.DB) ScheduleRepository {
 	return &mysqlScheduleRepository{db}
-}
-
-func(r *mysqlScheduleRepository) GetTransactionByCounselorId(counselorId string) ([]entity.Transaction, error) {
-	
-	
-	currentTime := time.Now()
-	currentDate := currentTime.Format(time.DateOnly)
-	
-	var transactions []entity.Transaction
-	
-	err := r.DB.Model(&entity.Transaction{}).Where("DATE(created_at) = ?", currentDate).Find(&transactions).Error
-
-	if err != nil {
-		return transactions, err
-	}
-
-	log.Println(transactions)
-	return transactions, nil
 }
 
 func(r *mysqlScheduleRepository) GetTimeByCounselorId(counselorId string) ([]entity.Time, error){

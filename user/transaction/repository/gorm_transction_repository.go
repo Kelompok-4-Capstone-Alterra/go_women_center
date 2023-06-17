@@ -14,7 +14,7 @@ type MysqlTransactionRepository interface {
 	GetById(id string) (entity.Transaction, error)
 	UpdateStatusByData(savedData entity.Transaction, newStatus string) (entity.Transaction, error)
 	UpdateStatusById(id string, newStatus string) (error)
-	GetOccuringTransactionToday() ([]entity.Transaction, error)
+	GetOccurTransacTodayByCounselorId(counselorId string) ([]entity.Transaction, error)
 }
 
 type mysqlTransactionRepository struct {
@@ -81,13 +81,13 @@ func (tr *mysqlTransactionRepository) UpdateStatusById(id string, newStatus stri
 	return nil
 }
 
-// get all transaction for today
-func (tr *mysqlTransactionRepository) GetOccuringTransactionToday() ([]entity.Transaction, error) {
+// get all transaction by counselor id for today
+func (tr *mysqlTransactionRepository) GetOccurTransacTodayByCounselorId(counselorId string) ([]entity.Transaction, error) {
 	currentTime := time.Now()
     currentDate := currentTime.Format(time.DateOnly)
 
     var transactions []entity.Transaction
-    err := tr.DB.Model(&entity.Transaction{}).Where("DATE(created_at) = ?", currentDate).Find(&transactions).Error
+    err := tr.DB.Model(&entity.Transaction{}).Where("counselor_id = ? AND DATE(created_at) = ?", counselorId, currentDate).Find(&transactions).Error
 	if err != nil {
 		return nil, err
 	}
