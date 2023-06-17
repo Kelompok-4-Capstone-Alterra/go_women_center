@@ -27,6 +27,7 @@ func (tr *mysqlTransactionRepository) GetAll(search, sortBy string, offset, limi
 	err := tr.DB.
 		Debug().
 		Model(&entity.Transaction{}).
+		Preload("Counselor").
 		Where(
 			"counselor_topic LIKE ? OR consultation_method LIKE ? OR date_id LIKE ? OR time_id LIKE ? OR id LIKE ? OR user_id LIKE ? OR counselor_id LIKE ? OR status LIKE ?",
 			"%"+search+"%",
