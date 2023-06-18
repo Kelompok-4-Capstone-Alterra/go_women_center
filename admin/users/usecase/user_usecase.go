@@ -16,10 +16,11 @@ type UserUsecase interface {
 
 type userUsecase struct {
 	userRepository repository.UserRepository
+	image 		helper.Image
 }
 
-func NewUserUsecase(userRepository repository.UserRepository) *userUsecase {
-	return &userUsecase{userRepository: userRepository}
+func NewUserUsecase(userRepository repository.UserRepository, image helper.Image) *userUsecase {
+	return &userUsecase{userRepository, image}
 }
 
 func (u *userUsecase) GetById(id string) (users.GetByIdResponse, error) {
@@ -58,7 +59,7 @@ func (u *userUsecase) GetAll(search, sortBy string, offset, limit int) ([]users.
 
 func (u *userUsecase) Delete(id string) error {
 
-	_,err := u.userRepository.GetById(id)
+	userSaved,err := u.userRepository.GetById(id)
 
 	if err != nil {
 		if err.Error() == "record not found" {
@@ -67,12 +68,19 @@ func (u *userUsecase) Delete(id string) error {
 		log.Println(err.Error())
 		return users.ErrInternalServerError
 	}
-	
+
+	if userSaved.ProfilePicture != "" {
+		err = u.image.DeleteImageFromS3(userSaved.ProfilePicture)
+		if err != nil {
+			log.Println(err.Error())
+			return users.ErrInternalServerError
+		}
+	}
 
 	err = u.userRepository.Delete(id)
 	
 	if err != nil {
-		return err
+		return users.ErrInternalServerError
 	}
 
 	return nil

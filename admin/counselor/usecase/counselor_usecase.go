@@ -173,6 +173,15 @@ func(u *counselorUsecase) Delete(id string) error {
 		return counselor.ErrCounselorNotFound
 	}
 	
+	if counselorData.ProfilePicture != "" {
+
+		err = u.Image.DeleteImageFromS3(counselorData.ProfilePicture)
+	
+		if err != nil {
+			return counselor.ErrInternalServerError
+		}
+	}
+	
 	err = u.CounselorRepo.Delete(counselorData.ID)
 	
 	if err != nil {

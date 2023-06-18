@@ -70,8 +70,21 @@ func (r *mysqlArticleRepository) Update(id string, article entity.Article) error
 }
 
 func (r *mysqlArticleRepository) Delete(id string) error {
+	err := r.DB.Transaction(func(tx *gorm.DB) error {
+		err := tx.Model(&entity.Comment{}).Unscoped().Delete(&entity.Comment{}, "article_id = ?", id).Error
 
-	err := r.DB.Unscoped().Delete(&entity.Article{}, "id = ?", id).Error
+		if err != nil {
+			return err
+		}
+
+		err = tx.Model(&entity.Article{}).Unscoped().Delete(&entity.Article{}, "id = ?", id).Error
+
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
 
 	if err != nil {
 		return err

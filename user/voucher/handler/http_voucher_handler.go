@@ -41,7 +41,7 @@ func (h *voucherHandler) GetAll(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, helper.ResponseData(
-		"success get new transaction",
+		"success get all voucher",
 		http.StatusOK,
 		data,
 	))
