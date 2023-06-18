@@ -2,10 +2,9 @@ package handler
 
 import (
 	"net/http"
-	"strconv"
 
-	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum/usecase"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -31,23 +30,21 @@ func NewForumHandler(ForumU usecase.ForumUsecaseInterface) ForumHandlerInterface
 
 func (fh ForumHandler) GetAll(c echo.Context) error {
 	var user = c.Get("user").(*helper.JwtCustomUserClaims)
-	getCreated := c.QueryParam("created")
-	getTopic := c.QueryParam("topic")
-	getPopular := c.QueryParam("popular")
-	getCategories := c.QueryParam("categories")
-	getMyForum := c.QueryParam("myforum")
-	page, _ := strconv.Atoi(c.QueryParam("page"))
-	limit, _ := strconv.Atoi(c.QueryParam("limit"))
+	var getAllRequest forum.GetAllRequest
+	c.Bind(&getAllRequest)
+	getAllRequest.UserId = user.ID
+	getAllRequest.Page, getAllRequest.Offset, getAllRequest.Limit = helper.GetPaginateData(getAllRequest.Page, getAllRequest.Limit)
 
-	page, offset, limit := helper.GetPaginateData(page, limit)
-
-	forums, totalPages, err := fh.ForumU.GetAll(user.ID, getTopic, getPopular, getCreated, getCategories, getMyForum, offset, limit)
+	forums, totalPages, err := fh.ForumU.GetAll(getAllRequest)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, helper.ResponseData("failed to get all forum data", http.StatusBadRequest, nil))
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
+	}
+	if getAllRequest.Page > totalPages {
+		return c.JSON(http.StatusNotFound, helper.ResponseData("page not found", http.StatusNotFound, nil))
 	}
 	return c.JSON(http.StatusOK, helper.ResponseData("success to get all forum data", http.StatusOK, echo.Map{
 		"forums":        forums,
-		"current_pages": page,
+		"current_pages": getAllRequest.Page,
 		"total_pages":   totalPages,
 	}))
 }
@@ -58,37 +55,37 @@ func (fh ForumHandler) GetById(c echo.Context) error {
 	forum, err := fh.ForumU.GetById(id, user.ID)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, helper.ResponseData("failed to get forum data details", http.StatusBadRequest, nil))
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
 	}
 	return c.JSON(http.StatusOK, helper.ResponseData("success to get forum data details", http.StatusOK, forum))
 }
 
 func (fh ForumHandler) Create(c echo.Context) error {
 	var user = c.Get("user").(*helper.JwtCustomUserClaims)
-	var forum entity.Forum
-	c.Bind(&forum)
+	var createRequest forum.CreateRequest
+	c.Bind(&createRequest)
 
 	uuidWithHyphen := uuid.New()
-	forum.ID = uuidWithHyphen.String()
-	forum.UserId = user.ID
+	createRequest.ID = uuidWithHyphen.String()
+	createRequest.UserId = user.ID
 
-	err := fh.ForumU.Create(&forum)
+	err := fh.ForumU.Create(&createRequest)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, helper.ResponseData("failed created forum data", http.StatusBadRequest, nil))
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
 	}
 	return c.JSON(http.StatusOK, helper.ResponseData("successfully created forum data", http.StatusOK, nil))
 }
 
 func (fh ForumHandler) Update(c echo.Context) error {
 	var user = c.Get("user").(*helper.JwtCustomUserClaims)
-	forum := entity.Forum{}
 	id := c.Param("id")
-	c.Bind(&forum)
-	err := fh.ForumU.Update(id, user.ID, &forum)
+	var updateRequest forum.UpdateRequest
+	c.Bind(&updateRequest)
+	err := fh.ForumU.Update(id, user.ID, &updateRequest)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, helper.ResponseData("failed to change forum data", http.StatusBadRequest, nil))
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
 	}
 	return c.JSON(http.StatusOK, helper.ResponseData("successfully changed forum data", http.StatusOK, nil))
 }
@@ -99,7 +96,7 @@ func (fh ForumHandler) Delete(c echo.Context) error {
 	err := fh.ForumU.Delete(id, user.ID)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, helper.ResponseData("failed to delete forum data", http.StatusBadRequest, nil))
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
 	}
 	return c.JSON(http.StatusOK, helper.ResponseData("successfully deleted forum data", http.StatusOK, nil))
 }

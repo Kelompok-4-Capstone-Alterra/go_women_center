@@ -3,8 +3,8 @@ package handler
 import (
 	"net/http"
 
-	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
+	userForum "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/user_forum"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/user_forum/usecase"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -24,17 +24,20 @@ func NewUserForumHandler(UserForumU usecase.UserForumUsecaseInterface) UserForum
 	}
 }
 
-func (fh UserForumHandler) Create(c echo.Context) error {
+func (ufh UserForumHandler) Create(c echo.Context) error {
 	var user = c.Get("user").(*helper.JwtCustomUserClaims)
-	var userForum entity.UserForum
-	c.Bind(&userForum)
+	var createUserForum userForum.CreateRequest
+	c.Bind(&createUserForum)
 	uuidWithHyphen := uuid.New()
-	userForum.ID = uuidWithHyphen.String()
-	userForum.UserId = user.ID
+	createUserForum.ID = uuidWithHyphen.String()
+	createUserForum.UserId = user.ID
 
-	err := fh.UserForumU.Create(&userForum)
+	if err := isRequestValid(createUserForum); err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
+	}
+	err := ufh.UserForumU.Create(&createUserForum)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, helper.ResponseData("Failed to join the forum", http.StatusBadRequest, nil))
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(userForum.ErrFailedCreateReadingList.Error(), http.StatusBadRequest, nil))
 	}
 	return c.JSON(http.StatusOK, helper.ResponseData("Successfully joined the forum", http.StatusOK, nil))
 }
