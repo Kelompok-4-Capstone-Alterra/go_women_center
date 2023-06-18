@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"log"
 	"mime/multipart"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/career"
@@ -147,6 +148,14 @@ func (u *careerUsecase) Delete(id string) error {
 	}
 
 	err = u.careerRepo.Delete(careerData.ID)
+
+	if careerData.Image != "" {
+		err = u.image.DeleteImageFromS3(careerData.Image)
+		if err != nil {
+			log.Println(err.Error())
+			return career.ErrCareerNotFound
+		}
+	}
 
 	if err != nil {
 		return career.ErrInternalServerError
