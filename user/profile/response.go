@@ -7,5 +7,4 @@ type GetByIdResponse struct {
 	Name           string `json:"name"`
 	Email          string `json:"email"`
 	PhoneNumber    string `json:"phone_number"`
-	BirthDate      string `json:"birth_date"`
 }

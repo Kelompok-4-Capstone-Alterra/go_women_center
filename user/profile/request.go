@@ -15,7 +15,6 @@ type UpdateRequest struct {
 	Name           string                `form:"name" validate:"omitempty"`
 	Email          string                `form:"email" validate:"omitempty,email"`
 	PhoneNumber    string                `form:"phone_number" validate:"omitempty"`
-	BirthDate      string                `form:"birth_date" validate:"omitempty"`
 }
 
 type UpdatePasswordRequest struct {

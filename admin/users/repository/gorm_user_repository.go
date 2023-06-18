@@ -52,6 +52,43 @@ func (r *mysqlUserRepository) Delete(id string) error {
 		if err != nil {
 			return err
 		}
+
+		err = tx.Model(&entity.Forum{}).Unscoped().Delete(&entity.Forum{}, "user_id = ?", id).Error
+
+		if err != nil {
+			return err
+		}
+
+		err = tx.Model(&entity.UserForum{}).Unscoped().Delete(&entity.UserForum{}, "user_id = ?", id).Error
+
+		if err != nil {
+			return err
+		}
+
+		err = tx.Model(&entity.Transaction{}).Unscoped().Delete(&entity.Transaction{}, "user_id = ?", id).Error
+
+		if err != nil {
+			return err
+		}
+
+		err = tx.Model(&entity.Voucher{}).Unscoped().Delete(&entity.Voucher{}, "user_id = ?", id).Error
+
+		if err != nil {
+			return err
+		}
+
+		err = tx.Model(&entity.ReadingList{}).Unscoped().Delete(&entity.ReadingList{}, "user_id = ?", id).Error
+
+		if err != nil {
+			return err
+		}
+
+		err = tx.Model(&entity.Comment{}).Unscoped().Delete(&entity.Comment{}, "user_id = ?", id).Error
+
+		if err != nil {
+			return err
+		}
+
 		err = tx.Model(&entity.User{}).Unscoped().Delete(&entity.User{}, "id = ?", id).Error
 
 		if err != nil {
