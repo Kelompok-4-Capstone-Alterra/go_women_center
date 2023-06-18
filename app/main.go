@@ -248,6 +248,9 @@ func main() {
 	e.POST("/verify", userAuthHandler.VerifyEmailHandler)
 	e.POST("/register", userAuthHandler.RegisterHandler)
 	e.POST("/login", userAuthHandler.LoginHandler)
+
+	e.POST("/verify/forget", userAuthHandler.CheckIsRegistered)
+
 	e.GET("/google/login", userAuthHandler.LoginGoogleHandler)
 	e.GET("/google/callback", userAuthHandler.LoginGoogleCallback)
 	e.POST("/admin/login", adminAuthHandler.LoginHandler)
@@ -260,7 +263,6 @@ func main() {
 		users.GET("/public/articles/:id", userArticleHandler.GetById)
 	}
 
-	
 	restrictUsers := e.Group("/users", userAuthMidd.JWTUser(), userAuthMidd.CheckUser(userAuthUsecase))
 	{
 		restrictUsers.GET("/profile", userHandler.GetById)
@@ -288,7 +290,7 @@ func main() {
 
 		restrictUsers.POST("/reading-lists/save", ReadingListArticleH.Create)
 		restrictUsers.DELETE("/reading-lists/save/:id", ReadingListArticleH.Delete)
-	
+
 		restrictUsers.GET("/articles", userArticleHandler.GetAll)
 		restrictUsers.GET("/articles/:id", userArticleHandler.GetById)
 		restrictUsers.POST("/articles/:id/comments", userArticleHandler.CreateComment)
