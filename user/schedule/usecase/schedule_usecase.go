@@ -89,7 +89,7 @@ func(u *scheduleUsecase) GetCurrSchedule(counselorId string) (schedule.GetSchedu
 	
 
 	return schedule.GetScheduleResponse{
-		DateId: currDatesCounselor.CounselorID,
+		DateId: currDatesCounselor.ID,
 		Times: scheduleTimes,
 	}, nil
 }
