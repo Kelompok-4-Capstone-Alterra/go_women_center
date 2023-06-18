@@ -167,7 +167,7 @@ func main() {
 	adminCareerHandler := CareerAdminHandler.NewCareerHandler(adminCareerUsecase)
 
 	adminUsersRepo := UsersAdminRepository.NewMysqlUserRepository(db)
-	adminUsersUsecase := UsersAdminUsecase.NewUserUsecase(adminUsersRepo)
+	adminUsersUsecase := UsersAdminUsecase.NewUserUsecase(adminUsersRepo, image)
 	adminUsersHandler := UsersAdminHandler.NewUserHandler(adminUsersUsecase)
 
 	adminScheduleRepo := AdminScheduleRepo.NewMysqlScheduleRepository(db)

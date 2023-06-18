@@ -17,7 +17,7 @@ type User struct {
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 	DeletedAt      gorm.DeletedAt `gorm:"index"`
-	Reviews        []Review       `gorm:"foreignKey:UserID;references:ID"`
+	Reviews        []Review       `gorm:"foreignKey:UserID"`
 	Forums         []Forum        `gorm:"foreignKey:UserId"`
 	UserForums     []UserForum    `gorm:"foreignKey:UserId"`
 	Transactions   []Transaction  `gorm:"foreignKey:UserId"`
