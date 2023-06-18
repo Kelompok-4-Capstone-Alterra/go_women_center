@@ -203,6 +203,14 @@ func (u *articleUsecase) Delete(id string) error {
 
 	err = u.articleRepo.Delete(articleData.ID)
 
+	if articleData.Image != "" {
+		err = u.image.DeleteImageFromS3(articleData.Image)
+		if err != nil {
+			log.Println(err.Error())
+			return article.ErrArticleNotFound
+		}
+	}
+
 	if err != nil {
 		return article.ErrInternalServerError
 	}
