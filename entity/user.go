@@ -6,6 +6,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// TODO remigrate the tabel user to make sure the counstraint is working
 type User struct {
 	ID             string `gorm:"type:varchar(36);primaryKey;uniqueindex;not null"`
 	Username       string `gorm:"type:varchar(150);uniqueindex;not null"`
@@ -17,6 +18,7 @@ type User struct {
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 	DeletedAt      gorm.DeletedAt `gorm:"index"`
+	Comments 	   []Comment      `gorm:"foreignKey:UserID"`
 	Reviews        []Review       `gorm:"foreignKey:UserID"`
 	Forums         []Forum        `gorm:"foreignKey:UserId"`
 	UserForums     []UserForum    `gorm:"foreignKey:UserId"`
