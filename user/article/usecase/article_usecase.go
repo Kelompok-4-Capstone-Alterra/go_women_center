@@ -49,7 +49,6 @@ func (u *articleUsecase) GetAll(search, userId, sortBy string) ([]article.GetAll
 
 	readingListArticles, err := u.GetReadingListArticles(userId)
 
-
 	if err != nil {
 		log.Print(err.Error())
 		return []article.GetAllResponse{}, article.ErrInternalServerError
@@ -70,6 +69,7 @@ func (u *articleUsecase) GetAll(search, userId, sortBy string) ([]article.GetAll
 				Title:        articles.Title,
 				ViewCount:    articles.ViewCount,
 				CommentCount: articles.CommentCount,
+				Description:  articles.Description,
 				Date:         articles.Date.Format("2006-01-02"),
 			}
 			articlesResponse[i] = articleResponse
