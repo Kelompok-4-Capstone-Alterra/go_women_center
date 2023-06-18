@@ -250,6 +250,7 @@ func main() {
 	e.POST("/login", userAuthHandler.LoginHandler)
 
 	e.POST("/verify/forget", userAuthHandler.CheckIsRegistered)
+	e.POST("/forget-password", userAuthHandler.ForgetPassword)
 
 	e.GET("/google/login", userAuthHandler.LoginGoogleHandler)
 	e.GET("/google/callback", userAuthHandler.LoginGoogleCallback)
@@ -346,5 +347,5 @@ func main() {
 	e.Logger.Fatal(e.StartTLS(":8080", "./ssl/certificate.crt", "./ssl/private.key"))
 
 	// e.Logger.Fatal(e.Start(":8080"))
-	
+
 }
