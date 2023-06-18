@@ -1,9 +1,6 @@
 package usecase
 
 import (
-	"errors"
-	"fmt"
-
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/constant"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
@@ -43,25 +40,20 @@ func (fu ForumUsecase) GetAll(getAllRequest forum.GetAllRequest) ([]forum.Respon
 		getAllRequest.SortBy = "member DESC"
 	}
 
+	switch getAllRequest.MyForum {
+	case "yes":
+		getAllRequest.MyForum = getAllRequest.UserId
+	}
+
 	var newCategory string
 	category, ok := constant.TOPICS[getAllRequest.Category]
 	if ok {
 		newCategory = category[0]
 	}
 
-	// if created == "asc" || created == "desc" {
-	// 	forums, totalData, err = fu.ForumR.GetAllByCreated(id_user, topic, created, categories, myforum, offset, limit)
-	// } else if popular == "asc" || popular == "desc" {
-	// 	forums, totalData, err = fu.ForumR.GetAllByPopular(id_user, topic, popular, categories, myforum, offset, limit)
-	// } else {
-	// 	forums, totalData, err = fu.ForumR.GetAll(id_user, topic, categories, myforum, offset, limit)
-	// }
-
 	if getAllRequest.SortBy != "" {
 		forums, totalData, err = fu.ForumR.GetAllSortBy(getAllRequest, newCategory)
-		fmt.Println("masuk if")
 	} else {
-		fmt.Println("masuk else")
 		forums, totalData, err = fu.ForumR.GetAll(getAllRequest, newCategory)
 	}
 
@@ -75,14 +67,14 @@ func (fu ForumUsecase) GetAll(getAllRequest forum.GetAllRequest) ([]forum.Respon
 }
 
 func (fu ForumUsecase) GetById(id, user_id string) (*forum.ResponseForum, error) {
-	forum, err := fu.ForumR.GetById(id, user_id)
+	forumId, err := fu.ForumR.GetById(id, user_id)
 
 	if err != nil {
-		return nil, err
-	} else if forum.ID == "" {
-		return nil, errors.New("invallid id")
+		return nil, forum.ErrFailedGetDetailReadingList
+	} else if forumId.ID == "" {
+		return nil, forum.ErrInvalidId
 	}
-	return forum, nil
+	return forumId, nil
 }
 
 func (fu ForumUsecase) Create(createRequest *forum.CreateRequest) error {
@@ -93,10 +85,10 @@ func (fu ForumUsecase) Create(createRequest *forum.CreateRequest) error {
 	}
 
 	if newCategory == "" {
-		return errors.New("invalllid category forum")
+		return forum.ErrInvalidCategory
 	}
 
-	forum := entity.Forum{
+	createForum := entity.Forum{
 		ID:       createRequest.ID,
 		UserId:   createRequest.UserId,
 		Category: newCategory,
@@ -106,21 +98,21 @@ func (fu ForumUsecase) Create(createRequest *forum.CreateRequest) error {
 		Member:   createRequest.Member,
 	}
 
-	err := fu.ForumR.Create(&forum)
+	err := fu.ForumR.Create(&createForum)
 	if err != nil {
-		return err
+		return forum.ErrFailedCreateReadingList
 	}
 	return nil
 }
 
 func (fu ForumUsecase) Update(id, user_id string, updateRequest *forum.UpdateRequest) error {
-	forum, err := fu.ForumR.GetById(id, user_id)
+	forumId, err := fu.ForumR.GetById(id, user_id)
 	if err != nil {
 		return err
-	} else if forum.ID == "" {
-		return errors.New("invallid id" + id)
-	} else if forum.UserId != user_id {
-		return errors.New("cannot access")
+	} else if forumId.ID == "" {
+		return forum.ErrInvalidId
+	} else if forumId.UserId != user_id {
+		return forum.ErrNotAccess
 	}
 
 	var newCategory string
@@ -130,7 +122,7 @@ func (fu ForumUsecase) Update(id, user_id string, updateRequest *forum.UpdateReq
 	}
 
 	if newCategory == "" {
-		return errors.New("invalllid category forum")
+		return forum.ErrInvalidCategory
 	}
 
 	updateForum := entity.Forum{
@@ -141,25 +133,25 @@ func (fu ForumUsecase) Update(id, user_id string, updateRequest *forum.UpdateReq
 	err = fu.ForumR.Update(id, user_id, &updateForum)
 
 	if err != nil {
-		return err
-	} else if forum.ID == "" {
-		return errors.New("invallid id" + id)
+		return forum.ErrFailedUpdateReadingList
 	}
 	return nil
 }
 
 func (fu ForumUsecase) Delete(id, user_id string) error {
-	forum, err := fu.ForumR.GetById(id, user_id)
+	forumId, err := fu.ForumR.GetById(id, user_id)
 	if err != nil {
 		return err
-	} else if forum.ID == "" {
-		return errors.New("invallid id " + id)
+	} else if forumId.ID == "" {
+		return forum.ErrInvalidId
+	} else if forumId.UserId != user_id {
+		return forum.ErrNotAccess
 	}
 
 	err = fu.ForumR.Delete(id, user_id)
 
 	if err != nil {
-		return err
+		return forum.ErrFailedDeleteReadingList
 	}
 	return nil
 }

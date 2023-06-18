@@ -35,6 +35,10 @@ func (fh ForumHandler) GetAll(c echo.Context) error {
 	getAllRequest.UserId = user.ID
 	getAllRequest.Page, getAllRequest.Offset, getAllRequest.Limit = helper.GetPaginateData(getAllRequest.Page, getAllRequest.Limit)
 
+	if err := isRequestValid(getAllRequest); err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
+	}
+
 	forums, totalPages, err := fh.ForumU.GetAll(getAllRequest)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
@@ -69,6 +73,9 @@ func (fh ForumHandler) Create(c echo.Context) error {
 	createRequest.ID = uuidWithHyphen.String()
 	createRequest.UserId = user.ID
 
+	if err := isRequestValid(createRequest); err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
+	}
 	err := fh.ForumU.Create(&createRequest)
 
 	if err != nil {

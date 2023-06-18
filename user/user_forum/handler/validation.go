@@ -20,9 +20,9 @@ func isRequestValid(m interface{}) error {
 
 				if field == "id" {
 					return userForum.ErrRequiredId
-				} else if field == "user_id" {
+				} else if field == "userid" {
 					return userForum.ErrRequiredUserId
-				} else if field == "forum_id" {
+				} else if field == "forumid" {
 					return userForum.ErrRequiredForumId
 				}
 				return userForum.ErrRequired
