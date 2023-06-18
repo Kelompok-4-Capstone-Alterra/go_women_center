@@ -76,6 +76,7 @@ func (fh ForumHandler) Create(c echo.Context) error {
 	if err := isRequestValid(createRequest); err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
 	}
+
 	err := fh.ForumU.Create(&createRequest)
 
 	if err != nil {
@@ -89,6 +90,10 @@ func (fh ForumHandler) Update(c echo.Context) error {
 	id := c.Param("id")
 	var updateRequest forum.UpdateRequest
 	c.Bind(&updateRequest)
+
+	if err := isRequestValid(updateRequest); err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
+	}
 	err := fh.ForumU.Update(id, user.ID, &updateRequest)
 
 	if err != nil {

@@ -84,9 +84,9 @@ func (fu ForumUsecase) Create(createRequest *forum.CreateRequest) error {
 		newCategory = category[0]
 	}
 
-	if newCategory == "" {
-		return forum.ErrInvalidCategory
-	}
+	// if newCategory == "" {
+	// 	return forum.ErrInvalidCategory
+	// }
 
 	createForum := entity.Forum{
 		ID:       createRequest.ID,
@@ -121,16 +121,12 @@ func (fu ForumUsecase) Update(id, user_id string, updateRequest *forum.UpdateReq
 		newCategory = category[0]
 	}
 
-	if newCategory == "" {
-		return forum.ErrInvalidCategory
-	}
-
 	updateForum := entity.Forum{
 		Category: newCategory,
 		Link:     updateRequest.Link,
 		Topic:    updateRequest.Topic,
 	}
-	err = fu.ForumR.Update(id, user_id, &updateForum)
+	err = fu.ForumR.Update(id, &updateForum)
 
 	if err != nil {
 		return forum.ErrFailedUpdateReadingList
@@ -148,7 +144,7 @@ func (fu ForumUsecase) Delete(id, user_id string) error {
 		return forum.ErrNotAccess
 	}
 
-	err = fu.ForumR.Delete(id, user_id)
+	err = fu.ForumR.Delete(id)
 
 	if err != nil {
 		return forum.ErrFailedDeleteReadingList

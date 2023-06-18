@@ -9,12 +9,10 @@ import (
 type ForumRepository interface {
 	GetAll(getAllRequest forum.GetAllRequest, category string) ([]forum.ResponseForum, int64, error)
 	GetAllSortBy(getAllRequest forum.GetAllRequest, category string) ([]forum.ResponseForum, int64, error)
-	GetAllByPopular(id_user, topic, popular, categories, myforum string, offset, limit int) ([]forum.ResponseForum, int64, error)
-	GetAllByCreated(id_user, topic, created, categories, myforum string, offset, limit int) ([]forum.ResponseForum, int64, error)
 	GetById(id, user_id string) (*forum.ResponseForum, error)
 	Create(forum *entity.Forum) error
-	Update(id, user_id string, forumId *entity.Forum) error
-	Delete(id, user_id string) error
+	Update(id string, forumId *entity.Forum) error
+	Delete(id string) error
 }
 
 type mysqlForumRepository struct {
@@ -52,48 +50,6 @@ func (fr mysqlForumRepository) GetAll(getAllRequest forum.GetAllRequest, categor
 	for i := 0; i < len(response); i++ {
 		for j := 0; j < len(response[i].UserForums); j++ {
 			if response[i].UserForums[j].UserId == getAllRequest.UserId {
-				response[i].Status = true
-				break
-			}
-		}
-		response[i].UserForums = nil
-	}
-
-	if err != nil {
-		return nil, totalData, err
-	}
-
-	return response, totalData, nil
-}
-
-func (fr mysqlForumRepository) GetAllByPopular(id_user, topic, popular, categories, myforum string, offset, limit int) ([]forum.ResponseForum, int64, error) {
-	var logicOperationCategory string
-	var logicOperationUser string
-	var totalData int64
-
-	if categories == "" {
-		logicOperationCategory = "!="
-	} else {
-		logicOperationCategory = "="
-	}
-
-	if myforum == "" {
-		logicOperationUser = "!="
-	} else {
-		logicOperationUser = "="
-	}
-
-	var response []forum.ResponseForum
-	err := fr.DB.Table("forums").
-		Select("forums.id, forums.user_id, forums.category, forums.link, forums.topic, COUNT(user_forums.id) AS member, forums.created_at").
-		Joins("LEFT JOIN user_forums ON forums.id = user_forums.forum_id").Where("forums.user_id "+logicOperationUser+" ? AND forums.category "+logicOperationCategory+" ? AND topic LIKE ?", myforum, categories, "%"+topic+"%").
-		Group("forums.id").Count(&totalData).
-		Order("member " + popular).Offset(offset).Limit(limit).Preload("UserForums").
-		Find(&response).Error
-
-	for i := 0; i < len(response); i++ {
-		for j := 0; j < len(response[i].UserForums); j++ {
-			if response[i].UserForums[j].UserId == id_user {
 				response[i].Status = true
 				break
 			}
@@ -150,48 +106,6 @@ func (fr mysqlForumRepository) GetAllSortBy(getAllRequest forum.GetAllRequest, c
 	return response, totalData, nil
 }
 
-func (fr mysqlForumRepository) GetAllByCreated(id_user, topic, created, categories, myforum string, offset, limit int) ([]forum.ResponseForum, int64, error) {
-	var logicOperationCategory string
-	var logicOperationUser string
-	var totalData int64
-
-	if categories == "" {
-		logicOperationCategory = "!="
-	} else {
-		logicOperationCategory = "="
-	}
-
-	if myforum == "" {
-		logicOperationUser = "!="
-	} else {
-		logicOperationUser = "="
-	}
-
-	var response []forum.ResponseForum
-	err := fr.DB.Table("forums").
-		Select("forums.id, forums.user_id, forums.category, forums.link, forums.topic, COUNT(user_forums.id) AS member, forums.created_at").
-		Joins("LEFT JOIN user_forums ON forums.id = user_forums.forum_id").Where("forums.user_id "+logicOperationUser+" ? AND category "+logicOperationCategory+" ? AND topic LIKE ?", myforum, categories, "%"+topic+"%").
-		Group("forums.id").
-		Order("forums.created_at " + created).Count(&totalData).Offset(offset).Limit(limit).Preload("UserForums").
-		Find(&response).Error
-
-	for i := 0; i < len(response); i++ {
-		for j := 0; j < len(response[i].UserForums); j++ {
-			if response[i].UserForums[j].UserId == id_user {
-				response[i].Status = true
-				break
-			}
-		}
-		response[i].UserForums = nil
-	}
-
-	if err != nil {
-		return nil, totalData, err
-	}
-
-	return response, totalData, nil
-}
-
 func (fr mysqlForumRepository) GetById(id, user_id string) (*forum.ResponseForum, error) {
 	var forumDetail forum.ResponseForum
 
@@ -225,9 +139,9 @@ func (fr mysqlForumRepository) Create(forum *entity.Forum) error {
 	return nil
 }
 
-func (fr mysqlForumRepository) Update(id, user_id string, forumId *entity.Forum) error {
+func (fr mysqlForumRepository) Update(id string, forumId *entity.Forum) error {
 	var forum entity.Forum
-	err := fr.DB.Model(&forum).Where("id = ? AND user_id = ? ", id, user_id).Updates(&forumId).Error
+	err := fr.DB.Model(&forum).Where("id = ?", id).Updates(&forumId).Error
 	if err != nil {
 		return err
 	}
@@ -235,7 +149,7 @@ func (fr mysqlForumRepository) Update(id, user_id string, forumId *entity.Forum)
 	return nil
 }
 
-func (fr mysqlForumRepository) Delete(id, user_id string) error {
+func (fr mysqlForumRepository) Delete(id string) error {
 	err := fr.DB.Transaction(func(tx *gorm.DB) error {
 		err := tx.Model(&entity.UserForum{}).Unscoped().Delete(&entity.UserForum{}, "forum_id = ?", id).Error
 
