@@ -25,15 +25,15 @@ func (r *mysqlCareerRepository) GetAll(search string, offset, limit int) ([]care
 	var career []career.GetAllResponse
 	var count int64
 	err := r.DB.Model(&entity.Career{}).
-		Where("job_position LIKE ? OR company_name LIKE ? OR Location LIKE ? OR CAST(Salary AS CHAR) LIKE ?",
-			"%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
-			Count(&count).
-			Offset(offset).
-			Limit(limit).
-			Find(&career).Error
+		Where("job_position LIKE ? OR company_name LIKE ? OR Location LIKE ? OR CAST(Salary AS CHAR) LIKE ? OR company_email LIKE ?",
+			"%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+		Count(&count).
+		Offset(offset).
+		Limit(limit).
+		Find(&career).Error
 
 	if err != nil {
-		return nil, 0,err
+		return nil, 0, err
 	}
 	return career, count, nil
 }
@@ -51,7 +51,7 @@ func (r *mysqlCareerRepository) GetBySearch(search string) ([]career.GetAllRespo
 	var career []career.GetAllResponse
 
 	err := r.DB.Model(&entity.Career{}).
-		Where("job_position LIKE ? OR company_name LIKE ? OR Location LIKE ? OR CAST(Salary AS CHAR) LIKE ?", 
+		Where("job_position LIKE ? OR company_name LIKE ? OR Location LIKE ? OR CAST(Salary AS CHAR) LIKE ?",
 			"%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Find(&career).Error
 	if err != nil {
