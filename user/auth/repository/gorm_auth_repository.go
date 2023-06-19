@@ -14,6 +14,7 @@ type UserRepository interface {
 	GetByUsername(username string) (entity.User, error)
 	GetByUsernameAndEmail(username, email string) (entity.User, error)
 	GetById(id string) (entity.User, error)
+	Update(userData entity.User) error
 }
 
 type userGormMysqlRepo struct {
@@ -75,4 +76,15 @@ func (u *userGormMysqlRepo) GetByUsernameAndEmail(username, email string) (entit
 	}
 
 	return savedUser, nil
+}
+
+func (u *userGormMysqlRepo) Update(userData entity.User) error {
+
+	err := u.DB.Model(&entity.User{}).Where("id = ?", userData.ID).Updates(userData).Error
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

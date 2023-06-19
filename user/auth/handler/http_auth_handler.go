@@ -175,14 +175,14 @@ func (h *userHandler) RegisterHandler(c echo.Context) error {
 
 	err = h.Usecase.Register(registerRequest)
 	if err != nil {
-		
+
 		status := http.StatusBadRequest
 
 		switch err {
-			case user.ErrUserIsRegistered:
-				status = http.StatusConflict
-			case user.ErrInternalServerError:
-				status = http.StatusInternalServerError
+		case user.ErrUserIsRegistered:
+			status = http.StatusConflict
+		case user.ErrInternalServerError:
+			status = http.StatusInternalServerError
 		}
 
 		return c.JSON(status, helper.ResponseData(
@@ -225,8 +225,8 @@ func (h *userHandler) LoginHandler(c echo.Context) error {
 		status := http.StatusBadRequest
 
 		switch err {
-			case user.ErrInternalServerError:
-				status = http.StatusInternalServerError
+		case user.ErrInternalServerError:
+			status = http.StatusInternalServerError
 		}
 
 		return c.JSON(status, helper.ResponseData(
@@ -244,5 +244,86 @@ func (h *userHandler) LoginHandler(c echo.Context) error {
 		echo.Map{
 			"token": token,
 		},
+	))
+}
+
+// forget pass feature handler for email verif
+func (h *userHandler) CheckIsRegistered(c echo.Context) error {
+	registerReq := user.VerifyEmailRequest{}
+	err := c.Bind(&registerReq)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
+			err.Error(),
+			http.StatusInternalServerError,
+			nil,
+		))
+	}
+
+	if err := isRequestValid(registerReq); err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(
+			err.Error(),
+			http.StatusBadRequest,
+			nil,
+		))
+	}
+
+	err = h.Usecase.CheckIsRegistered(registerReq.Email)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(
+			err.Error(),
+			http.StatusBadRequest,
+			nil,
+		))
+	}
+
+	err = h.Usecase.VerifyEmail(registerReq.Email)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
+			err.Error(),
+			http.StatusInternalServerError,
+			nil,
+		))
+	}
+
+	return c.JSON(http.StatusOK, helper.ResponseData(
+		"success sending otp, valid for 1 minute",
+		http.StatusOK,
+		nil,
+	))
+}
+
+// check otp then send generated new pass to user email
+func (h *userHandler) ForgetPassword(c echo.Context) error {
+	forgetPassReq := user.ForgetPasswordRequest{}
+	err := c.Bind(&forgetPassReq)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
+			err.Error(),
+			http.StatusInternalServerError,
+			nil,
+		))
+	}
+
+	if err := isRequestValid(forgetPassReq); err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(
+			err.Error(),
+			http.StatusBadRequest,
+			nil,
+		))
+	}
+
+	err = h.Usecase.ForgetPassword(forgetPassReq.Email, forgetPassReq.OTP)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
+			err.Error(),
+			http.StatusInternalServerError,
+			nil,
+		))
+	}
+
+	return c.JSON(http.StatusOK, helper.ResponseData(
+		"success sending new password",
+		http.StatusOK,
+		nil,
 	))
 }
