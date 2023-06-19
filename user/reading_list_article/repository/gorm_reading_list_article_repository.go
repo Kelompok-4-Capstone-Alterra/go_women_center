@@ -40,7 +40,7 @@ func (rlar mysqlReadingListArticleRepository) Create(readingListArticle *entity.
 }
 
 func (rlar mysqlReadingListArticleRepository) Delete(id, user_id string) error {
-	err := rlar.DB.Unscoped().Where("id = ? AND user_id = ? ", id, user_id).Delete(&entity.ReadingListArticle{}).Error
+	err := rlar.DB.Where("id = ? AND user_id = ? ", id, user_id).Delete(&entity.ReadingListArticle{}).Error
 	if err != nil {
 		return err
 	}

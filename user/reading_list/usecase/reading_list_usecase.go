@@ -103,7 +103,7 @@ func (rlu ReadingListUsecase) Delete(id, user_id string) error {
 	err = rlu.ReadingListR.Delete(id, user_id)
 
 	if err != nil {
-		return err
+		return readingList.ErrFailedDeleteReadingList
 	}
 	return nil
 }

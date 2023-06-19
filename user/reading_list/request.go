@@ -12,11 +12,11 @@ type GetAllRequest struct {
 type CreateRequest struct {
 	ID          string `gorm:"primarykey" json:"id" validate:"required"`
 	UserId      string `json:"user_id" form:"user_id" validate:"required"`
-	Name        string `json:"name" form:"name"`
-	Description string `json:"description" form:"description"`
+	Name        string `json:"name" form:"name" validate:"required"`
+	Description string `json:"description" form:"description" validate:"required"`
 }
 
 type UpdateRequest struct {
-	Name        string `json:"name" form:"name"`
-	Description string `json:"description" form:"description"`
+	Name        string `json:"name" form:"name" validate:"omitempty"`
+	Description string `json:"description" form:"description" validate:"omitempty"`
 }

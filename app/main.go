@@ -197,7 +197,7 @@ func main() {
 	ReadingListH := ReadingListHandler.NewReadingListHandler(ReadingListU)
 
 	ReadingListArticleR := ReadingListArticleRepository.NewMysqlReadingListArticleRepository(db)
-	ReadingListArticleU := ReadingListArticleUsecase.NewReadingListArticleUsecase(ReadingListArticleR)
+	ReadingListArticleU := ReadingListArticleUsecase.NewReadingListArticleUsecase(ReadingListArticleR, ReadingListR)
 	ReadingListArticleH := ReadingListArticleHandler.NewReadingListArticleHandler(ReadingListArticleU)
 
 	topicHandler := TopicHandler.NewTopicHandler()

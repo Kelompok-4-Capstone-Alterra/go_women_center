@@ -20,8 +20,12 @@ func isRequestValid(m interface{}) error {
 
 				if field == "id" {
 					return readingList.ErrRequiredId
-				} else if field == "user_id" {
+				} else if field == "userid" {
 					return readingList.ErrRequiredUserId
+				} else if field == "name" {
+					return readingList.ErrRequiredName
+				} else if field == "description" {
+					return readingList.ErrRequiredDescription
 				}
 
 				return readingList.ErrRequired
