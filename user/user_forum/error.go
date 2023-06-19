@@ -5,7 +5,9 @@ import (
 )
 
 var (
-	ErrFailedCreateReadingList = errors.New("failed created user forum data")
+	ErrFailedGetDetailUserForum = errors.New("failed to get member forum data details")
+	ErrFailedCreateUserForum    = errors.New("failed created user forum data")
+	ErrFailedJoinUserForum      = errors.New("failed to join forum")
 
 	ErrRequiredId      = errors.New("id is required")
 	ErrRequiredUserId  = errors.New("user id is required")

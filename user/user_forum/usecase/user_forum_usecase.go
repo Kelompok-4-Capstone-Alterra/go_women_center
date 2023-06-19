@@ -21,15 +21,20 @@ func NewUserForumUsecase(UserForumR repository.UserForumRepository) UserForumUse
 }
 
 func (ufu UserForumUsecase) Create(createUserForum *userForum.CreateRequest) error {
-	userForum := entity.UserForum{
+	_, err := ufu.UserForumR.GetById(createUserForum.UserId, createUserForum.ForumId)
+	if err == nil {
+		return userForum.ErrFailedJoinUserForum
+	}
+
+	newUserForum := entity.UserForum{
 		ID:      createUserForum.ID,
 		UserId:  createUserForum.UserId,
 		ForumId: createUserForum.ForumId,
 	}
 
-	err := ufu.UserForumR.Create(&userForum)
+	err = ufu.UserForumR.Create(&newUserForum)
 	if err != nil {
-		return err
+		return userForum.ErrFailedCreateUserForum
 	}
 	return nil
 }
