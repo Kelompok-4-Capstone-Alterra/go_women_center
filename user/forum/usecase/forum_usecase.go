@@ -46,7 +46,7 @@ func (fu ForumUsecase) GetAll(getAllRequest forum.GetAllRequest) ([]forum.Respon
 	}
 
 	var newCategory string
-	category, ok := constant.TOPICS[getAllRequest.Category]
+	category, ok := constant.TOPICS[getAllRequest.CategoryId]
 	if ok {
 		newCategory = category[0]
 	}
@@ -79,14 +79,10 @@ func (fu ForumUsecase) GetById(id, user_id string) (*forum.ResponseForum, error)
 
 func (fu ForumUsecase) Create(createRequest *forum.CreateRequest) error {
 	var newCategory string
-	category, ok := constant.TOPICS[createRequest.Category]
+	category, ok := constant.TOPICS[createRequest.CategoryId]
 	if ok {
 		newCategory = category[0]
 	}
-
-	// if newCategory == "" {
-	// 	return forum.ErrInvalidCategory
-	// }
 
 	createForum := entity.Forum{
 		ID:       createRequest.ID,
@@ -116,7 +112,7 @@ func (fu ForumUsecase) Update(id, user_id string, updateRequest *forum.UpdateReq
 	}
 
 	var newCategory string
-	category, ok := constant.TOPICS[updateRequest.Category]
+	category, ok := constant.TOPICS[updateRequest.CategoryId]
 	if ok {
 		newCategory = category[0]
 	}

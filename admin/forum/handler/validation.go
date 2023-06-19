@@ -18,7 +18,7 @@ func isRequestValid(m interface{}) error {
 
 			if err.Tag() == "required" {
 
-				if field == "category" {
+				if field == "categoryid" {
 					return forum.ErrRequiredCategory
 				} else if field == "link" {
 					return forum.ErrRequiredLink
@@ -32,7 +32,7 @@ func isRequestValid(m interface{}) error {
 			switch field {
 			case "sortby":
 				return forum.ErrInvalidSort
-			case "category":
+			case "categoryid":
 				return forum.ErrInvalidCategory
 			}
 

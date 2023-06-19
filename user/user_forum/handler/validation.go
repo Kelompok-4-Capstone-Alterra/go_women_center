@@ -18,11 +18,7 @@ func isRequestValid(m interface{}) error {
 
 			if err.Tag() == "required" {
 
-				if field == "id" {
-					return userForum.ErrRequiredId
-				} else if field == "userid" {
-					return userForum.ErrRequiredUserId
-				} else if field == "forumid" {
+				if field == "forumid" {
 					return userForum.ErrRequiredForumId
 				}
 				return userForum.ErrRequired

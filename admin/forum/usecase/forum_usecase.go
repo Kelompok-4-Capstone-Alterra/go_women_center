@@ -38,7 +38,7 @@ func (fau ForumAdminUsecase) GetAll(getAllRequest forum.GetAllRequest) ([]forum.
 	}
 
 	var newCategory string
-	category, ok := constant.TOPICS[getAllRequest.Category]
+	category, ok := constant.TOPICS[getAllRequest.CategoryId]
 	if ok {
 		newCategory = category[0]
 	}
