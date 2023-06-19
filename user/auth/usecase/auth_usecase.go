@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"log"
+	"strings"
 	"time"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
@@ -170,12 +171,11 @@ func(u *userUsecase) ForgetPassword(email, otpReq string) error {
 		return err
 	}
 
-	generatedPass, err := u.UuidGenerator.GenerateUUID()
+	genUUID, err := u.UuidGenerator.GenerateUUID()
 	if err != nil {
-		if err != nil {
-			return err
-		}
+		return err
 	}
+	generatedPass := strings.ReplaceAll(genUUID, "-", "")
 	encryptedPass, _ := u.Encryptor.HashPassword(generatedPass)
 
 	err = u.EmailSender.SendEmail(email, "temporary password", generatedPass) //TODO: write subject and body template
