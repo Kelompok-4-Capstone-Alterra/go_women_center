@@ -1,6 +1,8 @@
 package usecase
 
 import (
+	"log"
+	"strings"
 	"time"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
@@ -15,6 +17,8 @@ type UserUsecase interface {
 	Login(loginRequest user.LoginUserRequest) (entity.User, error)
 	GetById(id string) (entity.User, error)
 	CheckUnique(email, username string) error
+	CheckIsRegistered(email string) error
+	ForgetPassword(email, otpReq string) error
 }
 
 type userUsecase struct {
@@ -129,6 +133,60 @@ func(u *userUsecase) CheckUnique(email, username string) error {
 		return user.ErrUserIsRegistered
 	}
 	if err.Error() != user.ErrRecordNotFound.Error(){
+		return err
+	}
+
+	return nil
+}
+
+
+func(u *userUsecase) CheckIsRegistered(email string) error {
+	_, err := u.repo.GetByEmail(email)
+	if err != nil{
+		return err
+	}
+
+	return nil
+}
+
+func(u *userUsecase) ForgetPassword(email, otpReq string) error {
+	storedOtp, err := u.otpRepo.Read(email)
+	if err != nil {
+		return err
+	}
+	if storedOtp.Code != otpReq {
+		storedOtp.Attempt++
+		if storedOtp.Attempt >= 3 {
+			u.otpRepo.Delete(storedOtp.Email)
+			return user.ErrMaxOtpAttempt
+		}
+		u.otpRepo.Update(storedOtp, time.Now().Add(time.Minute).Unix())
+		return user.ErrInvalidOtp
+	}
+	defer u.otpRepo.Delete(storedOtp.Email)
+
+	userData, err := u.repo.GetByEmail(email)
+	if err != nil {
+		log.Println("error getting user data: ", err.Error())
+		return err
+	}
+
+	genUUID, err := u.UuidGenerator.GenerateUUID()
+	if err != nil {
+		return err
+	}
+	generatedPass := strings.ReplaceAll(genUUID, "-", "")
+	encryptedPass, _ := u.Encryptor.HashPassword(generatedPass)
+
+	err = u.EmailSender.SendEmail(email, "temporary password", generatedPass) //TODO: write subject and body template
+	if err != nil {
+		return user.ErrInternalServerError
+	}
+
+	userData.Password = encryptedPass
+	err = u.repo.Update(userData) // TODO: use user profile repo instead
+	if err != nil {
+		log.Println("error updating user data: ", err.Error())
 		return err
 	}
 
