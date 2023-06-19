@@ -30,7 +30,15 @@ func(h *ScheduleHandler) GetCurrSchedule(c echo.Context) error {
 	scheduleTimes, err := h.scheduleUcase.GetCurrSchedule(req.CounselorId)
 
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, helper.ResponseData(err.Error(), http.StatusInternalServerError, nil))
+		status := http.StatusInternalServerError
+
+		switch err {
+			case schedule.ErrCounselorNotFound:
+				status = http.StatusNotFound
+			
+		}
+
+		return c.JSON(status, helper.ResponseData(err.Error(), status, nil))
 	}
 
 	return c.JSON(http.StatusOK, helper.ResponseData("success get current schedule", http.StatusOK, echo.Map{
