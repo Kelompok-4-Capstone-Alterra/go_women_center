@@ -39,5 +39,5 @@ func (ufh UserForumHandler) Create(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(userForum.ErrFailedCreateReadingList.Error(), http.StatusBadRequest, nil))
 	}
-	return c.JSON(http.StatusOK, helper.ResponseData("Successfully joined the forum", http.StatusOK, nil))
+	return c.JSON(http.StatusOK, helper.ResponseData("successfully joined the forum", http.StatusOK, nil))
 }
