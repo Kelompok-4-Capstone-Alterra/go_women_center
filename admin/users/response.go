@@ -14,5 +14,4 @@ type GetByIdResponse struct {
 	Username       string `json:"username"`
 	ProfilePicture string `json:"profile_picture"`
 	PhoneNumber    string `json:"phone_number"`
-	BirthDate      string `json:"birth_date"`
 }

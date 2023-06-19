@@ -2,6 +2,8 @@ package usecase
 
 import (
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
+	readingList "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/reading_list"
+	repositoryReadingList "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/reading_list/repository"
 	readingListArticle "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/reading_list_article"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/reading_list_article/repository"
 )
@@ -13,15 +15,22 @@ type ReadingListArticleUsecaseInterface interface {
 
 type ReadingListArticleUsecase struct {
 	ReadingListArticleR repository.ReadingListArticleRepository
+	ReadingListR        repositoryReadingList.ReadingListRepository
 }
 
-func NewReadingListArticleUsecase(ReadingListArticleR repository.ReadingListArticleRepository) ReadingListArticleUsecaseInterface {
+func NewReadingListArticleUsecase(ReadingListArticleR repository.ReadingListArticleRepository, ReadingListR repositoryReadingList.ReadingListRepository) ReadingListArticleUsecaseInterface {
 	return &ReadingListArticleUsecase{
 		ReadingListArticleR: ReadingListArticleR,
+		ReadingListR:        ReadingListR,
 	}
 }
 
 func (rlau ReadingListArticleUsecase) Create(createRequest *readingListArticle.CreateRequest) error {
+	_, err := rlau.ReadingListR.GetById(createRequest.ReadingListId, createRequest.UserId)
+	if err != nil {
+		return readingList.ErrFailedGetDetailReadingList
+	}
+
 	newReadingListArticle := entity.ReadingListArticle{
 		ID:            createRequest.ID,
 		ArticleId:     createRequest.ArticleId,
@@ -29,7 +38,7 @@ func (rlau ReadingListArticleUsecase) Create(createRequest *readingListArticle.C
 		UserId:        createRequest.UserId,
 	}
 
-	err := rlau.ReadingListArticleR.Create(&newReadingListArticle)
+	err = rlau.ReadingListArticleR.Create(&newReadingListArticle)
 	if err != nil {
 		return readingListArticle.ErrFailedAddReadingListArticle
 	}

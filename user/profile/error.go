@@ -20,5 +20,4 @@ var (
 	ErrIdFormat             = errors.New("id must be a valid uuid")
 	ErrRequired 			= errors.New("all fields are required")
 	ErrPasswordNotMatch 		= errors.New("current password is not match")
-	ErrBirthDateFormat 		= errors.New("birth date must be a valid date format (yyyy-mm-dd)")
 )

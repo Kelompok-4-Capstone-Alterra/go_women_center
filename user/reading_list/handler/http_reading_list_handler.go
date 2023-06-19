@@ -31,7 +31,7 @@ func NewReadingListHandler(ReadingListU usecase.ReadingListUsecaseInterface) Rea
 func (rlh ReadingListHandler) GetAll(c echo.Context) error {
 	var user = c.Get("user").(*helper.JwtCustomUserClaims)
 	var getAllParams readingList.GetAllRequest
-	
+
 	c.Bind(&getAllParams)
 
 	if err := isRequestValid(getAllParams); err != nil {
@@ -41,7 +41,6 @@ func (rlh ReadingListHandler) GetAll(c echo.Context) error {
 	getAllParams.UserId = user.ID
 
 	getAllParams.Page, getAllParams.Offset, getAllParams.Limit = helper.GetPaginateData(getAllParams.Page, getAllParams.Limit)
-
 
 	reading_list, totalPages, err := rlh.ReadingListU.GetAll(getAllParams)
 
@@ -80,6 +79,9 @@ func (rlh ReadingListHandler) Create(c echo.Context) error {
 	createForum.ID = uuidWithHyphen.String()
 	createForum.UserId = user.ID
 
+	if err := isRequestValid(createForum); err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
+	}
 	err := rlh.ReadingListU.Create(&createForum)
 
 	if err != nil {
@@ -93,6 +95,10 @@ func (rlh ReadingListHandler) Update(c echo.Context) error {
 	var updateRequest readingList.UpdateRequest
 	id := c.Param("id")
 	c.Bind(&updateRequest)
+
+	if err := isRequestValid(updateRequest); err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
+	}
 	err := rlh.ReadingListU.Update(id, user.ID, &updateRequest)
 
 	if err != nil {

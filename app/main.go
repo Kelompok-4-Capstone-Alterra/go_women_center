@@ -167,7 +167,7 @@ func main() {
 	adminCareerHandler := CareerAdminHandler.NewCareerHandler(adminCareerUsecase)
 
 	adminUsersRepo := UsersAdminRepository.NewMysqlUserRepository(db)
-	adminUsersUsecase := UsersAdminUsecase.NewUserUsecase(adminUsersRepo)
+	adminUsersUsecase := UsersAdminUsecase.NewUserUsecase(adminUsersRepo, image)
 	adminUsersHandler := UsersAdminHandler.NewUserHandler(adminUsersUsecase)
 
 	adminScheduleRepo := AdminScheduleRepo.NewMysqlScheduleRepository(db)
@@ -196,7 +196,7 @@ func main() {
 	ReadingListH := ReadingListHandler.NewReadingListHandler(ReadingListU)
 
 	ReadingListArticleR := ReadingListArticleRepository.NewMysqlReadingListArticleRepository(db)
-	ReadingListArticleU := ReadingListArticleUsecase.NewReadingListArticleUsecase(ReadingListArticleR)
+	ReadingListArticleU := ReadingListArticleUsecase.NewReadingListArticleUsecase(ReadingListArticleR, ReadingListR)
 	ReadingListArticleH := ReadingListArticleHandler.NewReadingListArticleHandler(ReadingListArticleU)
 
 	topicHandler := TopicHandler.NewTopicHandler()
@@ -248,6 +248,10 @@ func main() {
 	e.POST("/verify", userAuthHandler.VerifyEmailHandler)
 	e.POST("/register", userAuthHandler.RegisterHandler)
 	e.POST("/login", userAuthHandler.LoginHandler)
+
+	e.POST("/verify/forget", userAuthHandler.CheckIsRegistered)
+	e.POST("/forget-password", userAuthHandler.ForgetPassword)
+
 	e.GET("/google/login", userAuthHandler.LoginGoogleHandler)
 	e.GET("/google/callback", userAuthHandler.LoginGoogleCallback)
 	e.POST("/admin/login", adminAuthHandler.LoginHandler)

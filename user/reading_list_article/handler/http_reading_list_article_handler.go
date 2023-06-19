@@ -37,7 +37,7 @@ func (rlah ReadingListArticleHandler) Create(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
 	}
-	return c.JSON(http.StatusOK, helper.ResponseData("Successfully joined the forum", http.StatusOK, nil))
+	return c.JSON(http.StatusOK, helper.ResponseData("successfully saved article to reading list", http.StatusOK, nil))
 }
 
 func (rlah ReadingListArticleHandler) Delete(c echo.Context) error {
@@ -48,5 +48,5 @@ func (rlah ReadingListArticleHandler) Delete(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
 	}
-	return c.JSON(http.StatusOK, helper.ResponseData("successfully deleted reading list data", http.StatusOK, nil))
+	return c.JSON(http.StatusOK, helper.ResponseData("successfully delete article to reading list", http.StatusOK, nil))
 }
