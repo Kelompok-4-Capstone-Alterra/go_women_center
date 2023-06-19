@@ -12,9 +12,6 @@ import (
 	CounselorAdminHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor/handler"
 	CounselorAdminRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor/repository"
 	CounselorAdminUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor/usecase"
-	ForumAdminHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/forum/handler"
-	ForumAdminRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/forum/repository"
-	ForumAdminUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/forum/usecase"
 	AdminScheduleHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/schedule/handler"
 	AdminScheduleRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/schedule/repository"
 	AdminScheduleUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/schedule/usecase"
@@ -43,6 +40,10 @@ import (
 	UserForumAdminHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/user_forum/handler"
 	UserForumAdminRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/user_forum/repository"
 	UserForumAdminUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/user_forum/usecase"
+
+	ForumAdminHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/forum/handler"
+	ForumAdminRepository "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/forum/repository"
+	ForumAdminUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/forum/usecase"
 
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/labstack/echo/v4"
@@ -178,9 +179,9 @@ func main() {
 	forumU := ForumUserUsecase.NewForumUsecase(forumR)
 	forumH := ForumUserHandler.NewForumHandler(forumU)
 
-	forumAdminR := ForumAdminRepository.NewMysqlForumRepository(db)
-	forumAdminU := ForumAdminUsecase.NewForumUsecase(forumAdminR)
-	forumAdminH := ForumAdminHandler.NewForumHandler(forumAdminU)
+	forumAdminR := ForumAdminRepository.NewMysqlForumAdminRepository(db)
+	forumAdminU := ForumAdminUsecase.NewForumAdminUsecase(forumAdminR)
+	forumAdminH := ForumAdminHandler.NewForumAdminHandler(forumAdminU)
 
 	userForumR := UserForumAdminRepository.NewMysqlUserForumRepository(db)
 	userForumU := UserForumAdminUsecase.NewUserForumUsecase(userForumR)
@@ -336,6 +337,8 @@ func main() {
 		restrictAdmin.GET("/users/:id", adminUsersHandler.GetById)
 		restrictAdmin.DELETE("/users/:id", adminUsersHandler.Delete)
 
+		restrictAdmin.GET("/forums", forumAdminH.GetAll)
+		restrictAdmin.GET("/forums/:id", forumAdminH.GetById)
 		restrictAdmin.DELETE("/forums/:id", forumAdminH.Delete)
 
 		restrictAdmin.GET("/transactions", adminTransactionHandler.GetAll)

@@ -1,20 +1,18 @@
 package usecase
 
 import (
-	"strconv"
-
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/constant"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
-	response "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum"
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum/repository"
 )
 
 type ForumUsecaseInterface interface {
-	GetAll(id_user, topic, popular, created, categories, getMyForum string, offset, limit int) ([]response.ResponseForum, int, error)
-	GetById(id, user_id string) (*response.ResponseForum, error)
-	Create(forum *entity.Forum) error
-	Update(id, user_id string, forumId *entity.Forum) error
+	GetAll(getAllRequest forum.GetAllRequest) ([]forum.ResponseForum, int, error)
+	GetById(id, user_id string) (*forum.ResponseForum, error)
+	Create(createRequest *forum.CreateRequest) error
+	Update(id, user_id string, updateRequest *forum.UpdateRequest) error
 	Delete(id, user_id string) error
 }
 
@@ -28,65 +26,124 @@ func NewForumUsecase(ForumR repository.ForumRepository) ForumUsecaseInterface {
 	}
 }
 
-func (fu ForumUsecase) GetAll(id_user, topic, popular, created, categories, myforum string, offset, limit int) ([]response.ResponseForum, int, error) {
-	var forums []response.ResponseForum
+func (fu ForumUsecase) GetAll(getAllRequest forum.GetAllRequest) ([]forum.ResponseForum, int, error) {
+	var forums []forum.ResponseForum
 	var err error
 	var totalData int64
 
-	idCategories, _ := strconv.Atoi(categories)
-	categories = constant.TOPICS[idCategories][0]
+	switch getAllRequest.SortBy {
+	case "oldest":
+		getAllRequest.SortBy = "forums.created_at ASC"
+	case "newest":
+		getAllRequest.SortBy = "forums.created_at DESC"
+	case "popular":
+		getAllRequest.SortBy = "member DESC"
+	}
 
-	if created == "asc" || created == "desc" {
-		forums, totalData, err = fu.ForumR.GetAllByCreated(id_user, topic, created, categories, myforum, offset, limit)
-	} else if popular == "asc" || popular == "desc" {
-		forums, totalData, err = fu.ForumR.GetAllByPopular(id_user, topic, popular, categories, myforum, offset, limit)
+	switch getAllRequest.MyForum {
+	case "yes":
+		getAllRequest.MyForum = getAllRequest.UserId
+	}
+
+	var newCategory string
+	category, ok := constant.TOPICS[getAllRequest.CategoryId]
+	if ok {
+		newCategory = category[0]
+	}
+
+	if getAllRequest.SortBy != "" {
+		forums, totalData, err = fu.ForumR.GetAllSortBy(getAllRequest, newCategory)
 	} else {
-		forums, totalData, err = fu.ForumR.GetAll(id_user, topic, categories, myforum, offset, limit)
+		forums, totalData, err = fu.ForumR.GetAll(getAllRequest, newCategory)
 	}
 
 	if err != nil {
 		return nil, 0, err
 	}
 
-	totalPages := helper.GetTotalPages(int(totalData), limit)
+	totalPages := helper.GetTotalPages(int(totalData), getAllRequest.Limit)
 
 	return forums, totalPages, nil
 }
 
-func (fu ForumUsecase) GetById(id, user_id string) (*response.ResponseForum, error) {
-	forum, err := fu.ForumR.GetById(id, user_id)
+func (fu ForumUsecase) GetById(id, user_id string) (*forum.ResponseForum, error) {
+	forumId, err := fu.ForumR.GetById(id, user_id)
 
 	if err != nil {
-		return nil, err
+		return nil, forum.ErrFailedGetDetailReadingList
+	} else if forumId.ID == "" {
+		return nil, forum.ErrInvalidId
 	}
-	return forum, nil
+	return forumId, nil
 }
 
-func (fu ForumUsecase) Create(forum *entity.Forum) error {
-	topic, _ := strconv.Atoi(forum.Category)
-	forum.Category = constant.TOPICS[topic][0]
+func (fu ForumUsecase) Create(createRequest *forum.CreateRequest) error {
+	var newCategory string
+	category, ok := constant.TOPICS[createRequest.CategoryId]
+	if ok {
+		newCategory = category[0]
+	}
 
-	err := fu.ForumR.Create(forum)
+	createForum := entity.Forum{
+		ID:       createRequest.ID,
+		UserId:   createRequest.UserId,
+		Category: newCategory,
+		Link:     createRequest.Link,
+		Topic:    createRequest.Topic,
+		Status:   createRequest.Status,
+		Member:   createRequest.Member,
+	}
+
+	err := fu.ForumR.Create(&createForum)
 	if err != nil {
-		return err
+		return forum.ErrFailedCreateReadingList
 	}
 	return nil
 }
 
-func (fu ForumUsecase) Update(id, user_id string, forumId *entity.Forum) error {
-	err := fu.ForumR.Update(id, user_id, forumId)
-
+func (fu ForumUsecase) Update(id, user_id string, updateRequest *forum.UpdateRequest) error {
+	forumId, err := fu.ForumR.GetById(id, user_id)
 	if err != nil {
 		return err
+	} else if forumId.ID == "" {
+		return forum.ErrInvalidId
+	} else if forumId.UserId != user_id {
+		return forum.ErrNotAccess
+	}
+
+	var newCategory string
+	category, ok := constant.TOPICS[updateRequest.CategoryId]
+	if ok {
+		newCategory = category[0]
+	}
+
+	updateForum := entity.Forum{
+		Category: newCategory,
+		Link:     updateRequest.Link,
+		Topic:    updateRequest.Topic,
+	}
+	err = fu.ForumR.Update(id, &updateForum)
+
+	if err != nil {
+		return forum.ErrFailedUpdateReadingList
 	}
 	return nil
 }
 
 func (fu ForumUsecase) Delete(id, user_id string) error {
-	err := fu.ForumR.Delete(id, user_id)
-
+	forumId, err := fu.ForumR.GetById(id, user_id)
 	if err != nil {
 		return err
+	} else if forumId.ID == "" {
+		return forum.ErrInvalidId
+	} else if forumId.UserId != user_id {
+		return forum.ErrNotAccess
+	}
+
+	err = fu.ForumR.Delete(id)
+
+	if err != nil {
+		return forum.ErrFailedDeleteReadingList
 	}
 	return nil
 }

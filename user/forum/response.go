@@ -1,10 +1,9 @@
-package response
+package forum
 
 import (
 	"time"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
-	"gorm.io/gorm"
 )
 
 type ResponseForum struct {
@@ -16,7 +15,5 @@ type ResponseForum struct {
 	Status     bool               `json:"status"`
 	Member     int                `json:"member"`
 	CreatedAt  time.Time          `json:"created_at"`
-	UpdatedAt  time.Time          `json:"updated_at"`
-	DeletedAt  gorm.DeletedAt     `gorm:"index" json:"deleted_at"`
-	UserForums []entity.UserForum `gorm:"foreignKey:ForumId" json:"user_forums"`
+	UserForums []entity.UserForum `gorm:"foreignKey:ForumId" json:"-"`
 }

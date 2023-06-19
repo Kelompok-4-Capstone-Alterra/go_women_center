@@ -17,8 +17,8 @@ func NewMysqlUserForumRepository(db *gorm.DB) UserForumRepository {
 	return &mysqlUserForumRepository{DB: db}
 }
 
-func (fr mysqlUserForumRepository) Create(user_forum *entity.UserForum) error {
-	err := fr.DB.Save(user_forum).Error
+func (ufr mysqlUserForumRepository) Create(user_forum *entity.UserForum) error {
+	err := ufr.DB.Save(user_forum).Error
 
 	if err != nil {
 		return err
