@@ -1,6 +1,9 @@
 package repository
 
 import (
+	"log"
+
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/transaction"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"gorm.io/gorm"
 )
@@ -9,6 +12,7 @@ type MysqlTransactionRepository interface {
 	GetAll(search, sortBy string, offset, limit int) ([]entity.Transaction, int64, error)
 	GetById(id string) (entity.Transaction, error)
 	UpdateById(id, link, status string) (entity.Transaction, error)
+	GetAllForReport(transaction.ReportRequest) ([]entity.Transaction, int64, error)
 }
 
 type mysqlTransactionRepository struct {
@@ -82,4 +86,55 @@ func (tr *mysqlTransactionRepository) UpdateById(id, link, status string) (entit
 	}
 
 	return updatedData, nil
+}
+
+// if func is called for displaying in web, will use pagination data
+// 
+// else will not be using pagination
+func (tr *mysqlTransactionRepository) GetAllForReport(tReq transaction.ReportRequest) ([]entity.Transaction, int64, error) {
+	search := tReq.Search
+	sortBy := tReq.SortBy
+	
+	transactionData := []entity.Transaction{}
+	count := int64(0)
+	
+	dbQuery := tr.DB.
+		Debug().
+		Model(&entity.Transaction{}).
+		Preload("Counselor").
+		Where(
+			"counselor_topic LIKE ? OR consultation_method LIKE ? OR date_id LIKE ? OR time_id LIKE ? OR id LIKE ? OR user_id LIKE ? OR counselor_id LIKE ? OR status LIKE ?",
+			"%"+search+"%",
+			"%"+search+"%",
+			"%"+search+"%",
+			"%"+search+"%",
+			"%"+search+"%",
+			"%"+search+"%",
+			"%"+search+"%",
+			"%"+search+"%")
+
+	log.Println(transactionData)
+
+	// for pagination
+	if !tReq.IsDownload {
+		dbQuery.Count(&count).
+			Offset(tReq.Offset).
+			Limit(tReq.Limit)
+	}
+
+	if tReq.StartDate != "" && tReq.EndDate != "" {
+		dbQuery.
+			Where("created_at BETWEEN ? AND ?", tReq.StartDate, tReq.EndDate)
+	}
+	dbQuery.
+		Order(sortBy).
+		Find(&transactionData)
+
+	log.Println(transactionData)
+
+	if err := dbQuery.Error; err != nil {
+		return nil, 0, err
+	}
+
+	return transactionData, count, nil
 }
