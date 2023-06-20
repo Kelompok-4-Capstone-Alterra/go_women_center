@@ -68,11 +68,11 @@ func (h *counselorHandler) Create(c echo.Context) error {
 	if err != nil {
 		status := http.StatusInternalServerError
 
-		switch err.Error() {
-		case counselor.ErrEmailConflict.Error(),
-			counselor.ErrUsernameConflict.Error():
+		switch err {
+		case counselor.ErrEmailConflict,
+			counselor.ErrUsernameConflict:
 			status = http.StatusConflict
-		case counselor.ErrProfilePictureFormat.Error():
+		case counselor.ErrProfilePictureFormat:
 			status = http.StatusBadRequest
 		}
 

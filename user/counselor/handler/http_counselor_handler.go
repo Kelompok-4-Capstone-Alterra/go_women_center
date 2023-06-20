@@ -80,8 +80,10 @@ func (h *counselorHandler) GetAllReview(c echo.Context) error {
 		status := http.StatusInternalServerError
 
 		switch err {
-		case counselor.ErrCounselorNotFound:
-			status = http.StatusNotFound
+			case counselor.ErrCounselorNotFound:
+				status = http.StatusNotFound
+			case counselor.ErrReviewAlreadyExist:
+				status = http.StatusConflict
 		}
 
 		return c.JSON(status, helper.ResponseData(err.Error(), status, nil))
