@@ -32,16 +32,21 @@ func (h *scheduleHandler) GetByCounselorId(c echo.Context) error {
 		)
 	}
 
-	schedule, err := h.Usecase.GetByCounselorId(req.CounselorId)
+	scheduleRes, err := h.Usecase.GetByCounselorId(req.CounselorId)
 
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError,
-			helper.ResponseData(err.Error(), http.StatusInternalServerError, nil),
+		status := http.StatusInternalServerError
+		switch err {
+			case schedule.ErrCounselorNotFound:
+				status = http.StatusNotFound
+		}
+		return c.JSON(status,
+			helper.ResponseData(err.Error(), status, nil),
 		)
 	}
 
 	return c.JSON(http.StatusOK, helper.ResponseData("success get schedule counselor", http.StatusOK, echo.Map{
-		"schedule": schedule,
+		"schedule": scheduleRes,
 	}))
 }
 
@@ -67,6 +72,7 @@ func (h *scheduleHandler) Create(c echo.Context) error {
 			case schedule.ErrCounselorNotFound:
 				status = http.StatusNotFound
 			case schedule.ErrTimeInvalid,
+				schedule.ErrScheduleAlreadyExist,
 				schedule.ErrDateInvalid:
 				status = http.StatusBadRequest
 		}

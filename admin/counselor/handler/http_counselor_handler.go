@@ -29,8 +29,8 @@ func (h *counselorHandler) GetAll(c echo.Context) error {
 	}
 
 	page, offset, limit := helper.GetPaginateData(req.Page, req.Limit)
-
-	counselors, totalPages, err := h.CUscase.GetAll(req.Search, req.SortBy, offset, limit)
+	
+	counselors, totalPages, err := h.CUscase.GetAll(req.Search, req.SortBy, req.HasSchedule, offset, limit)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, helper.ResponseData(err.Error(), http.StatusInternalServerError, nil))
@@ -54,6 +54,7 @@ func (h *counselorHandler) Create(c echo.Context) error {
 	counselorReq.ProfilePicture = file
 
 	c.Bind(&counselorReq)
+	helper.RemoveWhiteSpace(&counselorReq)
 
 	if err := isRequestValid(counselorReq); err != nil {
 		return c.JSON(
@@ -120,6 +121,7 @@ func (h *counselorHandler) Update(c echo.Context) error {
 	counselorReq.ProfilePicture = file
 
 	c.Bind(&counselorReq)
+	helper.RemoveWhiteSpace(&counselorReq)
 
 	if err := isRequestValid(counselorReq); err != nil {
 		return c.JSON(

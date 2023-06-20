@@ -26,6 +26,8 @@ func isRequestValid(m interface{}) error {
 			}
 
 			switch field {
+			case "hasschedule": 
+				return counselor.ErrHasScheduleFormat
 			case "email":
 				return counselor.ErrEmailFormat
 			case "price":
