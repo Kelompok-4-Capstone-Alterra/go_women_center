@@ -139,36 +139,30 @@ func (tu *transactionUsecase) GenerateReport(transactionRecord []entity.Transact
 
 	csvW := csv.NewWriter(file)
 
-	row := []string{"date_id",
-		"time_id",
+	row := []string{
 		"id",
 		"user_id",
 		"counselor_id",
-		"link",
-		"time_start",
+		"counselor name",
 		"consultation_method",
+		"consultation topic",
 		"status",
-		"value_voucher",
-		"gross_price",
 		"total_price",
-		"is_reviewed",
 		"created_at",
 	}
 	csvW.Write(row)
 	for _, tr := range transactionRecord {
-		row = []string{tr.TimeId,
+		
+		row = []string{
 			tr.ID,
 			tr.UserId,
 			tr.CounselorID,
-			tr.Link,
-			tr.TimeStart,
+			tr.Counselor.Name,
 			tr.ConsultationMethod,
+			tr.Counselor.Topic,
 			tr.Status,
-			strconv.Itoa(int(tr.ValueVoucher)),
-			strconv.Itoa(int(tr.GrossPrice)),
 			strconv.Itoa(int(tr.TotalPrice)),
-			strconv.FormatBool(tr.IsReviewed),
-			tr.Created_at.String(),
+			tr.Created_at.Format("02/01/2006"),
 		}
 		err := csvW.Write(row)
 		if err != nil {
