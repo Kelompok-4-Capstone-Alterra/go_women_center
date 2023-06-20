@@ -39,7 +39,7 @@ services:
     networks:
       - network_go_women_center
     ports:
-      - 5432:5432
+      - 3306:3306
     volumes:
       - ./db/backup:/var/lib/mysql
 
