@@ -29,8 +29,8 @@ func (h *counselorHandler) GetAll(c echo.Context) error {
 	}
 
 	page, offset, limit := helper.GetPaginateData(req.Page, req.Limit)
-
-	counselors, totalPages, err := h.CUscase.GetAll(req.Search, req.SortBy, offset, limit)
+	
+	counselors, totalPages, err := h.CUscase.GetAll(req.Search, req.SortBy, req.HasSchedule, offset, limit)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, helper.ResponseData(err.Error(), http.StatusInternalServerError, nil))
