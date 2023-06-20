@@ -10,5 +10,5 @@ var TOPICS = map[int][]string{
 	7:  {"couples", "https://women-center.s3.ap-southeast-1.amazonaws.com/ca626e30-5b2c-4348-9421-8c09bff73b6c-couples.jpg"},
 	8:  {"depression", "https://women-center.s3.ap-southeast-1.amazonaws.com/f2526643-dd49-4656-81f1-60978c7ea5f4-depression.jpg"},
 	9:  {"mental disorder", "https://women-center.s3.ap-southeast-1.amazonaws.com/36d7b998-d6f5-4385-8edd-587abb69162b-mental_disorder.jpg"},
-	10: {"self harming behaviour", "https://women-center.s3.ap-southeast-1.amazonaws.com/ac9e3cd6-d178-44e9-aae4-3791d216868e-self-development.jpg"},
+	10: {"self harming behaviour", "https://women-center.s3.ap-southeast-1.amazonaws.com/7c75f14c-3126-4fce-9f2d-f642c9c2030f-self_harming_behaviour.jpg"},
 }
