@@ -29,7 +29,7 @@ func (rlr mysqlReadingListRepository) GetAll(getAllParams readingList.GetAllRequ
 	var dataReadingList []readingList.ReadingList
 	var totalData int64
 
-	err := rlr.DB.Table("reading_lists").Select("reading_lists.id, reading_lists.user_id, reading_lists.name, reading_lists.description, COUNT(reading_list_articles.id) AS article_total").
+	err := rlr.DB.Table("reading_lists").Select("reading_lists.id, reading_lists.user_id, reading_lists.name, reading_lists.description, COUNT(reading_list_articles.id) AS article_total,reading_lists.created_at").
 		Joins("LEFT JOIN reading_list_articles ON reading_lists.id = reading_list_articles.reading_list_id").
 		Joins("LEFT JOIN articles ON articles.id = reading_list_articles.article_id").Where("reading_lists.user_id = ? AND reading_lists.name LIKE ?", getAllParams.UserId, "%"+getAllParams.Name+"%").
 		Group("reading_lists.id").Order(getAllParams.SortBy).Count(&totalData).Offset(getAllParams.Offset).Limit(getAllParams.Limit).Preload("ReadingListArticles.Articles").Find(&dataReadingList).Error
@@ -44,7 +44,7 @@ func (rlr mysqlReadingListRepository) GetAll(getAllParams readingList.GetAllRequ
 func (rlr mysqlReadingListRepository) GetById(id, user_id string) (*readingList.ReadingList, error) {
 
 	var readingList readingList.ReadingList
-	err := rlr.DB.Table("reading_lists").Select("reading_lists.id, reading_lists.user_id, reading_lists.name, reading_lists.description, COUNT(reading_list_articles.id) AS article_total").
+	err := rlr.DB.Table("reading_lists").Select("reading_lists.id, reading_lists.user_id, reading_lists.name, reading_lists.description, COUNT(reading_list_articles.id) AS article_total,reading_lists.created_at").
 		Joins("LEFT JOIN reading_list_articles ON reading_lists.id = reading_list_articles.reading_list_id").
 		Joins("LEFT JOIN articles ON articles.id = reading_list_articles.article_id").Where("reading_lists.user_id = ?", user_id).
 		Group("reading_lists.id").
