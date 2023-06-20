@@ -119,12 +119,12 @@ func (tu *transactionUsecase) GetAllForReport(tReq transaction.ReportRequest) ([
 	case "oldest":
 		tReq.SortBy = "created_at ASC"
 	}
-	data, dataCount, err := tu.repo.GetAllForReport(tReq)
+	trList, dataCount, err := tu.repo.GetAllForReport(tReq)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	return data, int(dataCount), nil
+	return trList, int(dataCount), nil
 }
 
 func (tu *transactionUsecase) GenerateReport(transactionRecord []entity.Transaction) (string, int, error) {
@@ -148,11 +148,11 @@ func (tu *transactionUsecase) GenerateReport(transactionRecord []entity.Transact
 		"consultation topic",
 		"status",
 		"total_price",
-		"created_at",
+		"date",
+		"time",
 	}
 	csvW.Write(row)
 	for _, tr := range transactionRecord {
-		
 		row = []string{
 			tr.ID,
 			tr.UserId,
@@ -163,6 +163,7 @@ func (tu *transactionUsecase) GenerateReport(transactionRecord []entity.Transact
 			tr.Status,
 			strconv.Itoa(int(tr.TotalPrice)),
 			tr.Created_at.Format("02/01/2006"),
+			tr.TimeStart,
 		}
 		err := csvW.Write(row)
 		if err != nil {
