@@ -16,6 +16,7 @@ type CancelTransactionRequest struct {
 	TransactionId string `json:"transaction_id" validate:"required,uuid"`
 }
 
+// after initialization, set the download
 type ReportRequest struct {
 	StartDate  string    `query:"start_date" validate:"omitempty"`
 	EndDate    string    `query:"end_date" validate:"omitempty"`

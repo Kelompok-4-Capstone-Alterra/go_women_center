@@ -109,6 +109,41 @@ func (th *transactionHandler) CancelTransaction(c echo.Context) error {
 	))
 }
 
+func (th *transactionHandler) GetReport(c echo.Context) error {
+	reportReq := transaction.ReportRequest{}
+	err := c.Bind(&reportReq)
+	if err != nil {
+		log.Println(err.Error())
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(
+			err.Error(),
+			http.StatusBadRequest,
+			nil,
+		))
+	}
+	reportReq.IsDownload = false
+
+	page, offset, limit := helper.GetPaginateData(reportReq.Page, reportReq.Limit)
+	reportReq.Page = page
+	reportReq.Offset = offset
+	reportReq.Limit = limit
+
+	data, totalPages, err := th.Usecase.GetAllForReport(reportReq)
+	if err != nil {
+		log.Println(err)
+		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
+			err.Error(),
+			http.StatusInternalServerError,
+			nil,
+		))
+	}
+
+	return c.JSON(http.StatusOK, helper.ResponseData("success get all transaction", http.StatusOK, echo.Map{
+		"current_pages": page,
+		"total_pages":   totalPages,
+		"transaction":   data,
+	}))
+}
+
 func (th *transactionHandler) DownloadReport(c echo.Context) error {
 	// TODO: validation
 	reportReq := transaction.ReportRequest{}
