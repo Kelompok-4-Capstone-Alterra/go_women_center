@@ -87,7 +87,6 @@ func(u *counselorUsecase) CreateReview(inputReview counselor.CreateReviewRequest
 	}
 
 	if transaction.IsReviewed {
-		log.Println("review already exist")
 		return counselor.ErrReviewAlreadyExist
 	}
 
