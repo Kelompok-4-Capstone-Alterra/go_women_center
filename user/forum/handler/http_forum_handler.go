@@ -73,6 +73,8 @@ func (fh ForumHandler) Create(c echo.Context) error {
 	createRequest.ID = uuidWithHyphen.String()
 	createRequest.UserId = user.ID
 
+	helper.RemoveWhiteSpace(&createRequest)
+
 	if err := isRequestValid(createRequest); err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
 	}
@@ -91,11 +93,13 @@ func (fh ForumHandler) Update(c echo.Context) error {
 	var updateRequest forum.UpdateRequest
 	c.Bind(&updateRequest)
 
+	helper.RemoveWhiteSpace(&updateRequest)
+
 	if err := isRequestValid(updateRequest); err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
 	}
-	err := fh.ForumU.Update(id, user.ID, &updateRequest)
 
+	err := fh.ForumU.Update(id, user.ID, &updateRequest)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
 	}
