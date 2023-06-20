@@ -117,7 +117,7 @@ func (tr *mysqlTransactionRepository) GetAllForReport(tReq transaction.ReportReq
 
 	// for pagination
 	if !tReq.IsDownload {
-		dbQuery.Count(&count).
+		dbQuery.
 			Offset(tReq.Offset).
 			Limit(tReq.Limit)
 	}
@@ -138,6 +138,7 @@ func (tr *mysqlTransactionRepository) GetAllForReport(tReq transaction.ReportReq
 	}
 
 	dbQuery.
+		Count(&count).
 		Order(sortBy).
 		Find(&transactionData)
 
