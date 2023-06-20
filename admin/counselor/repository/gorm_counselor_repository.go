@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"log"
+
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"gorm.io/gorm"
@@ -8,6 +10,8 @@ import (
 
 type CounselorRepository interface {
 	GetAll(search, sortBy string, offset, limit int) ([]counselor.GetAllResponse, int64, error)
+	GetAllHasSchedule(search, sortBy string, offset, limit int) ([]counselor.GetAllResponse, int64, error)
+	GetAllNotHasSchedule(search, sortBy string, offset, limit int) ([]counselor.GetAllResponse, int64, error)
 	GetById(id string) (counselor.GetByResponse, error)
 	GetByEmail(email string) (counselor.GetByResponse, error)
 	GetByUsername(username string) (counselor.GetByResponse, error)
@@ -40,6 +44,58 @@ func(r *mysqlCounselorRepository) GetAll(search, sortBy string, offset, limit in
 		return nil, totalData,err
 	}
 	
+	return counselor, totalData, nil
+}
+
+func(r *mysqlCounselorRepository) GetAllHasSchedule(search, sortBy string, offset, limit int) ([]counselor.GetAllResponse, int64, error) {
+
+	var counselor []counselor.GetAllResponse
+
+	var totalData int64
+	// get counselor that has schedule
+	err := r.DB.Table("counselors").
+		Joins("INNER JOIN dates ON counselors.id = dates.counselor_id").
+		Where("counselors.name LIKE ? OR counselors.topic LIKE ? OR counselors.username LIKE ? OR counselors.email LIKE ?",
+		"%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+		Group("counselors.id").
+		Count(&totalData).
+		Order(sortBy).
+		Offset(offset).
+		Limit(limit).
+		Find(&counselor).Error
+
+	if err != nil {
+		log.Println(err)
+		return nil, totalData, err
+	}
+	
+	return counselor, totalData, nil
+}
+
+func(r *mysqlCounselorRepository) GetAllNotHasSchedule(search, sortBy string, offset, limit int) ([]counselor.GetAllResponse, int64, error) {
+
+	var counselor []counselor.GetAllResponse
+
+	var totalData int64
+
+	// get counselor that not has schedule
+	err := r.DB.Table("counselors").
+		Joins("LEFT JOIN dates ON counselors.id = dates.counselor_id").
+		Where("dates.counselor_id IS NULL").
+		Where("counselors.name LIKE ? OR counselors.topic LIKE ? OR counselors.username LIKE ? OR counselors.email LIKE ?",
+		"%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+		Group("counselors.id").
+		Count(&totalData).
+		Order(sortBy).
+		Offset(offset).
+		Limit(limit).
+		Find(&counselor).Error
+
+	if err != nil {
+		log.Println(err)
+		return nil, totalData, err
+	}
+
 	return counselor, totalData, nil
 }
 

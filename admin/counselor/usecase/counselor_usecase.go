@@ -2,14 +2,15 @@ package usecase
 
 import (
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor"
-	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor/repository"
+	repo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor/repository"
+	repoSchedule "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/schedule/repository"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/constant"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
 )
 
 type CounselorUsecase interface {
-	GetAll(search, sortBy string, offset, limit int) ([]counselor.GetAllResponse, int, error)
+	GetAll(search, sortBy, hasSchedule string, offset, limit int) ([]counselor.GetAllResponse, int, error)
 	GetById(id string) (counselor.GetByResponse, error)
 	Create(input counselor.CreateRequest) error
 	Update(input counselor.UpdateRequest) error
@@ -17,15 +18,16 @@ type CounselorUsecase interface {
 }
 
 type counselorUsecase struct {
-	CounselorRepo repository.CounselorRepository
+	CounselorRepo repo.CounselorRepository
+	ScheduleRepo repoSchedule.ScheduleRepository
 	Image helper.Image
 }
 
-func NewCounselorUsecase(CRepo repository.CounselorRepository, Image helper.Image) CounselorUsecase {
-	return &counselorUsecase{CounselorRepo: CRepo, Image: Image}
+func NewCounselorUsecase(CRepo repo.CounselorRepository, SRepo repoSchedule.ScheduleRepository, Image helper.Image) CounselorUsecase {
+	return &counselorUsecase{CRepo, SRepo, Image}
 }
 
-func(u *counselorUsecase) GetAll(search, sortBy string, offset, limit int) ([]counselor.GetAllResponse, int, error) {
+func(u *counselorUsecase) GetAll(search, sortBy, hasSchedule string, offset, limit int) ([]counselor.GetAllResponse, int, error) {
 	
 	switch sortBy {
 		case "oldest":
@@ -33,8 +35,15 @@ func(u *counselorUsecase) GetAll(search, sortBy string, offset, limit int) ([]co
 		case "newest":
 			sortBy = "created_at DESC"
 	}
-
-	counselors, totalData, err := u.CounselorRepo.GetAll(search, sortBy, offset, limit)
+	var counselors, totalData, err = []counselor.GetAllResponse{}, int64(0), error(nil)
+	switch hasSchedule {
+		case "true":
+			counselors, totalData, err = u.CounselorRepo.GetAllHasSchedule(search, sortBy, offset, limit)
+		case "false":
+			counselors, totalData, err = u.CounselorRepo.GetAllNotHasSchedule(search, sortBy, offset, limit)
+		default:
+			counselors, totalData, err = u.CounselorRepo.GetAll(search, sortBy, offset, limit)
+	}
 
 	if err != nil {
 		return nil, 0, counselor.ErrInternalServerError

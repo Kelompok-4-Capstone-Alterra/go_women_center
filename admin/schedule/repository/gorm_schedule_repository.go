@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/schedule"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"gorm.io/gorm"
 )
@@ -9,7 +8,8 @@ import (
 type ScheduleRepository interface {
 	DeleteByCounselorId(counselorId string) error
 	Create(dates []entity.Date, times []entity.Time) error
-	GetByCounselorId(counselorId string) (schedule.GetAllResponse, error)
+	GetTimeByCounselorId(counselorId string) ([]entity.Time, error)
+	GetDateByCounselorId(counselorId string) ([]entity.Date, error)
 	Update(counselorId string, dates []entity.Date, times []entity.Time) error
 }
 
@@ -72,40 +72,23 @@ func (r *mysqlScheduleRepository) Create(dates []entity.Date, times []entity.Tim
 	return nil
 }
 
-func (r *mysqlScheduleRepository) GetByCounselorId(counselorId string) (schedule.GetAllResponse, error) {
-
-	var dates []entity.Date
+func (r *mysqlScheduleRepository) GetTimeByCounselorId(counselorId string) ([]entity.Time, error) {
 	var times []entity.Time
+	err := r.DB.Find(&times, "counselor_id = ?", counselorId).Error
 
-	var schedule schedule.GetAllResponse
+	if err != nil {
+		return times, err
+	}
+	return times, nil
+}
 
+func (r *mysqlScheduleRepository) GetDateByCounselorId(counselorId string) ([]entity.Date, error) {
+	var dates []entity.Date
 	err := r.DB.Find(&dates, "counselor_id = ?", counselorId).Error
-
 	if err != nil {
-		return schedule, err
+		return dates, err
 	}
-
-	err = r.DB.Find(&times, "counselor_id = ?", counselorId).Error
-
-	if err != nil {
-		return schedule, err
-	}
-
-	var datesRes = make([]string, len(dates))
-	var timesRes = make([]string, len(times))
-
-	for i, date := range dates {
-		datesRes[i] = date.Date.Format("2006-01-02")
-	}
-
-	for i, time := range times {
-		timesRes[i] = time.Time
-	}
-
-	schedule.Dates = datesRes
-	schedule.Times = timesRes
-	
-	return schedule, nil
+	return dates, nil
 }
 
 func (r *mysqlScheduleRepository) Update(counselorId string, dates []entity.Date, times []entity.Time) error {

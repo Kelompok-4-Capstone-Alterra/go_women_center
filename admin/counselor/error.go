@@ -27,4 +27,5 @@ var (
 	ErrRequiredTopic 		= errors.New("topic is required")
 	ErrRequired = errors.New("all fields are required")
 	ErrInvalidSort 			= errors.New("invalid sort")
+	ErrHasScheduleFormat 	= errors.New("has_schedule must be true or false")
 )

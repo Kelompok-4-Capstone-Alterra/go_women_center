@@ -26,6 +26,7 @@ type UpdateRequest struct {
 type GetAllRequest struct {
 	Page int `query:"page" validate:"omitempty"`
 	Limit int `query:"limit" validate:"omitempty"`
+	HasSchedule string `query:"has_schedule" validate:"omitempty,oneof=true false"`
 	Search string `query:"search" validate:"omitempty"`
 	SortBy string `query:"sort_by" validate:"omitempty,oneof=oldest newest"`
 }
