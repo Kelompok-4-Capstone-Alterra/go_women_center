@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
@@ -81,7 +80,6 @@ func (rlh ReadingListHandler) Create(c echo.Context) error {
 	createForum.UserId = user.ID
 
 	helper.RemoveWhiteSpace(&createForum)
-	fmt.Println(createForum)
 
 	if err := isRequestValid(createForum); err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
@@ -99,6 +97,8 @@ func (rlh ReadingListHandler) Update(c echo.Context) error {
 	var updateRequest readingList.UpdateRequest
 	id := c.Param("id")
 	c.Bind(&updateRequest)
+
+	helper.RemoveWhiteSpace(&updateRequest)
 
 	if err := isRequestValid(updateRequest); err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
