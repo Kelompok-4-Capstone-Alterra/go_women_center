@@ -54,6 +54,7 @@ func (h *counselorHandler) Create(c echo.Context) error {
 	counselorReq.ProfilePicture = file
 
 	c.Bind(&counselorReq)
+	helper.RemoveWhiteSpace(&counselorReq)
 
 	if err := isRequestValid(counselorReq); err != nil {
 		return c.JSON(
@@ -120,6 +121,7 @@ func (h *counselorHandler) Update(c echo.Context) error {
 	counselorReq.ProfilePicture = file
 
 	c.Bind(&counselorReq)
+	helper.RemoveWhiteSpace(&counselorReq)
 
 	if err := isRequestValid(counselorReq); err != nil {
 		return c.JSON(
