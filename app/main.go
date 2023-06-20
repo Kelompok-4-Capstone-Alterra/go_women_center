@@ -159,9 +159,7 @@ func main() {
 	adminAuthUsecase := AdminAuthUsecase.NewAuthUsecase(adminAuthRepo, encryptor)
 	adminAuthHandler := AdminAuthHandler.NewAuthHandler(adminAuthUsecase, jwtConf)
 
-	adminCounselorRepo := CounselorAdminRepo.NewMysqlCounselorRepository(db)
-	adminCounselorUsecase := CounselorAdminUsecase.NewCounselorUsecase(adminCounselorRepo, image)
-	adminCounselorHandler := CounselorAdminHandler.NewCounselorHandler(adminCounselorUsecase)
+	
 
 	adminCareerRepo := CareerAdminRepository.NewMysqlCareerRepository(db)
 	adminCareerUsecase := CareerAdminUsecase.NewCareerUsecase(adminCareerRepo, image)
@@ -171,7 +169,10 @@ func main() {
 	adminUsersUsecase := UsersAdminUsecase.NewUserUsecase(adminUsersRepo, image)
 	adminUsersHandler := UsersAdminHandler.NewUserHandler(adminUsersUsecase)
 
+	adminCounselorRepo := CounselorAdminRepo.NewMysqlCounselorRepository(db)
 	adminScheduleRepo := AdminScheduleRepo.NewMysqlScheduleRepository(db)
+	adminCounselorUsecase := CounselorAdminUsecase.NewCounselorUsecase(adminCounselorRepo, adminScheduleRepo ,image)
+	adminCounselorHandler := CounselorAdminHandler.NewCounselorHandler(adminCounselorUsecase)
 	adminScheduleUsecase := AdminScheduleUsecase.NewScheduleUsecase(adminCounselorRepo, adminScheduleRepo, googleUUID)
 	adminScheduleHandler := AdminScheduleHandler.NewScheduleHandler(adminScheduleUsecase)
 

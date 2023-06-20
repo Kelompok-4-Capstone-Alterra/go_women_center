@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"log"
+	"sync"
 	"time"
 
 	Counselor "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor/repository"
@@ -43,7 +44,59 @@ func(u *scheduleUsecase) GetByCounselorId(counselorId string) (schedule.GetAllRe
 		return schedule.GetAllResponse{}, schedule.ErrCounselorNotFound
 	}
 
-	scheduleRes, err := u.scheduleRepo.GetByCounselorId(counselorId)
+	g := errgroup.Group{}
+	
+	var dates []entity.Date
+	var times []entity.Time
+
+	g.Go(func() error {
+		var err error
+		dates, err = u.scheduleRepo.GetDateByCounselorId(counselorId)
+		if err != nil {
+			return schedule.ErrInternalServerError
+		}
+		return nil
+	})
+
+	g.Go(func() error {
+		var err error
+		times, err = u.scheduleRepo.GetTimeByCounselorId(counselorId)
+		if err != nil {
+			return schedule.ErrInternalServerError
+		}
+		return nil
+	})
+	
+	var scheduleRes schedule.GetAllResponse
+
+	if err := g.Wait(); err != nil {
+		return scheduleRes, err
+	}
+
+	var datesRes = make([]string, len(dates))
+	var timesRes = make([]string, len(times))
+
+	wg := sync.WaitGroup{}
+
+	for i, date := range dates {
+		wg.Add(1)
+		go func(i int, date entity.Date) {
+			defer wg.Done()
+			datesRes[i] = date.Date.Format("2006-01-02")
+		}(i, date)
+	}
+
+	for i, time := range times {
+		wg.Add(1)
+		go func(i int, time entity.Time) {
+			defer wg.Done()
+			timesRes[i] = time.Time
+		}(i, time)
+	}
+	wg.Wait()
+
+	scheduleRes.Dates = datesRes
+	scheduleRes.Times = timesRes
 
 	if err != nil {
 		log.Println(err.Error())
@@ -61,7 +114,17 @@ func(u *scheduleUsecase) Create(input schedule.CreateRequest) error {
 		log.Println(err.Error())
 		return schedule.ErrCounselorNotFound
 	}
-	
+
+	datesSaved, err := u.scheduleRepo.GetDateByCounselorId(input.CounselorId)
+
+	if err != nil {
+		return schedule.ErrInternalServerError
+	}	
+
+	if len(datesSaved) > 0 {
+		return schedule.ErrScheduleAlreadyExist
+	}
+
 	g := errgroup.Group{}
 
 	var times = make([]entity.Time, len(input.Times))
@@ -110,7 +173,6 @@ func(u *scheduleUsecase) Create(input schedule.CreateRequest) error {
 			}
 
 			times[i] = newTime
-
 			return nil
 		})
 	}
