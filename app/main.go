@@ -261,6 +261,7 @@ func main() {
 	{
 		users.GET("/counselors", userCounselorHandler.GetAll)
 		users.GET("/careers", userCareerHandler.GetAll)
+		users.GET("/careers/:id", userCareerHandler.GetById)
 		users.GET("/public/articles", userArticleHandler.GetAll)
 		users.GET("/public/articles/:id", userArticleHandler.GetById)
 	}
@@ -282,7 +283,6 @@ func main() {
 		restrictUsers.PUT("/forums/:id", forumH.Update)
 		restrictUsers.DELETE("/forums/:id", forumH.Delete)
 		restrictUsers.POST("/forums/joins", userForumH.Create)
-		restrictUsers.GET("/careers/:id", userCareerHandler.GetById)
 
 		restrictUsers.GET("/reading-lists", ReadingListH.GetAll)
 		restrictUsers.GET("/reading-lists/:id", ReadingListH.GetById)
