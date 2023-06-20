@@ -20,7 +20,7 @@ type TransactionUsecase interface {
 	GetAll(search, sortBy string, offset, limit int) (code int, totalPages int, data []entity.Transaction, err error)
 	SendLink(req transaction.SendLinkRequest) (code int, err error)
 	CancelTransaction(req transaction.CancelTransactionRequest) (int, error)
-	GetAllForReport(tReq transaction.ReportRequest) ([]entity.Transaction, int, error)
+	GetAllForReport(tReq transaction.ReportRequest) (data []entity.Transaction, totalPages int, err error)
 	GenerateReport(transactionRecord []entity.Transaction) (string, int, error)
 }
 
