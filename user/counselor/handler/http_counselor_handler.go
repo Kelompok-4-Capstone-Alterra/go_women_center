@@ -73,8 +73,8 @@ func (h *counselorHandler) GetAllReview(c echo.Context) error {
 	}
 
 	page, offset, limit := helper.GetPaginateData(getAllReviewReq.Page, getAllReviewReq.Limit, "mobile")
-
-	reviews, totalData, err := h.CUscase.GetAllReview(getAllReviewReq.CounselorID, offset, limit)
+	
+	reviews, totalPages, err := h.CUscase.GetAllReview(getAllReviewReq.CounselorID, offset, limit)
 
 	if err != nil {
 		status := http.StatusInternalServerError
@@ -86,8 +86,6 @@ func (h *counselorHandler) GetAllReview(c echo.Context) error {
 
 		return c.JSON(status, helper.ResponseData(err.Error(), status, nil))
 	}
-
-	totalPages := helper.GetTotalPages(totalData, limit)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, helper.ResponseData(err.Error(), http.StatusInternalServerError, nil))
