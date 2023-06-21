@@ -22,6 +22,7 @@ func NewMysqlCareerRepository(db *gorm.DB) CareerRepository {
 }
 
 func (r *mysqlCareerRepository) GetAll(search, sortBy  string, offset, limit int) ([]career.GetAllResponse, int64, error) {
+	//added sort
 	var career []career.GetAllResponse
 	var count int64
 	err := r.DB.Model(&entity.Career{}).
