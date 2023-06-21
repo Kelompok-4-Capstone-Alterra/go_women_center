@@ -10,7 +10,7 @@ import (
 )
 
 func isRequestValid(m interface{}) error {
-	
+
 	validate := validator.New()
 	err := validate.Struct(m)
 
@@ -23,9 +23,11 @@ func isRequestValid(m interface{}) error {
 			}
 
 			switch field {
-			case "counselor_id":
+			case "counselorid":
 				return transaction.ErrInvalidUUID
-		}
+			case "status":
+				return transaction.ErrorInvalidPaymentStatus
+			}
 		}
 	}
 
@@ -44,14 +46,4 @@ func isValidUserId(user_id string, token *helper.JwtCustomUserClaims) error {
 		return transaction.ErrInvalidUserCredential
 	}
 	return nil
-}
-
-func isValidStatus(status string) error {
-	switch status {
-	case "ongoing":
-		return nil
-	case "completed":
-		return nil
-	}
-	return transaction.ErrorInvalidPaymentStatus
 }

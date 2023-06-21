@@ -97,8 +97,10 @@ func (h *transactionHandler) GetAllTransaction(c echo.Context) error {
 		))
 	}
 
-	trStatus := c.QueryParam("status")
-	err = isValidStatus(trStatus)
+	req := transaction.GetAllRequest{
+		Status: c.QueryParam("status"),
+	}
+	err = isRequestValid(req)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(
 			err.Error(),
@@ -107,7 +109,7 @@ func (h *transactionHandler) GetAllTransaction(c echo.Context) error {
 		))
 	}
 
-	data, err := h.Usecase.GetAll(user.ID, trStatus)
+	data, err := h.Usecase.GetAll(user.ID, req.Status)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
 			err.Error(),
