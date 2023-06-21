@@ -33,7 +33,7 @@ func (th *transactionHandler) GetAll(c echo.Context) error {
 		))
 	}
 
-	err = IsRequestValid(getAllReq)
+	err = isRequestValid(getAllReq)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(
 			err.Error(),
@@ -71,7 +71,7 @@ func (th *transactionHandler) SendLink(c echo.Context) error {
 		))
 	}
 
-	err = IsRequestValid(req)
+	err = isRequestValid(req)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(
 			err.Error(),
@@ -107,7 +107,7 @@ func (th *transactionHandler) CancelTransaction(c echo.Context) error {
 		))
 	}
 
-	err = IsRequestValid(req)
+	err = isRequestValid(req)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(
 			err.Error(),
@@ -145,7 +145,7 @@ func (th *transactionHandler) GetReport(c echo.Context) error {
 	}
 	reportReq.IsDownload = false
 
-	err = IsRequestValid(reportReq)
+	err = isRequestValid(reportReq)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(
 			err.Error(),
@@ -189,7 +189,7 @@ func (th *transactionHandler) DownloadReport(c echo.Context) error {
 	}
 	reportReq.IsDownload = true
 
-	err = IsRequestValid(reportReq)
+	err = isRequestValid(reportReq)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(
 			err.Error(),
