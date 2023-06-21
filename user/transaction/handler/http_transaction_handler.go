@@ -138,9 +138,19 @@ func (h *transactionHandler) GetTransactionDetail(c echo.Context) error {
 		))
 	}
 
-	transactionId := c.Param("id")
+	transactionId := transaction.GetTransactionDetailRequest{
+		TransactionId: c.Param("id"),
+	}
+	err = isRequestValid(transactionId)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(
+			err.Error(),
+			http.StatusBadRequest,
+			nil,
+		))
+	}
 
-	code, data, err := h.Usecase.GetTransactionDetail(user.ID, transactionId)
+	code, data, err := h.Usecase.GetTransactionDetail(user.ID, transactionId.TransactionId)
 	if err != nil {
 		return c.JSON(code, helper.ResponseData(
 			err.Error(),
@@ -167,7 +177,7 @@ func (h *transactionHandler) UserJoinHandler(c echo.Context) error {
 			nil,
 		))
 	}
-	
+
 	req := transaction.UserJoinHandlerRequest{}
 	err = c.Bind(&req)
 	if err != nil {

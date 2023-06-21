@@ -4,6 +4,10 @@ import (
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
 )
 
+type GetTransactionDetailRequest struct {
+	TransactionId string `validate:"required,uuid"`
+}
+
 type GetAllRequest struct {
 	Status string `query:"status" validate:"required,oneof=waiting completed"`
 	Search string `query:"search" validate:"omitempty"`

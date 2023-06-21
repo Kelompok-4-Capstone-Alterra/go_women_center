@@ -27,6 +27,8 @@ func isRequestValid(m interface{}) error {
 				return transaction.ErrInvalidUUID
 			case "status":
 				return transaction.ErrorInvalidPaymentStatus
+			case "transactionid":
+				return transaction.ErrInvalidUUID
 			}
 		}
 	}
