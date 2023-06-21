@@ -45,3 +45,13 @@ func isValidUserId(user_id string, token *helper.JwtCustomUserClaims) error {
 	}
 	return nil
 }
+
+func isValidStatus(status string) error {
+	switch status {
+	case "ongoing":
+		return nil
+	case "completed":
+		return nil
+	}
+	return transaction.ErrorInvalidPaymentStatus
+}

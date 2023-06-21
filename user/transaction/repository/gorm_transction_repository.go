@@ -10,7 +10,7 @@ import (
 
 type MysqlTransactionRepository interface {
 	CreateTransaction(transaction entity.Transaction) (entity.Transaction, error)
-	GetAllSuccess(userId string) ([]entity.Transaction, error)
+	GetAll(userId, trStatus string) ([]entity.Transaction, error)
 	GetById(id string) (entity.Transaction, error)
 	UpdateStatusByData(savedData entity.Transaction, newStatus string) (entity.Transaction, error)
 	UpdateStatusById(id string, newStatus string) (error)
@@ -35,9 +35,9 @@ func (tr *mysqlTransactionRepository) CreateTransaction(transaction entity.Trans
 	return transaction, nil
 }
 
-func (tr *mysqlTransactionRepository) GetAllSuccess(userId string) ([]entity.Transaction, error) {
+func (tr *mysqlTransactionRepository) GetAll(userId, trStatus string) ([]entity.Transaction, error) {
 	allUserTransaction := []entity.Transaction{}
-	err := tr.DB.Preload("Counselor").Where("user_id = ? AND status != ?", userId, "pending").Find(&allUserTransaction).Error
+	err := tr.DB.Preload("Counselor").Where("user_id = ? AND status != ?", userId, trStatus).Find(&allUserTransaction).Error
 	if err != nil {
 		return nil, err
 	}

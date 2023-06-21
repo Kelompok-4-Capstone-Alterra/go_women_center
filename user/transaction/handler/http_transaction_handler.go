@@ -97,7 +97,17 @@ func (h *transactionHandler) GetAllTransaction(c echo.Context) error {
 		))
 	}
 
-	data, err := h.Usecase.GetAll(user.ID)
+	trStatus := c.QueryParam("status")
+	err = isValidStatus(trStatus)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(
+			err.Error(),
+			http.StatusBadRequest,
+			nil,
+		))
+	}
+
+	data, err := h.Usecase.GetAll(user.ID, trStatus)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
 			err.Error(),
