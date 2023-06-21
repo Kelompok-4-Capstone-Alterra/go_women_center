@@ -7,7 +7,7 @@ import (
 )
 
 type CareerRepository interface {
-	GetAll(search string, offset, limit int) ([]career.GetAllResponse, int64, error)
+	GetAll(search, sortBy string, offset, limit int) ([]career.GetAllResponse, int64, error)
 	GetById(id string) (career.GetByResponse, error)
 	GetBySearch(search string) ([]career.GetAllResponse, error)
 	Create(career entity.Career) error
@@ -24,15 +24,16 @@ func NewMysqlCareerRepository(db *gorm.DB) CareerRepository {
 	return &mysqlCareerRepository{DB: db}
 }
 
-func (r *mysqlCareerRepository) GetAll(search string, offset, limit int) ([]career.GetAllResponse, int64, error) {
+func (r *mysqlCareerRepository) GetAll(search, sortBy string, offset, limit int) ([]career.GetAllResponse, int64, error) {
 	var career []career.GetAllResponse
 	var count int64
 	err := r.DB.Model(&entity.Career{}).
-		Where("job_position LIKE ? OR company_name LIKE ? OR Location LIKE ? OR CAST(Salary AS CHAR) LIKE ? OR company_email LIKE ?",
-			"%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+		Where("job_position LIKE ? OR company_name LIKE ? OR Location LIKE ? OR CAST(min_salary AS CHAR) LIKE ? OR CAST(max_salary AS CHAR) LIKE ? OR company_email LIKE ?",
+			"%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Count(&count).
 		Offset(offset).
 		Limit(limit).
+		Order(sortBy).
 		Find(&career).Error
 
 	if err != nil {
