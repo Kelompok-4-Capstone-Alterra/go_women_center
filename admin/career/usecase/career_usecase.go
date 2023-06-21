@@ -33,8 +33,8 @@ func (u *careerUsecase) GetAll(search, sortBy string, offset, limit int) ([]care
 	switch sortBy {
 	case "newest":
 		sortBy = "created_at DESC"
-	case "highest_salary":
-		sortBy = "min_salary DESC"
+	case "oldest":
+		sortBy = "created_at ASC"
 	}
 
 	careers, totalData, err := u.careerRepo.GetAll(search, sortBy, offset, limit)
@@ -83,7 +83,7 @@ func (u *careerUsecase) Create(inputDetail career.CreateRequest, inputImage *mul
 		JobPosition:   inputDetail.JobPosition,
 		CompanyName:   inputDetail.CompanyName,
 		Location:      inputDetail.Location,
-		Salary:     inputDetail.Salary,
+		Salary:        inputDetail.Salary,
 		MinExperience: inputDetail.MinExperience,
 		LastEducation: inputDetail.LastEducation,
 		Description:   inputDetail.Description,
@@ -112,7 +112,7 @@ func (u *careerUsecase) Update(inputDetail career.UpdateRequest, inputImage *mul
 		JobPosition:   inputDetail.JobPosition,
 		CompanyName:   inputDetail.CompanyName,
 		Location:      inputDetail.Location,
-		Salary:     inputDetail.Salary,
+		Salary:        inputDetail.Salary,
 		MinExperience: inputDetail.MinExperience,
 		LastEducation: inputDetail.LastEducation,
 		Description:   inputDetail.Description,

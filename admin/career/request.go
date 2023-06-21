@@ -31,7 +31,7 @@ type GetAllRequest struct {
 	Page   int    `query:"page"`
 	Limit  int    `query:"limit"`
 	Search string `query:"search"`
-	SortBy string `query:"sort_by" validate:"omitempty,oneof=newest highest_salary"`
+	SortBy string `query:"sort_by" validate:"omitempty,oneof=newest oldest"`
 }
 
 type IdRequest struct {
