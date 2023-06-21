@@ -33,6 +33,15 @@ func (th *transactionHandler) GetAll(c echo.Context) error {
 		))
 	}
 
+	err = IsRequestValid(getAllReq)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(
+			err.Error(),
+			http.StatusBadRequest,
+			nil,
+		))
+	}
+
 	page, offset, limit := helper.GetPaginateData(getAllReq.Page, getAllReq.Limit)
 
 	status, totalPages, data, err := th.Usecase.GetAll(getAllReq.Search, getAllReq.SortBy, offset, limit)
@@ -62,7 +71,14 @@ func (th *transactionHandler) SendLink(c echo.Context) error {
 		))
 	}
 
-	// TODO: validate req
+	err = IsRequestValid(req)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(
+			err.Error(),
+			http.StatusBadRequest,
+			nil,
+		))
+	}
 
 	status, err := th.Usecase.SendLink(req)
 	if err != nil {
@@ -91,7 +107,14 @@ func (th *transactionHandler) CancelTransaction(c echo.Context) error {
 		))
 	}
 
-	// TODO: validate req
+	err = IsRequestValid(req)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(
+			err.Error(),
+			http.StatusBadRequest,
+			nil,
+		))
+	}
 
 	status, err := th.Usecase.CancelTransaction(req)
 	if err != nil {
@@ -121,6 +144,15 @@ func (th *transactionHandler) GetReport(c echo.Context) error {
 		))
 	}
 	reportReq.IsDownload = false
+
+	err = IsRequestValid(reportReq)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(
+			err.Error(),
+			http.StatusBadRequest,
+			nil,
+		))
+	}
 
 	page, offset, limit := helper.GetPaginateData(reportReq.Page, reportReq.Limit)
 	reportReq.Page = page
@@ -156,6 +188,15 @@ func (th *transactionHandler) DownloadReport(c echo.Context) error {
 		))
 	}
 	reportReq.IsDownload = true
+
+	err = IsRequestValid(reportReq)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(
+			err.Error(),
+			http.StatusBadRequest,
+			nil,
+		))
+	}
 
 	log.Println(reportReq)
 
