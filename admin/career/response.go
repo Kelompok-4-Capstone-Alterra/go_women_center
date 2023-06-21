@@ -16,7 +16,7 @@ type GetByResponse struct {
 	JobPosition   string  `json:"job_position"`
 	CompanyName   string  `json:"company_name"`
 	Location      string  `json:"location"`
-	Salary        float64 `json:"salary" validate:"omitempty,number"`
+	Salary        float64 `json:"salary"`
 	MinExperience string  `json:"min_experience"`
 	LastEducation string  `json:"last_education"`
 	Description   string  `json:"description"`

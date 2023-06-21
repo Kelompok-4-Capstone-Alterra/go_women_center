@@ -8,7 +8,7 @@ import (
 )
 
 type CareerUsecase interface {
-	GetAll(search string, offset, limit int) ([]career.GetAllResponse, int, error)
+	GetAll(search, sortBy string, offset, limit int) ([]career.GetAllResponse, int, error)
 	GetById(id string) (career.GetByResponse, error)
 	GetBySearch(search string) ([]career.GetAllResponse, error)
 	GetTotalPages(limit int) (int, error)
@@ -22,9 +22,15 @@ func NewCareerUsecase(CRepo repository.CareerRepository) CareerUsecase {
 	return &careerUsecase{careerRepo: CRepo}
 }
 
-func (u *careerUsecase) GetAll(search string, offset, limit int) ([]career.GetAllResponse, int, error) {
+func (u *careerUsecase) GetAll(search, sortBy string, offset, limit int) ([]career.GetAllResponse, int, error) {
+	switch sortBy {
+	case "newest":
+		sortBy = "created_at DESC"
+	case "highest_salary":
+		sortBy = "min_salary DESC"
+	}
 
-	careers, totalData, err := u.careerRepo.GetAll(search, offset, limit)
+	careers, totalData, err := u.careerRepo.GetAll(search, sortBy, offset, limit)
 
 	if err != nil {
 		return nil, 0, career.ErrInternalServerError

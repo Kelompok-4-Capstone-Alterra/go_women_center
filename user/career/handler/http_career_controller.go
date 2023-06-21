@@ -20,12 +20,19 @@ func NewCareerHandler(CareerUsecase usecase.CareerUsecase) *careerHandler {
 
 func (h *careerHandler) GetAll(c echo.Context) error {
 
-	page, _ := helper.StringToInt(c.QueryParam("page"))
-	limit, _ := helper.StringToInt(c.QueryParam("limit"))
+	var getAllReq career.GetAllRequest
 
-	page, offset, limit := helper.GetPaginateData(page, limit, "mobile")
-	search := c.QueryParam("search")
-	careers, totalPages, err := h.CareerUsecase.GetAll(search, offset, limit)
+	c.Bind(&getAllReq)
+
+	if err := isRequestValid(&getAllReq); err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
+	}
+
+	page := getAllReq.Page
+	limit := getAllReq.Limit
+
+	page, offset, limit := helper.GetPaginateData(page, limit)
+	careers, totalPages, err := h.CareerUsecase.GetAll(getAllReq.Search, getAllReq.SortBy, offset, limit)
 
 	if err != nil {
 		return c.JSON(
