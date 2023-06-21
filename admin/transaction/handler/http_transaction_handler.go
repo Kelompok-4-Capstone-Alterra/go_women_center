@@ -1,8 +1,7 @@
 package handler
 
 import (
-	// "net/http"
-
+	"log"
 	"net/http"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/transaction"
@@ -36,11 +35,11 @@ func (th *transactionHandler) GetAll(c echo.Context) error {
 
 	page, offset, limit := helper.GetPaginateData(getAllReq.Page, getAllReq.Limit)
 
-	code, totalPages, data, err := th.Usecase.GetAll(getAllReq.Search, getAllReq.SortBy, offset, limit)
+	status, totalPages, data, err := th.Usecase.GetAll(getAllReq.Search, getAllReq.SortBy, offset, limit)
 	if err != nil {
-		return c.JSON(code, helper.ResponseData(
+		return c.JSON(status, helper.ResponseData(
 			err.Error(),
-			code,
+			status,
 			nil,
 		))
 	}
@@ -65,18 +64,18 @@ func (th *transactionHandler) SendLink(c echo.Context) error {
 
 	// TODO: validate req
 
-	code, err := th.Usecase.SendLink(req)
+	status, err := th.Usecase.SendLink(req)
 	if err != nil {
-		return c.JSON(code, helper.ResponseData(
+		return c.JSON(status, helper.ResponseData(
 			err.Error(),
-			code,
+			status,
 			nil,
 		))
 	}
 
-	return c.JSON(code, helper.ResponseData(
+	return c.JSON(status, helper.ResponseData(
 		"success sending link",
-		code,
+		status,
 		nil,
 	))
 }
@@ -94,18 +93,89 @@ func (th *transactionHandler) CancelTransaction(c echo.Context) error {
 
 	// TODO: validate req
 
-	code, err := th.Usecase.CancelTransaction(req)
+	status, err := th.Usecase.CancelTransaction(req)
 	if err != nil {
-		return c.JSON(code, helper.ResponseData(
+		return c.JSON(status, helper.ResponseData(
 			err.Error(),
-			code,
+			status,
 			nil,
 		))
 	}
 
-	return c.JSON(code, helper.ResponseData(
+	return c.JSON(status, helper.ResponseData(
 		"success canceling transaction",
-		code,
+		status,
 		nil,
 	))
+}
+
+func (th *transactionHandler) GetReport(c echo.Context) error {
+	reportReq := transaction.ReportRequest{}
+	err := c.Bind(&reportReq)
+	if err != nil {
+		log.Println(err.Error())
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(
+			err.Error(),
+			http.StatusBadRequest,
+			nil,
+		))
+	}
+	reportReq.IsDownload = false
+
+	page, offset, limit := helper.GetPaginateData(reportReq.Page, reportReq.Limit)
+	reportReq.Page = page
+	reportReq.Offset = offset
+	reportReq.Limit = limit
+
+	data, totalPages, err := th.Usecase.GetAllForReport(reportReq)
+	if err != nil {
+		log.Println(err)
+		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
+			err.Error(),
+			http.StatusInternalServerError,
+			nil,
+		))
+	}
+
+	return c.JSON(http.StatusOK, helper.ResponseData("success get all transaction", http.StatusOK, echo.Map{
+		"current_pages": page,
+		"total_pages":   totalPages,
+		"transaction":   data,
+	}))
+}
+
+func (th *transactionHandler) DownloadReport(c echo.Context) error {
+	// TODO: validation
+	reportReq := transaction.ReportRequest{}
+	err := c.Bind(&reportReq)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(
+			err.Error(),
+			http.StatusBadRequest,
+			nil,
+		))
+	}
+	reportReq.IsDownload = true
+
+	log.Println(reportReq)
+
+	data, _, err := th.Usecase.GetAllForReport(reportReq)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, helper.ResponseData(
+			err.Error(),
+			http.StatusInternalServerError,
+			nil,
+		))
+	}
+
+	fileLocation, status, err := th.Usecase.GenerateReport(data)
+	if err != nil {
+		return c.JSON(status, helper.ResponseData(
+			err.Error(),
+			status,
+			nil,
+		))
+	}
+
+	return c.Attachment(fileLocation, "report.csv")
 }

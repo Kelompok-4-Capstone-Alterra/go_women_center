@@ -343,6 +343,9 @@ func main() {
 		restrictAdmin.GET("/transactions", adminTransactionHandler.GetAll)
 		restrictAdmin.PUT("/transactions/link", adminTransactionHandler.SendLink)
 		restrictAdmin.PUT("/transactions/cancel", adminTransactionHandler.CancelTransaction)
+
+		restrictAdmin.GET("/transactions/report", adminTransactionHandler.GetReport)
+		restrictAdmin.GET("/transactions/report/download", adminTransactionHandler.DownloadReport)
 	}
 
 	// ssl
