@@ -25,6 +25,8 @@ func isRequestValid(m interface{}) error {
 				return career.ErrEmailFormat
 			case "id":
 				return career.ErrIdFormat
+			case "sortby":
+				return career.ErrInvalidSort
 			}
 
 		}

@@ -23,6 +23,8 @@ func isRequestValid(m interface{}) error {
 			switch field {
 			case "id":
 				return career.ErrIdFormat
+			case "sortby":
+				return career.ErrInvalidSort
 			}
 
 		}
