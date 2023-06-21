@@ -12,7 +12,7 @@ type Transaction struct {
 	UserId             string    `json:"user_id" gorm:"type:varchar(36);not null"`
 	CounselorID        string    `json:"counselor_id" gorm:"type:varchar(36);not null"`
 	Counselor          Counselor `json:"counselor_data"`
-	Link               string    `json:"link"` // link meeting
+	Link               string    `json:"link" gorm:"type:text"` // link meeting
 	TimeStart          string    `json:"time_start" gorm:"type:time(0);not null"`
 	ConsultationMethod string    `json:"consultation_method" gorm:"type:varchar(36)"`
 	Status             string    `json:"status" gorm:"type:varchar(36)"`
