@@ -3,8 +3,8 @@ package transaction
 type GetAllRequest struct {
 	Page   int    `query:"page" validate:"omitempty"`
 	Limit  int    `query:"limit" validate:"omitempty"`
-	Search string `query:"search"`
-	SortBy string `query:"sort_by"`
+	Search string `query:"search" validate:"omitempty"`
+	SortBy string `query:"sort_by" validate:"omitempty,oneof=oldest newest"`
 }
 
 type SendLinkRequest struct {
@@ -18,12 +18,12 @@ type CancelTransactionRequest struct {
 
 // after initialization, set the download
 type ReportRequest struct {
-	StartDate  string    `query:"start_date" validate:"omitempty"`
-	EndDate    string    `query:"end_date" validate:"omitempty"`
+	StartDate  string `query:"start_date" validate:"omitempty"`
+	EndDate    string `query:"end_date" validate:"omitempty"`
 	Page       int    `query:"page" validate:"omitempty"`
 	Limit      int    `query:"limit" validate:"omitempty"`
-	Search     string `query:"search"`
-	SortBy     string `query:"sort_by"`
+	Search     string `query:"search" validate:"omitempty"`
+	SortBy     string `query:"sort_by" validate:"omitempty,oneof=oldest newest"`
 	Offset     int
 	IsDownload bool
 }
