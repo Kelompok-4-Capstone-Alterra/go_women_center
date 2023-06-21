@@ -12,13 +12,11 @@ type Career struct {
 	JobPosition   string  `gorm:"type:varchar(150);not null"`
 	CompanyName   string  `gorm:"type:varchar(150);not null"`
 	Location      string  `gorm:"type:varchar(150);not null"`
-	MinSalary     float64 `gorm:"type:float"`
-	MaxSalary     float64 `gorm:"type:float"`
+	Salary        float64 `gorm:"type:float"`
 	MinExperience string  `gorm:"type:varchar(150);not null"`
 	LastEducation string  `gorm:"type:varchar(150);not null"`
 	CompanyEmail  string  `gorm:"type:varchar(150);not null"`
 	Description   string
-	Requirement   string
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 	DeletedAt     gorm.DeletedAt `gorm:"index"`

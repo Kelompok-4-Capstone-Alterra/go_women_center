@@ -6,8 +6,7 @@ type GetAllResponse struct {
 	JobPosition  string  `json:"job_position"`
 	CompanyName  string  `json:"company_name"`
 	Location     string  `json:"location"`
-	MinSalary    float64 `json:"min_salary"`
-	MaxSalary    float64 `json:"max_salary"`
+	Salary       float64 `json:"salary"`
 	CompanyEmail string  `json:"company_email"`
 }
 
@@ -17,11 +16,9 @@ type GetByResponse struct {
 	JobPosition   string  `json:"job_position"`
 	CompanyName   string  `json:"company_name"`
 	Location      string  `json:"location"`
-	MinSalary     float64 `json:"min_salary"`
-	MaxSalary     float64 `json:"max_salary"`
+	Salary        float64 `json:"salary"`
 	MinExperience string  `json:"min_experience"`
 	LastEducation string  `json:"last_education"`
 	Description   string  `json:"description"`
-	Requirement   string  `json:"requirement"`
 	CompanyEmail  string  `json:"company_email" validate:"required,email"`
 }
