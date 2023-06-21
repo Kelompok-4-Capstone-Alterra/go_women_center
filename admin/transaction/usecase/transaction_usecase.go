@@ -4,9 +4,8 @@ import (
 	"encoding/csv"
 	"log"
 	"net/http"
-	"os"
-	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/transaction"
@@ -21,7 +20,7 @@ type TransactionUsecase interface {
 	SendLink(req transaction.SendLinkRequest) (code int, err error)
 	CancelTransaction(req transaction.CancelTransactionRequest) (int, error)
 	GetAllForReport(tReq transaction.ReportRequest) (data []entity.Transaction, totalPages int, err error)
-	GenerateReport(transactionRecord []entity.Transaction) (string, int, error)
+	GenerateReport(transactionRecord []entity.Transaction) ([]byte, int, error)
 }
 
 type transactionUsecase struct {
@@ -127,17 +126,10 @@ func (tu *transactionUsecase) GetAllForReport(tReq transaction.ReportRequest) ([
 	return trList, helper.GetTotalPages(int(dataCount), tReq.Limit), nil
 }
 
-func (tu *transactionUsecase) GenerateReport(transactionRecord []entity.Transaction) (string, int, error) {
-	workdir, _ := os.Getwd()
-	fileLocation := filepath.Join(workdir, "admin", "transaction", "report.csv")
-	file, err := os.Create(fileLocation)
-	if err != nil {
-		log.Fatalln(err.Error())
-	}
-
-	log.Println(fileLocation)
-
-	csvW := csv.NewWriter(file)
+func (tu *transactionUsecase) GenerateReport(transactionRecord []entity.Transaction) ([]byte, int, error) {
+	// Initialize a buffer to hold the CSV data
+	csvData := &strings.Builder{}
+	csvW := csv.NewWriter(csvData)
 
 	row := []string{
 		"id",
@@ -172,11 +164,11 @@ func (tu *transactionUsecase) GenerateReport(transactionRecord []entity.Transact
 	}
 	csvW.Flush()
 
-	_, err = os.Open(fileLocation)
-	if err != nil {
-		return "", http.StatusInternalServerError, err
-	}
-	file.Close()
+	if err := csvW.Error(); err != nil {
+        return nil, 0, err
+    }
 
-	return fileLocation, http.StatusOK, nil
+	data := []byte(csvData.String())
+
+	return data, http.StatusOK, nil
 }

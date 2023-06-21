@@ -209,7 +209,7 @@ func (th *transactionHandler) DownloadReport(c echo.Context) error {
 		))
 	}
 
-	fileLocation, status, err := th.Usecase.GenerateReport(data)
+	csvData, status, err := th.Usecase.GenerateReport(data)
 	if err != nil {
 		return c.JSON(status, helper.ResponseData(
 			err.Error(),
@@ -218,5 +218,11 @@ func (th *transactionHandler) DownloadReport(c echo.Context) error {
 		))
 	}
 
-	return c.Attachment(fileLocation, "report.csv")
+	// Set the appropriate headers for the CSV response
+    c.Response().Header().Set("Content-Type", "text/csv")
+    c.Response().Header().Set("Content-Disposition", "attachment; filename=export.csv")
+
+    // Write the CSV data as the response body
+    return c.Blob(status, "text/csv", csvData)
+
 }
