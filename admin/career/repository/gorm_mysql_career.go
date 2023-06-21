@@ -28,8 +28,8 @@ func (r *mysqlCareerRepository) GetAll(search, sortBy string, offset, limit int)
 	var career []career.GetAllResponse
 	var count int64
 	err := r.DB.Model(&entity.Career{}).
-		Where("job_position LIKE ? OR company_name LIKE ? OR Location LIKE ? OR CAST(min_salary AS CHAR) LIKE ? OR CAST(max_salary AS CHAR) LIKE ? OR company_email LIKE ?",
-			"%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
+		Where("job_position LIKE ? OR company_name LIKE ? OR Location LIKE ? OR CAST(salary AS CHAR) LIKE ? OR company_email LIKE ?",
+			"%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Count(&count).
 		Offset(offset).
 		Limit(limit).
