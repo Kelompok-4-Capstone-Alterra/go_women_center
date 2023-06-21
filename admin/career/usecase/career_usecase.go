@@ -12,7 +12,7 @@ import (
 )
 
 type CareerUsecase interface {
-	GetAll(search string, offset, limit int) ([]career.GetAllResponse, int, error)
+	GetAll(search, sortBy string, offset, limit int) ([]career.GetAllResponse, int, error)
 	GetTotalPages(limit int) (int, error)
 	GetById(id string) (career.GetByResponse, error)
 	Create(inputDetail career.CreateRequest, inputImage *multipart.FileHeader) error
@@ -29,9 +29,15 @@ func NewCareerUsecase(CRepo repository.CareerRepository, Image helper.Image) Car
 	return &careerUsecase{careerRepo: CRepo, image: Image}
 }
 
-func (u *careerUsecase) GetAll(search string, offset, limit int) ([]career.GetAllResponse, int, error) {
+func (u *careerUsecase) GetAll(search, sortBy string, offset, limit int) ([]career.GetAllResponse, int, error) {
+	switch sortBy {
+	case "newest":
+		sortBy = "created_at DESC"
+	case "highest_salary":
+		sortBy = "min_salary DESC"
+	}
 
-	careers, totalData, err := u.careerRepo.GetAll(search, offset, limit)
+	careers, totalData, err := u.careerRepo.GetAll(search, sortBy, offset, limit)
 
 	if err != nil {
 		return nil, 0, career.ErrInternalServerError
@@ -77,10 +83,12 @@ func (u *careerUsecase) Create(inputDetail career.CreateRequest, inputImage *mul
 		JobPosition:   inputDetail.JobPosition,
 		CompanyName:   inputDetail.CompanyName,
 		Location:      inputDetail.Location,
-		Salary:        inputDetail.Salary,
+		MinSalary:     inputDetail.MinSalary,
+		MaxSalary:     inputDetail.MaxSalary,
 		MinExperience: inputDetail.MinExperience,
 		LastEducation: inputDetail.LastEducation,
 		Description:   inputDetail.Description,
+		Requirement:   inputDetail.Requirement,
 		CompanyEmail:  inputDetail.CompanyEmail,
 		Image:         path,
 	}
@@ -106,10 +114,12 @@ func (u *careerUsecase) Update(inputDetail career.UpdateRequest, inputImage *mul
 		JobPosition:   inputDetail.JobPosition,
 		CompanyName:   inputDetail.CompanyName,
 		Location:      inputDetail.Location,
-		Salary:        inputDetail.Salary,
+		MinSalary:     inputDetail.MinSalary,
+		MaxSalary:     inputDetail.MaxSalary,
 		MinExperience: inputDetail.MinExperience,
 		LastEducation: inputDetail.LastEducation,
 		Description:   inputDetail.Description,
+		Requirement:   inputDetail.Requirement,
 		CompanyEmail:  inputDetail.CompanyEmail,
 	}
 
