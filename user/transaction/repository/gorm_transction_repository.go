@@ -10,10 +10,10 @@ import (
 
 type MysqlTransactionRepository interface {
 	CreateTransaction(transaction entity.Transaction) (entity.Transaction, error)
-	GetAllSuccess(userId string) ([]entity.Transaction, error)
+	GetAll(userId, trStatus, search string) ([]entity.Transaction, error)
 	GetById(id string) (entity.Transaction, error)
 	UpdateStatusByData(savedData entity.Transaction, newStatus string) (entity.Transaction, error)
-	UpdateStatusById(id string, newStatus string) (error)
+	UpdateStatusById(id string, newStatus string) error
 	GetOccurTransacTodayByCounselorId(counselorId string) ([]entity.Transaction, error)
 }
 
@@ -35,9 +35,26 @@ func (tr *mysqlTransactionRepository) CreateTransaction(transaction entity.Trans
 	return transaction, nil
 }
 
-func (tr *mysqlTransactionRepository) GetAllSuccess(userId string) ([]entity.Transaction, error) {
+func (tr *mysqlTransactionRepository) GetAll(userId, trStatus, search string) ([]entity.Transaction, error) {
 	allUserTransaction := []entity.Transaction{}
-	err := tr.DB.Preload("Counselor").Where("user_id = ? AND status != ?", userId, "pending").Find(&allUserTransaction).Error
+	gormQuery := tr.DB.
+		Preload("Counselor").
+		Where("user_id = ? AND status = ?", userId, trStatus)
+
+	if search != "" {
+		gormQuery.Where(
+			"counselor_topic LIKE ? OR consultation_method LIKE ? OR date_id LIKE ? OR time_id LIKE ? OR id LIKE ? OR counselor_id LIKE ?",
+			"%"+search+"%",
+			"%"+search+"%",
+			"%"+search+"%",
+			"%"+search+"%",
+			"%"+search+"%",
+			"%"+search+"%")
+	}
+
+	err := gormQuery.
+		Find(&allUserTransaction).
+		Error
 	if err != nil {
 		return nil, err
 	}
@@ -65,9 +82,9 @@ func (tr *mysqlTransactionRepository) UpdateStatusByData(savedData entity.Transa
 	return savedData, nil
 }
 
-func (tr *mysqlTransactionRepository) UpdateStatusById(id string, newStatus string) (error) {
+func (tr *mysqlTransactionRepository) UpdateStatusById(id string, newStatus string) error {
 	result := tr.DB.Debug().Model(&entity.Transaction{}).Where("id = ?", id).Update("status", newStatus)
-	
+
 	updated := result.RowsAffected
 	if updated < 1 {
 		return gorm.ErrEmptySlice
@@ -84,10 +101,10 @@ func (tr *mysqlTransactionRepository) UpdateStatusById(id string, newStatus stri
 // get all transaction by counselor id for today
 func (tr *mysqlTransactionRepository) GetOccurTransacTodayByCounselorId(counselorId string) ([]entity.Transaction, error) {
 	currentTime := time.Now()
-    currentDate := currentTime.Format(time.DateOnly)
+	currentDate := currentTime.Format(time.DateOnly)
 
-    var transactions []entity.Transaction
-    err := tr.DB.Model(&entity.Transaction{}).Where("counselor_id = ? AND DATE(created_at) = ?", counselorId, currentDate).Find(&transactions).Error
+	var transactions []entity.Transaction
+	err := tr.DB.Model(&entity.Transaction{}).Where("counselor_id = ? AND DATE(created_at) = ?", counselorId, currentDate).Find(&transactions).Error
 	if err != nil {
 		return nil, err
 	}

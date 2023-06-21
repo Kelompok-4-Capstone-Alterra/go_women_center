@@ -4,6 +4,11 @@ import (
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
 )
 
+type GetAllRequest struct {
+	Status string `query:"status" validate:"required,oneof=ongoing completed"`
+	Search string `query:"search" validate:"omitempty"`
+}
+
 type SendTransactionRequest struct {
 	UserCredential        *helper.JwtCustomUserClaims
 	CounselorID           string `json:"counselor_id" validate:"required,uuid"`

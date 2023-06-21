@@ -10,7 +10,7 @@ import (
 )
 
 func isRequestValid(m interface{}) error {
-	
+
 	validate := validator.New()
 	err := validate.Struct(m)
 
@@ -23,9 +23,11 @@ func isRequestValid(m interface{}) error {
 			}
 
 			switch field {
-			case "counselor_id":
+			case "counselorid":
 				return transaction.ErrInvalidUUID
-		}
+			case "status":
+				return transaction.ErrorInvalidPaymentStatus
+			}
 		}
 	}
 
