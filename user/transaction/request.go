@@ -5,7 +5,7 @@ import (
 )
 
 type GetAllRequest struct {
-	Status string `query:"status" validate:"required,oneof=ongoing completed"`
+	Status string `query:"status" validate:"required,oneof=waiting completed"`
 	Search string `query:"search" validate:"omitempty"`
 }
 
