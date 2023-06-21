@@ -9,19 +9,28 @@ import (
 	adminAuthMidd "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/auth/handler/middleware"
 	AdminAuthRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/auth/repository"
 	AdminAuthUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/auth/usecase"
+
 	CounselorAdminHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor/handler"
 	CounselorAdminRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor/repository"
 	CounselorAdminUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/counselor/usecase"
+
 	AdminScheduleHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/schedule/handler"
 	AdminScheduleRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/schedule/repository"
 	AdminScheduleUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/schedule/usecase"
+
+	AdminStatisticHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/statistics/handler"
+	AdminStatisticRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/statistics/repository"
+	AdminStatisticUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/admin/statistics/usecase"
+
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/app/config"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
 	TopicHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/topic/handler"
+
 	UserAuthHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth/handler"
 	userAuthMidd "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth/handler/middleware"
 	UserAuthRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth/repository"
 	UserAuthUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth/usecase"
+
 	CounselorUserHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor/handler"
 	CounselorUserRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor/repository"
 	CounselorUserUsecase "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor/usecase"
@@ -228,6 +237,10 @@ func main() {
 	adminTransactionUsecase := TransactionAdminUsecase.NewtransactionUsecase(adminTransactionRepo, adminVoucherRepo, googleUUID)
 	adminTransactionHandler := TransactionAdminHandler.NewTransactionHandler(adminTransactionUsecase)
 
+	adminStatisticRepo := AdminStatisticRepo.NewStatisticGormMysqlRepo(db)
+	adminStatisticUsecase := AdminStatisticUsecase.NewAuthUsecase(adminStatisticRepo)
+	adminStatisticHandler := AdminStatisticHandler.NewStatisticController(adminStatisticUsecase)
+
 	e := echo.New()
 
 	// middleware
@@ -346,6 +359,8 @@ func main() {
 
 		restrictAdmin.GET("/transactions/report", adminTransactionHandler.GetReport)
 		restrictAdmin.GET("/transactions/report/download", adminTransactionHandler.DownloadReport)
+
+		restrictAdmin.GET("/statistics", adminStatisticHandler.GetData)
 	}
 
 	// ssl
