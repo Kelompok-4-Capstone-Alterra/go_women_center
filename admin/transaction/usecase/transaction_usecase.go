@@ -124,7 +124,7 @@ func (tu *transactionUsecase) GetAllForReport(tReq transaction.ReportRequest) ([
 		return nil, 0, err
 	}
 
-	return trList, int(dataCount), nil
+	return trList, helper.GetTotalPages(int(dataCount), tReq.Limit), nil
 }
 
 func (tu *transactionUsecase) GenerateReport(transactionRecord []entity.Transaction) (string, int, error) {
