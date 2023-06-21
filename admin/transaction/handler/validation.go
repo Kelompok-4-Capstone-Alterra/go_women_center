@@ -7,7 +7,7 @@ import (
 	"github.com/go-playground/validator"
 )
 
-func IsRequestValid(m interface{}) error {
+func isRequestValid(m interface{}) error {
 
 	validate := validator.New()
 	err := validate.Struct(m)

@@ -33,8 +33,7 @@ func (tr *mysqlTransactionRepository) GetAll(search, sortBy string, offset, limi
 		Model(&entity.Transaction{}).
 		Preload("Counselor").
 		Where(
-			"counselor_topic LIKE ? OR consultation_method LIKE ? OR date_id LIKE ? OR time_id LIKE ? OR id LIKE ? OR user_id LIKE ? OR counselor_id LIKE ? OR status LIKE ?",
-			"%"+search+"%",
+			"consultation_method LIKE ? OR date_id LIKE ? OR time_id LIKE ? OR id LIKE ? OR user_id LIKE ? OR counselor_id LIKE ? OR status LIKE ?",
 			"%"+search+"%",
 			"%"+search+"%",
 			"%"+search+"%",
@@ -103,8 +102,7 @@ func (tr *mysqlTransactionRepository) GetAllForReport(tReq transaction.ReportReq
 		Model(&entity.Transaction{}).
 		Preload("Counselor").
 		Where(
-			"counselor_topic LIKE ? OR consultation_method LIKE ? OR date_id LIKE ? OR time_id LIKE ? OR id LIKE ? OR user_id LIKE ? OR counselor_id LIKE ? OR status LIKE ?",
-			"%"+search+"%",
+			"consultation_method LIKE ? OR date_id LIKE ? OR time_id LIKE ? OR id LIKE ? OR user_id LIKE ? OR counselor_id LIKE ? OR status LIKE ?",
 			"%"+search+"%",
 			"%"+search+"%",
 			"%"+search+"%",
