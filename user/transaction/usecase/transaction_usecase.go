@@ -20,7 +20,7 @@ import (
 type TransactionUsecase interface {
 	SendTransaction(transactionRequest transaction.SendTransactionRequest) (code int, res transaction.SendTransactionResponse, err error)
 	UpdateStatus(transactionId string, transactionStatus string) error
-	GetAll(userId, trStatus string) ([]entity.Transaction, error)
+	GetAll(userId, trStatus, search string) ([]entity.Transaction, error)
 	GetTransactionDetail(userId, transactionId string) (code int, res entity.Transaction, err error)
 	UserJoinNotification(transactionId string) error
 }
@@ -195,8 +195,8 @@ func (u *transactionUsecase) SendTransaction(trRequest transaction.SendTransacti
 }
 
 // completed or ongoing only
-func (u *transactionUsecase) GetAll(userId, trStatus string) ([]entity.Transaction, error) {
-	data, err := u.repo.GetAll(userId, trStatus)
+func (u *transactionUsecase) GetAll(userId, trStatus, search string) ([]entity.Transaction, error) {
+	data, err := u.repo.GetAll(userId, trStatus, search)
 	if err != nil {
 		return nil, err
 	}

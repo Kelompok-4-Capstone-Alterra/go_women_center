@@ -6,6 +6,7 @@ import (
 
 type GetAllRequest struct {
 	Status string `query:"status" validate:"required,oneof=ongoing completed"`
+	Search string `query:"search" validate:"omitempty"`
 }
 
 type SendTransactionRequest struct {
