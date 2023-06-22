@@ -80,6 +80,17 @@ func (th *transactionHandler) SendLink(c echo.Context) error {
 		))
 	}
 
+	err = helper.IsValidUrl(req.Link, validUrlHost)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(
+			err.Error(),
+			http.StatusBadRequest,
+			nil,
+		))
+	}
+
+	return nil
+
 	status, err := th.Usecase.SendLink(req)
 	if err != nil {
 		return c.JSON(status, helper.ResponseData(
