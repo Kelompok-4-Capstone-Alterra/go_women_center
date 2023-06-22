@@ -27,7 +27,7 @@ func (u *careerUsecase) GetAll(search, sortBy string, offset, limit int) ([]care
 	case "newest":
 		sortBy = "created_at DESC"
 	case "highest_salary":
-		sortBy = "min_salary DESC"
+		sortBy = "salary DESC"
 	}
 
 	careers, totalData, err := u.careerRepo.GetAll(search, sortBy, offset, limit)
