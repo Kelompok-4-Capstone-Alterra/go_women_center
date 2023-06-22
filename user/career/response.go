@@ -21,4 +21,5 @@ type GetByResponse struct {
 	LastEducation string  `json:"last_education"`
 	Description   string  `json:"description"`
 	CompanyEmail  string  `json:"company_email" validate:"required,email"`
+	CreatedAt     string  `json:"created_at"`
 }
