@@ -89,8 +89,6 @@ func (th *transactionHandler) SendLink(c echo.Context) error {
 		))
 	}
 
-	return nil
-
 	status, err := th.Usecase.SendLink(req)
 	if err != nil {
 		return c.JSON(status, helper.ResponseData(
