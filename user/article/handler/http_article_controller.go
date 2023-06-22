@@ -117,7 +117,8 @@ func (h *articleHandler) CreateComment(c echo.Context) error {
 	var user = c.Get("user").(*helper.JwtCustomUserClaims)
 
 	c.Bind(&commentReq)
-
+	helper.RemoveWhiteSpace(commentReq)
+	
 	if err := isRequestValid(&commentReq); err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
 	}

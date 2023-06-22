@@ -59,6 +59,7 @@ func (h *careerHandler) Create(c echo.Context) error {
 	imgInput, _ := c.FormFile("image")
 	careerReq.Image = imgInput
 	c.Bind(&careerReq)
+	helper.RemoveWhiteSpace(careerReq)
 
 	if err := isRequestValid(careerReq); err != nil {
 
@@ -112,6 +113,7 @@ func (h *careerHandler) Update(c echo.Context) error {
 	imgInput, _ := c.FormFile("image")
 	careerReq.Image = imgInput
 	c.Bind(&careerReq)
+	helper.RemoveWhiteSpace(careerReq)
 
 	if err := isRequestValid(careerReq); err != nil {
 		return c.JSON(

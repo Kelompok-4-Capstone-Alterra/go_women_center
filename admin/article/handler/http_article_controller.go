@@ -24,6 +24,7 @@ func (h *articleHandler) Create(c echo.Context) error {
 	imgInput, _ := c.FormFile("image")
 	articleReq.Image = imgInput
 	c.Bind(&articleReq)
+	helper.RemoveWhiteSpace(articleReq)
 
 	if err := isRequestValid(articleReq); err != nil {
 
@@ -113,6 +114,7 @@ func (h *articleHandler) Update(c echo.Context) error {
 	imgInput, _ := c.FormFile("image")
 	articleReq.Image = imgInput
 	c.Bind(&articleReq)
+	helper.RemoveWhiteSpace(articleReq)
 
 	if err := isRequestValid(articleReq); err != nil {
 		return c.JSON(
