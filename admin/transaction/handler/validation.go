@@ -44,3 +44,8 @@ func isRequestValid(m interface{}) error {
 
 	return nil
 }
+
+var validUrlHost = map[string]bool{
+	"zoom.us": true,
+	"t.me": true,
+}
