@@ -8,7 +8,7 @@ import (
 
 type CareerRepository interface {
 	GetAll(search, sortBy  string, offset, limit int) ([]career.GetAllResponse, int64, error)
-	GetById(id string) (career.GetByResponse, error)
+	GetById(id string) (entity.Career, error)
 	GetBySearch(search string) ([]career.GetAllResponse, error)
 	Count() (int, error)
 }
@@ -40,8 +40,8 @@ func (r *mysqlCareerRepository) GetAll(search, sortBy  string, offset, limit int
 	return career, count, nil
 }
 
-func (r *mysqlCareerRepository) GetById(id string) (career.GetByResponse, error) {
-	var career career.GetByResponse
+func (r *mysqlCareerRepository) GetById(id string) (entity.Career, error) {
+	var career entity.Career
 	err := r.DB.Model(&entity.Career{}).First(&career, "id = ?", id).Error
 	if err != nil {
 		return career, err

@@ -36,18 +36,32 @@ func (u *careerUsecase) GetAll(search, sortBy string, offset, limit int) ([]care
 		return nil, 0, career.ErrInternalServerError
 	}
 
-	return careers, helper.GetTotalPages(int(totalData), limit) ,nil
+	return careers, helper.GetTotalPages(int(totalData), limit), nil
 }
 
 func (u *careerUsecase) GetById(id string) (career.GetByResponse, error) {
 
 	careerData, err := u.careerRepo.GetById(id)
 
-	if err != nil {
-		return careerData, career.ErrCareerNotFound
+	careerDataResponse := career.GetByResponse{
+		ID:            careerData.ID,
+		Image:         careerData.Image,
+		JobPosition:   careerData.JobPosition,
+		CompanyName:   careerData.CompanyName,
+		Location:      careerData.Location,
+		Salary:        careerData.Salary,
+		MinExperience: careerData.MinExperience,
+		LastEducation: careerData.LastEducation,
+		CompanyEmail:  careerData.CompanyEmail,
+		Description:   careerData.Description,
+		CreatedAt:     careerData.CreatedAt.Format("2006-01-02"),
 	}
 
-	return careerData, nil
+	if err != nil {
+		return careerDataResponse, career.ErrCareerNotFound
+	}
+
+	return careerDataResponse, nil
 }
 
 func (u *careerUsecase) GetBySearch(search string) ([]career.GetAllResponse, error) {
