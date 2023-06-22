@@ -28,9 +28,13 @@ func (h *counselorHandler) GetAll(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
 	}
 
-	topicStr := constant.TOPICS[getAllReq.Topic][0]
+	var topicStr string
+	
+	if topic, ok := constant.TOPICS[getAllReq.Topic]; ok {
+		topicStr = topic[0]
+	}
 
-	counselors, err := h.CUscase.GetAll(getAllReq.Search, topicStr, getAllReq.SortBy)
+	counselors, err := h.CUscase.GetAll(getAllReq.Search, topicStr, getAllReq.SortBy, getAllReq.IsAvailable)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, helper.ResponseData(err.Error(), http.StatusInternalServerError, nil))

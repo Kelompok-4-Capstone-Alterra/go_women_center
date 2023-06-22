@@ -9,9 +9,10 @@ type CreateReviewRequest struct {
 }
 
 type GetAllRequest struct {
-	Search string `query:"search"`
-	SortBy string `query:"sort_by" validate:"omitempty,oneof=highest_rating lowest_price highest_price"`
-	Topic  int    `query:"topic" validate:"required,number,oneof=1 2 3 4 5 6 7 8 9 10"`
+	Search      string `query:"search"`
+	SortBy      string `query:"sort_by" validate:"omitempty,oneof=highest_rating lowest_price highest_price"`
+	Topic       int    `query:"topic" validate:"omitempty,number,oneof=1 2 3 4 5 6 7 8 9 10"`
+	IsAvailable string `query:"is_available" validate:"omitempty,oneof=true"`
 }
 
 type GetAllReviewRequest struct {

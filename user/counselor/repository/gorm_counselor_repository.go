@@ -9,7 +9,7 @@ import (
 )
 
 type CounselorRepository interface {
-	GetAll(search, topic, sortBy string) ([]counselor.GetAllResponse, error)
+	GetAll(search, topic, sortBy, is_available string) ([]counselor.GetAllResponse, error)
 	GetById(id string) (counselor.GetByResponse, error)
 }
 
@@ -21,22 +21,27 @@ func NewMysqlCounselorRepository(db *gorm.DB) CounselorRepository{
 	return &mysqlCounselorRepository{DB: db}
 }
 
-func(r *mysqlCounselorRepository) GetAll(search, topic, sortBy string) ([]counselor.GetAllResponse, error) {
+func(r *mysqlCounselorRepository) GetAll(search, topic, sortBy, is_available string) ([]counselor.GetAllResponse, error) {
 
 	var counselors []counselor.GetAllResponse
-	var totalData int64
+	
+	dbQuery := r.DB.Table("counselors").
+		Where("name LIKE ? OR CAST(price AS CHAR) LIKE ? OR CAST(rating AS CHAR) LIKE ?", 
+		"%"+search+"%", "%"+search+"%", "%"+search+"%")
 
-	currentTime := time.Now()
-	currentDate := currentTime.Format(time.DateOnly)
+	if topic != "" {
+		dbQuery.Where("topic = ?", topic)
+	}
+	
+	if is_available == "true" {
+		currentTime := time.Now()
+		currentDate := currentTime.Format(time.DateOnly)
 
-	// get counselor that have date/schedule today
-	err := r.DB.Table("counselors").
-		Where("topic = ? AND name LIKE ?", topic, "%"+search+"%").
-		Joins("INNER JOIN dates ON dates.counselor_id = counselors.id").
-		Where("dates.date = ?", currentDate).
-		Count(&totalData).
-		Order(sortBy).
-		Find(&counselors).Error
+		dbQuery.Joins("INNER JOIN dates ON dates.counselor_id = counselors.id").
+		Where("dates.date = ?", currentDate)
+	}
+	
+	err := dbQuery.Order(sortBy).Find(&counselors).Error
 
 	if err != nil {
 		return nil, err

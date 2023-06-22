@@ -22,4 +22,5 @@ var (
 	ErrInvalidSort 			= errors.New("invalid sort")
 	ErrReviewAlreadyExist 	= errors.New("review already exist")
 	ErrTransactionNotFound 	= errors.New("transaction not found")
+	ErrInvalidIsAvailable = errors.New("invalid is_available")
 )
