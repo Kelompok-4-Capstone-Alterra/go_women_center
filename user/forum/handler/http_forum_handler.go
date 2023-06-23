@@ -29,10 +29,16 @@ func NewForumHandler(ForumU usecase.ForumUsecaseInterface) ForumHandlerInterface
 }
 
 func (fh ForumHandler) GetAll(c echo.Context) error {
-	var user = c.Get("user").(*helper.JwtCustomUserClaims)
 	var getAllRequest forum.GetAllRequest
 	c.Bind(&getAllRequest)
-	getAllRequest.UserId = user.ID
+
+	user, ok := c.Get("user").(*helper.JwtCustomUserClaims)
+	if !ok || user == nil {
+		getAllRequest.UserId = ""
+	} else {
+		getAllRequest.UserId = user.ID
+	}
+
 	getAllRequest.Page, getAllRequest.Offset, getAllRequest.Limit = helper.GetPaginateData(getAllRequest.Page, getAllRequest.Limit)
 
 	if err := isRequestValid(getAllRequest); err != nil {
@@ -54,9 +60,16 @@ func (fh ForumHandler) GetAll(c echo.Context) error {
 }
 
 func (fh ForumHandler) GetById(c echo.Context) error {
-	var user = c.Get("user").(*helper.JwtCustomUserClaims)
 	id := c.Param("id")
-	forum, err := fh.ForumU.GetById(id, user.ID)
+	var user_id string
+	user, ok := c.Get("user").(*helper.JwtCustomUserClaims)
+	if !ok || user == nil {
+		user_id = ""
+	} else {
+		user_id = user.ID
+	}
+
+	forum, err := fh.ForumU.GetById(id, user_id)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))

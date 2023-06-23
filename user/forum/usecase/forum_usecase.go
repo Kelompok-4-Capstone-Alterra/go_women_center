@@ -84,6 +84,16 @@ func (fu ForumUsecase) Create(createRequest *forum.CreateRequest) error {
 		newCategory = category[0]
 	}
 
+	var validUrlHost = map[string]bool{
+		"t.me": true,
+	}
+	err := helper.IsValidUrl(createRequest.Link, validUrlHost)
+	if err == helper.ErrInvalidUrl {
+		return helper.ErrInvalidUrl
+	} else if err == helper.ErrInvalidUrlHost {
+		return forum.ErrInvalidUrlHost
+	}
+
 	createForum := entity.Forum{
 		ID:       createRequest.ID,
 		UserId:   createRequest.UserId,
@@ -94,7 +104,7 @@ func (fu ForumUsecase) Create(createRequest *forum.CreateRequest) error {
 		Member:   createRequest.Member,
 	}
 
-	err := fu.ForumR.Create(&createForum)
+	err = fu.ForumR.Create(&createForum)
 	if err != nil {
 		return forum.ErrFailedCreateReadingList
 	}

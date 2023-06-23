@@ -22,4 +22,6 @@ var (
 	ErrInvalidCategory = errors.New("invalid category forum")
 	ErrInvalidId       = errors.New("invalid id forum")
 	ErrNotAccess       = errors.New("cannot access this data")
+	ErrInvalidLink     = errors.New("invalid link forum")
+	ErrInvalidUrlHost  = errors.New("invalid url host, use telegram link")
 )

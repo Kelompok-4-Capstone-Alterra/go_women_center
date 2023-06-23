@@ -47,14 +47,15 @@ func (fr mysqlForumRepository) GetAll(getAllRequest forum.GetAllRequest, categor
 		Group("forums.id").Count(&totalData).Offset(getAllRequest.Offset).Limit(getAllRequest.Limit).Preload("UserForums").
 		Find(&response).Error
 
-	for i := 0; i < len(response); i++ {
-		for j := 0; j < len(response[i].UserForums); j++ {
-			if response[i].UserForums[j].UserId == getAllRequest.UserId {
-				response[i].Status = true
-				break
+	if getAllRequest.UserId != "" {
+		for i := 0; i < len(response); i++ {
+			for j := 0; j < len(response[i].UserForums); j++ {
+				if response[i].UserForums[j].UserId == getAllRequest.UserId {
+					response[i].Status = true
+					break
+				}
 			}
 		}
-		response[i].UserForums = nil
 	}
 
 	if err != nil {
@@ -89,14 +90,17 @@ func (fr mysqlForumRepository) GetAllSortBy(getAllRequest forum.GetAllRequest, c
 		Order(getAllRequest.SortBy).Offset(getAllRequest.Offset).Limit(getAllRequest.Limit).Preload("UserForums").
 		Find(&response).Error
 
-	for i := 0; i < len(response); i++ {
-		for j := 0; j < len(response[i].UserForums); j++ {
-			if response[i].UserForums[j].UserId == getAllRequest.UserId {
-				response[i].Status = true
-				break
+	if getAllRequest.UserId != "" {
+		for i := 0; i < len(response); i++ {
+			if getAllRequest.UserId != "" {
+				for j := 0; j < len(response[i].UserForums); j++ {
+					if response[i].UserForums[j].UserId == getAllRequest.UserId {
+						response[i].Status = true
+						break
+					}
+				}
 			}
 		}
-		response[i].UserForums = nil
 	}
 
 	if err != nil {
@@ -115,13 +119,14 @@ func (fr mysqlForumRepository) GetById(id, user_id string) (*forum.ResponseForum
 		Group("forums.id").Having("forums.id =?", id).
 		Find(&forumDetail).Error
 
-	for i := 0; i < len(forumDetail.UserForums); i++ {
-		if forumDetail.UserForums[i].UserId == user_id {
-			forumDetail.Status = true
-			break
+	if user_id != "" {
+		for i := 0; i < len(forumDetail.UserForums); i++ {
+			if forumDetail.UserForums[i].UserId == user_id {
+				forumDetail.Status = true
+				break
+			}
 		}
 	}
-	forumDetail.UserForums = nil
 
 	if err != nil {
 		return nil, err
