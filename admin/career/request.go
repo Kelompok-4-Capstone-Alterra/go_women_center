@@ -7,7 +7,7 @@ type CreateRequest struct {
 	CompanyName   string                `form:"company_name" validate:"required"`
 	Location      string                `form:"location" validate:"required"`
 	Salary        float64               `form:"salary" validate:"omitempty"`
-	MinExperience string                `form:"min_experience" validate:"required"`
+	MinExperience int                   `form:"min_experience" validate:"required,number"`
 	LastEducation string                `form:"last_education" validate:"required"`
 	Description   string                `form:"description" validate:"required"`
 	CompanyEmail  string                `form:"company_email" validate:"required,email"`
@@ -20,7 +20,7 @@ type UpdateRequest struct {
 	CompanyName   string                `form:"company_name" validate:"omitempty"`
 	Location      string                `form:"location" validate:"omitempty"`
 	Salary        float64               `form:"salary" validate:"omitempty"`
-	MinExperience string                `form:"min_experience" validate:"omitempty"`
+	MinExperience int                   `form:"min_experience" validate:"omitempty,number"`
 	LastEducation string                `form:"last_education" validate:"omitempty"`
 	Description   string                `form:"description" validate:"omitempty"`
 	CompanyEmail  string                `form:"company_email" validate:"omitempty,email"`

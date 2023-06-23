@@ -17,7 +17,7 @@ type GetByResponse struct {
 	CompanyName   string  `json:"company_name"`
 	Location      string  `json:"location"`
 	Salary        float64 `json:"salary"`
-	MinExperience string  `json:"min_experience"`
+	MinExperience int     `json:"min_experience"`
 	LastEducation string  `json:"last_education"`
 	Description   string  `json:"description"`
 	CompanyEmail  string  `json:"company_email" validate:"required,email"`

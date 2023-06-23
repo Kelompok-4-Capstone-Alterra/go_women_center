@@ -13,7 +13,7 @@ type Career struct {
 	CompanyName   string  `gorm:"type:varchar(150);not null"`
 	Location      string  `gorm:"type:varchar(150);not null"`
 	Salary        float64 `gorm:"type:float"`
-	MinExperience string  `gorm:"type:varchar(150);not null"`
+	MinExperience int     `gorm:"type:integer;not null"`
 	LastEducation string  `gorm:"type:varchar(150);not null"`
 	CompanyEmail  string  `gorm:"type:varchar(150);not null"`
 	Description   string
