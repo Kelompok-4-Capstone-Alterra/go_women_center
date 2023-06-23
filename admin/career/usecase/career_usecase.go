@@ -93,7 +93,6 @@ func (u *careerUsecase) Create(inputDetail career.CreateRequest, inputImage *mul
 		MinExperience: inputDetail.MinExperience,
 		LastEducation: inputDetail.LastEducation,
 		Description:   inputDetail.Description,
-		Requirement:   inputDetail.Requirement,
 		CompanyEmail:  inputDetail.CompanyEmail,
 		Image:         path,
 	}
@@ -124,7 +123,6 @@ func (u *careerUsecase) Update(inputDetail career.UpdateRequest, inputImage *mul
 		MinExperience: inputDetail.MinExperience,
 		LastEducation: inputDetail.LastEducation,
 		Description:   inputDetail.Description,
-		Requirement:   inputDetail.Requirement,
 		CompanyEmail:  inputDetail.CompanyEmail,
 	}
 

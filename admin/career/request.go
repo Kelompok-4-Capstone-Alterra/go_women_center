@@ -11,7 +11,6 @@ type CreateRequest struct {
 	MinExperience int                   `form:"min_experience" validate:"required,number"`
 	LastEducation string                `form:"last_education" validate:"required"`
 	Description   string                `form:"description" validate:"required"`
-	Requirement   string                `form:"requirement" validate:"required"`
 	CompanyEmail  string                `form:"company_email" validate:"required,email"`
 	Image         *multipart.FileHeader `form:"image" validate:"required"`
 }
@@ -26,7 +25,6 @@ type UpdateRequest struct {
 	MinExperience int                   `form:"min_experience" validate:"omitempty,number"`
 	LastEducation string                `form:"last_education" validate:"omitempty"`
 	Description   string                `form:"description" validate:"omitempty"`
-	Requirement   string                `form:"requirement" validate:"omitempty"`
 	CompanyEmail  string                `form:"company_email" validate:"omitempty,email"`
 	Image         *multipart.FileHeader `form:"image" validate:"omitempty,required"`
 }

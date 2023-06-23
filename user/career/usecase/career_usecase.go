@@ -55,7 +55,6 @@ func (u *careerUsecase) GetById(id string) (career.GetByResponse, error) {
 		LastEducation: careerData.LastEducation,
 		CompanyEmail:  careerData.CompanyEmail,
 		Description:   careerData.Description,
-		Requirement:   careerData.Requirement,
 		CreatedAt:     careerData.CreatedAt.Format("2006-01-02"),
 	}
 
