@@ -4,9 +4,8 @@ import "errors"
 
 var (
 	ErrorInvalidTopic            error = errors.New("invalid topic code")
-	ErrorInsertDB                error = errors.New("error inserting new data to db")
 	ErrorInvalidRequest          error = errors.New("error invalid callback")
-	ErrorTransactionNotFound     error = errors.New("transaction not found in db")
+	ErrorTransactionNotFound     error = errors.New("transaction not found")
 	ErrorInvalidPaymentStatus    error = errors.New("error invalid payment status")
 	ErrorMidtrans                error = errors.New("error when sending payment to midtrans")
 	ErrRequired                  error = errors.New("all fields are required")
@@ -20,6 +19,7 @@ var (
 	ErrVoucherExpired            error = errors.New("voucher unavailable")
 	ErrCounselorNotFound         error = errors.New("counselor not found")
 	ErrDeletingVoucher           error = errors.New("error deleting voucher")
+	ErrInternalServerError 	 	 error = errors.New("internal server error")
 )
 
 var (

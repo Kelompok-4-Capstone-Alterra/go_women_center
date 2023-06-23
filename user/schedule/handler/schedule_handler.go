@@ -33,7 +33,7 @@ func(h *ScheduleHandler) GetCurrSchedule(c echo.Context) error {
 		status := http.StatusInternalServerError
 
 		switch err {
-			case schedule.ErrCounselorNotFound:
+			case schedule.ErrScheduleNotFound:
 				status = http.StatusNotFound
 			
 		}
