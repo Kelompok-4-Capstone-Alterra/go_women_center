@@ -283,7 +283,7 @@ func main() {
 			auth.POST("/forget-password", userAuthHandler.ForgetPassword)
 		}
 
-		restrictUsers := e.Group("", userAuthMidd.JWTUser(), userAuthMidd.CheckUser(userAuthUsecase))
+		restrictUsers := users.Group("", userAuthMidd.JWTUser(), userAuthMidd.CheckUser(userAuthUsecase))
 		
 		{
 			restrictUsers.GET("/profile", userHandler.GetById)
