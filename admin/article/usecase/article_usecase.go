@@ -32,10 +32,17 @@ type articleUsecase struct {
 	commentRepo Comment.CommentRepository
 	userRepo    User.UserRepository
 	image       helper.Image
+	uuidGenerator        helper.UuidGenerator
 }
 
-func NewArticleUsecase(ARepo repository.ArticleRepository, CommentRepo Comment.CommentRepository, UserRepo User.UserRepository, Image helper.Image) ArticleUsecase {
-	return &articleUsecase{articleRepo: ARepo, commentRepo: CommentRepo, userRepo: UserRepo, image: Image}
+func NewArticleUsecase(
+		ARepo repository.ArticleRepository,
+		CommentRepo Comment.CommentRepository,
+		UserRepo User.UserRepository,
+		Image helper.Image,
+		UuidGenerator helper.UuidGenerator,
+		) ArticleUsecase {
+	return &articleUsecase{ARepo, CommentRepo, UserRepo, Image, UuidGenerator}
 }
 
 func (u *articleUsecase) GetAll(search, sortBy string, offset, limit int) ([]article.GetAllResponse, int, error) {
@@ -125,7 +132,12 @@ func (u *articleUsecase) Create(inputDetail article.CreateRequest, inputImage *m
 	if err != nil {
 		return article.ErrInternalServerError
 	}
-	uuid, _ := helper.NewGoogleUUID().GenerateUUID()
+	
+	uuid, err := u.uuidGenerator.GenerateUUID()
+
+	if err != nil {
+		return article.ErrInternalServerError
+	}
 
 	newArticle := entity.Article{
 		ID:          uuid,

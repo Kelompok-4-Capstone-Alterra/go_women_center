@@ -21,10 +21,11 @@ type counselorUsecase struct {
 	CounselorRepo repo.CounselorRepository
 	ScheduleRepo repoSchedule.ScheduleRepository
 	Image helper.Image
+	uuidGenerator helper.UuidGenerator
 }
 
-func NewCounselorUsecase(CRepo repo.CounselorRepository, SRepo repoSchedule.ScheduleRepository, Image helper.Image) CounselorUsecase {
-	return &counselorUsecase{CRepo, SRepo, Image}
+func NewCounselorUsecase(CRepo repo.CounselorRepository, SRepo repoSchedule.ScheduleRepository, Image helper.Image, UuidGenerator helper.UuidGenerator) CounselorUsecase {
+	return &counselorUsecase{CRepo, SRepo, Image, UuidGenerator}
 }
 
 func(u *counselorUsecase) GetAll(search, sortBy, hasSchedule string, offset, limit int) ([]counselor.GetAllResponse, int, error) {
@@ -90,7 +91,12 @@ func(u *counselorUsecase) Create(input counselor.CreateRequest) error{
 		return counselor.ErrInternalServerError
 	}
 
-	uuid, _ := helper.NewGoogleUUID().GenerateUUID()
+	uuid, err := u.uuidGenerator.GenerateUUID()
+
+	if err != nil {
+		return counselor.ErrInternalServerError
+	}
+	
 	
 	newCounselor := entity.Counselor{
 		ID: uuid,

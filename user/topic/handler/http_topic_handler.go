@@ -5,7 +5,7 @@ import (
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/constant"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
-	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/topic"
+	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/topic"
 	"github.com/labstack/echo/v4"
 )
 

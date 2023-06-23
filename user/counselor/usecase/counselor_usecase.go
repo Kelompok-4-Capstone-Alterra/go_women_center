@@ -24,6 +24,7 @@ type counselorUsecase struct {
 	reviewRepo Counselor.ReviewRepository
 	userRepo User.UserRepository
 	transRepo Transaction.MysqlTransactionRepository
+	uuidGenerator helper.UuidGenerator
 }
 
 func NewCounselorUsecase(
@@ -31,8 +32,9 @@ func NewCounselorUsecase(
 		ReviewRepo Counselor.ReviewRepository,
 		UserRepo User.UserRepository,
 		TransactionRepo Transaction.MysqlTransactionRepository,
+		UuidGenerator helper.UuidGenerator,
 	) CounselorUsecase {
-	return &counselorUsecase{CounselorRepo, ReviewRepo, UserRepo, TransactionRepo}
+	return &counselorUsecase{CounselorRepo, ReviewRepo, UserRepo, TransactionRepo, UuidGenerator}
 }
 
 func(u *counselorUsecase) GetAll(search, topic, sortBy, isAvailable string) ([]counselor.GetAllResponse, error) {
@@ -90,7 +92,11 @@ func(u *counselorUsecase) CreateReview(inputReview counselor.CreateReviewRequest
 		return counselor.ErrReviewAlreadyExist
 	}
 
-	uuid, _ := helper.NewGoogleUUID().GenerateUUID()
+	uuid, err := u.uuidGenerator.GenerateUUID()
+
+	if err != nil {
+		return counselor.ErrInternalServerError
+	}
 
 	newReview := entity.Review{
 		ID: uuid,

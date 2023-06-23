@@ -25,10 +25,11 @@ type articleUsecase struct {
 	articleRepo repository.ArticleRepository
 	commentRepo Comment.CommentRepository
 	userRepo    User.UserRepository
+	uuidGenerator helper.UuidGenerator
 }
 
-func NewArticleUsecase(ARepo repository.ArticleRepository, CommentRepo Comment.CommentRepository, UserRepo User.UserRepository) ArticleUsecase {
-	return &articleUsecase{articleRepo: ARepo, commentRepo: CommentRepo, userRepo: UserRepo}
+func NewArticleUsecase(ARepo repository.ArticleRepository, CommentRepo Comment.CommentRepository, UserRepo User.UserRepository, UuidGenerator helper.UuidGenerator) ArticleUsecase {
+	return &articleUsecase{articleRepo: ARepo, commentRepo: CommentRepo, userRepo: UserRepo, uuidGenerator: UuidGenerator}
 }
 
 func (u *articleUsecase) GetAll(search, userId, sortBy string) ([]article.GetAllResponse, error) {
@@ -165,7 +166,11 @@ func (u *articleUsecase) CreateComment(inputComment article.CreateCommentRequest
 		return article.ErrArticleNotFound
 	}
 
-	uuid, _ := helper.NewGoogleUUID().GenerateUUID()
+	uuid, err := u.uuidGenerator.GenerateUUID()
+
+	if err != nil {
+		return article.ErrInternalServerError
+	}
 
 	newComment := entity.Comment{
 		ID:        uuid,
