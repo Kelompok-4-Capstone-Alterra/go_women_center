@@ -81,12 +81,14 @@ func (u *careerUsecase) Create(inputDetail career.CreateRequest, inputImage *mul
 	newCareer := entity.Career{
 		ID:            uuid,
 		JobPosition:   inputDetail.JobPosition,
+		JobType:       inputDetail.JobType,
 		CompanyName:   inputDetail.CompanyName,
 		Location:      inputDetail.Location,
 		Salary:        inputDetail.Salary,
 		MinExperience: inputDetail.MinExperience,
 		LastEducation: inputDetail.LastEducation,
 		Description:   inputDetail.Description,
+		Requirement:   inputDetail.Requirement,
 		CompanyEmail:  inputDetail.CompanyEmail,
 		Image:         path,
 	}
@@ -110,12 +112,14 @@ func (u *careerUsecase) Update(inputDetail career.UpdateRequest, inputImage *mul
 
 	careerUpdate := entity.Career{
 		JobPosition:   inputDetail.JobPosition,
+		JobType:       inputDetail.JobType,
 		CompanyName:   inputDetail.CompanyName,
 		Location:      inputDetail.Location,
 		Salary:        inputDetail.Salary,
 		MinExperience: inputDetail.MinExperience,
 		LastEducation: inputDetail.LastEducation,
 		Description:   inputDetail.Description,
+		Requirement:   inputDetail.Requirement,
 		CompanyEmail:  inputDetail.CompanyEmail,
 	}
 

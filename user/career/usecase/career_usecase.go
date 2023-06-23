@@ -47,6 +47,7 @@ func (u *careerUsecase) GetById(id string) (career.GetByResponse, error) {
 		ID:            careerData.ID,
 		Image:         careerData.Image,
 		JobPosition:   careerData.JobPosition,
+		JobType:       careerData.JobType,
 		CompanyName:   careerData.CompanyName,
 		Location:      careerData.Location,
 		Salary:        careerData.Salary,
@@ -54,6 +55,7 @@ func (u *careerUsecase) GetById(id string) (career.GetByResponse, error) {
 		LastEducation: careerData.LastEducation,
 		CompanyEmail:  careerData.CompanyEmail,
 		Description:   careerData.Description,
+		Requirement:   careerData.Requirement,
 		CreatedAt:     careerData.CreatedAt.Format("2006-01-02"),
 	}
 

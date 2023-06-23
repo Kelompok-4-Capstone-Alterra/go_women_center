@@ -4,12 +4,14 @@ import "mime/multipart"
 
 type CreateRequest struct {
 	JobPosition   string                `form:"job_position" validate:"required"`
+	JobType       string                `form:"job_type" validate:"required"`
 	CompanyName   string                `form:"company_name" validate:"required"`
 	Location      string                `form:"location" validate:"required"`
 	Salary        float64               `form:"salary" validate:"omitempty"`
 	MinExperience int                   `form:"min_experience" validate:"required,number"`
 	LastEducation string                `form:"last_education" validate:"required"`
 	Description   string                `form:"description" validate:"required"`
+	Requirement   string                `form:"requirement" validate:"required"`
 	CompanyEmail  string                `form:"company_email" validate:"required,email"`
 	Image         *multipart.FileHeader `form:"image" validate:"required"`
 }
@@ -17,12 +19,14 @@ type CreateRequest struct {
 type UpdateRequest struct {
 	ID            string                `param:"id" validate:"required,uuid"`
 	JobPosition   string                `form:"job_position" validate:"omitempty"`
+	JobType       string                `form:"job_type" validate:"omitempty"`
 	CompanyName   string                `form:"company_name" validate:"omitempty"`
 	Location      string                `form:"location" validate:"omitempty"`
 	Salary        float64               `form:"salary" validate:"omitempty"`
 	MinExperience int                   `form:"min_experience" validate:"omitempty,number"`
 	LastEducation string                `form:"last_education" validate:"omitempty"`
 	Description   string                `form:"description" validate:"omitempty"`
+	Requirement   string                `form:"requirement" validate:"omitempty"`
 	CompanyEmail  string                `form:"company_email" validate:"omitempty,email"`
 	Image         *multipart.FileHeader `form:"image" validate:"omitempty,required"`
 }
