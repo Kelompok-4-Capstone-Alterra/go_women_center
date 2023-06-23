@@ -43,6 +43,7 @@ func (h *transactionHandler) SendTransaction(c echo.Context) error {
 		UserCredential: user,
 	}
 	err = c.Bind(&request)
+	helper.RemoveWhiteSpace(&request)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(
 			err.Error(),
@@ -101,6 +102,7 @@ func (h *transactionHandler) GetAllTransaction(c echo.Context) error {
 		Status: c.QueryParam("status"),
 		Search: c.QueryParam("search"),
 	}
+	helper.RemoveWhiteSpace(&req)
 	err = isRequestValid(req)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(
@@ -141,6 +143,7 @@ func (h *transactionHandler) GetTransactionDetail(c echo.Context) error {
 	transactionId := transaction.GetTransactionDetailRequest{
 		TransactionId: c.Param("id"),
 	}
+	helper.RemoveWhiteSpace(&transactionId)
 	err = isRequestValid(transactionId)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(
@@ -179,6 +182,7 @@ func (h *transactionHandler) UserJoinHandler(c echo.Context) error {
 	}
 
 	req := transaction.UserJoinHandlerRequest{}
+	helper.RemoveWhiteSpace(&req)
 	err = c.Bind(&req)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(

@@ -25,6 +25,7 @@ func NewTransactionHandler(transactionUsecase usecase.TransactionUsecase) *trans
 func (th *transactionHandler) GetAll(c echo.Context) error {
 	getAllReq := transaction.GetAllRequest{}
 	err := c.Bind(&getAllReq)
+	helper.RemoveWhiteSpace(&getAllReq)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(
 			err.Error(),
@@ -63,6 +64,7 @@ func (th *transactionHandler) GetAll(c echo.Context) error {
 func (th *transactionHandler) SendLink(c echo.Context) error {
 	req := transaction.SendLinkRequest{}
 	err := c.Bind(&req)
+	helper.RemoveWhiteSpace(&req)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(
 			err.Error(),
@@ -108,6 +110,7 @@ func (th *transactionHandler) SendLink(c echo.Context) error {
 func (th *transactionHandler) CancelTransaction(c echo.Context) error {
 	req := transaction.CancelTransactionRequest{}
 	err := c.Bind(&req)
+	helper.RemoveWhiteSpace(&req)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(
 			err.Error(),
@@ -144,6 +147,7 @@ func (th *transactionHandler) CancelTransaction(c echo.Context) error {
 func (th *transactionHandler) GetReport(c echo.Context) error {
 	reportReq := transaction.ReportRequest{}
 	err := c.Bind(&reportReq)
+	helper.RemoveWhiteSpace(&reportReq)
 	if err != nil {
 		log.Println(err.Error())
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(
@@ -189,6 +193,7 @@ func (th *transactionHandler) DownloadReport(c echo.Context) error {
 	// TODO: validation
 	reportReq := transaction.ReportRequest{}
 	err := c.Bind(&reportReq)
+	helper.RemoveWhiteSpace(&reportReq)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(
 			err.Error(),
