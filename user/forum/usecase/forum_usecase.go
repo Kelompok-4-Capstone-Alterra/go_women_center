@@ -61,6 +61,17 @@ func (fu ForumUsecase) GetAll(getAllRequest forum.GetAllRequest) ([]forum.Respon
 		return nil, 0, err
 	}
 
+	if getAllRequest.UserId != "" {
+		for i := 0; i < len(forums); i++ {
+			for j := 0; j < len(forums[i].UserForums); j++ {
+				if forums[i].UserForums[j].UserId == getAllRequest.UserId {
+					forums[i].Status = true
+					break
+				}
+			}
+		}
+	}
+
 	totalPages := helper.GetTotalPages(int(totalData), getAllRequest.Limit)
 
 	return forums, totalPages, nil
@@ -73,6 +84,15 @@ func (fu ForumUsecase) GetById(id, user_id string) (*forum.ResponseForum, error)
 		return nil, forum.ErrFailedGetDetailReadingList
 	} else if forumId.ID == "" {
 		return nil, forum.ErrInvalidId
+	}
+
+	if user_id != "" {
+		for i := 0; i < len(forumId.UserForums); i++ {
+			if forumId.UserForums[i].UserId == user_id {
+				forumId.Status = true
+				break
+			}
+		}
 	}
 	return forumId, nil
 }
