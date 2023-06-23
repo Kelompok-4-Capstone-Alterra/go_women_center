@@ -6,6 +6,9 @@ import (
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum/repository"
+	userForum "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/user_forum"
+	repositoryUserForum "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/user_forum/repository"
+	"github.com/google/uuid"
 )
 
 type ForumUsecaseInterface interface {
@@ -17,12 +20,14 @@ type ForumUsecaseInterface interface {
 }
 
 type ForumUsecase struct {
-	ForumR repository.ForumRepository
+	ForumR     repository.ForumRepository
+	UserForumR repositoryUserForum.UserForumRepository
 }
 
-func NewForumUsecase(ForumR repository.ForumRepository) ForumUsecaseInterface {
+func NewForumUsecase(ForumR repository.ForumRepository, UserForumR repositoryUserForum.UserForumRepository) ForumUsecaseInterface {
 	return &ForumUsecase{
-		ForumR: ForumR,
+		ForumR:     ForumR,
+		UserForumR: UserForumR,
 	}
 }
 
@@ -58,7 +63,7 @@ func (fu ForumUsecase) GetAll(getAllRequest forum.GetAllRequest) ([]forum.Respon
 	}
 
 	if err != nil {
-		return nil, 0, err
+		return nil, 0, forum.ErrFailedGetForum
 	}
 
 	if getAllRequest.UserId != "" {
@@ -81,7 +86,7 @@ func (fu ForumUsecase) GetById(id, user_id string) (*forum.ResponseForum, error)
 	forumId, err := fu.ForumR.GetById(id, user_id)
 
 	if err != nil {
-		return nil, forum.ErrFailedGetDetailReadingList
+		return nil, forum.ErrFailedGetDetailForum
 	} else if forumId.ID == "" {
 		return nil, forum.ErrInvalidId
 	}
@@ -126,8 +131,20 @@ func (fu ForumUsecase) Create(createRequest *forum.CreateRequest) error {
 
 	err = fu.ForumR.Create(&createForum)
 	if err != nil {
-		return forum.ErrFailedCreateReadingList
+		return forum.ErrFailedCreateForum
 	}
+
+	uuidWithHyphen := uuid.New()
+	createUserForum := entity.UserForum{
+		ID:      uuidWithHyphen.String(),
+		UserId:  createForum.UserId,
+		ForumId: createForum.ID,
+	}
+	err = fu.UserForumR.Create(&createUserForum)
+	if err != nil {
+		return userForum.ErrFailedCreateUserForum
+	}
+
 	return nil
 }
 
@@ -155,7 +172,7 @@ func (fu ForumUsecase) Update(id, user_id string, updateRequest *forum.UpdateReq
 	err = fu.ForumR.Update(id, &updateForum)
 
 	if err != nil {
-		return forum.ErrFailedUpdateReadingList
+		return forum.ErrFailedUpdateForum
 	}
 	return nil
 }
@@ -173,7 +190,7 @@ func (fu ForumUsecase) Delete(id, user_id string) error {
 	err = fu.ForumR.Delete(id)
 
 	if err != nil {
-		return forum.ErrFailedDeleteReadingList
+		return forum.ErrFailedDeleteForum
 	}
 	return nil
 }

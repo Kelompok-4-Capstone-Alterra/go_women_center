@@ -13,7 +13,7 @@ import (
 )
 
 type CounselorUsecase interface {
-	GetAll(search, topic, sortBy string) ([]counselor.GetAllResponse, error)
+	GetAll(search, topic, sortBy, isAvailable string) ([]counselor.GetAllResponse, error)
 	GetById(id string) (counselor.GetByResponse, error)
 	GetAllReview(id string, offset, limit int) ([]counselor.GetAllReviewResponse, int, error)
 	CreateReview(input counselor.CreateReviewRequest) error
@@ -35,7 +35,7 @@ func NewCounselorUsecase(
 	return &counselorUsecase{CounselorRepo, ReviewRepo, UserRepo, TransactionRepo}
 }
 
-func(u *counselorUsecase) GetAll(search, topic, sortBy string) ([]counselor.GetAllResponse, error) {
+func(u *counselorUsecase) GetAll(search, topic, sortBy, isAvailable string) ([]counselor.GetAllResponse, error) {
 
 	switch sortBy {
 		case "highest_price":
@@ -46,7 +46,7 @@ func(u *counselorUsecase) GetAll(search, topic, sortBy string) ([]counselor.GetA
 			sortBy = "rating DESC"
 	}
 
-	counselorsRes, err := u.counselorRepo.GetAll(search, topic, sortBy)
+	counselorsRes, err := u.counselorRepo.GetAll(search, topic, sortBy, isAvailable)
 	
 	if err != nil {
 		return nil, counselor.ErrInternalServerError

@@ -50,7 +50,7 @@ func (fau ForumAdminUsecase) GetAll(getAllRequest forum.GetAllRequest) ([]forum.
 	}
 
 	if err != nil {
-		return nil, 0, err
+		return nil, 0, forum.ErrFailedGetForum
 	}
 
 	totalPages := helper.GetTotalPages(int(totalData), getAllRequest.Limit)
@@ -62,7 +62,7 @@ func (fau ForumAdminUsecase) GetById(id string) (*forum.ResponseForum, error) {
 	forumId, err := fau.ForumAdminR.GetById(id)
 
 	if err != nil {
-		return nil, forum.ErrFailedGetDetailReadingList
+		return nil, forum.ErrFailedGetDetailForum
 	} else if forumId.ID == "" {
 		return nil, forum.ErrInvalidId
 	}
@@ -80,7 +80,7 @@ func (fau ForumAdminUsecase) Delete(id string) error {
 	err = fau.ForumAdminR.Delete(id)
 
 	if err != nil {
-		return forum.ErrFailedDeleteReadingList
+		return forum.ErrFailedDeleteForum
 	}
 	return nil
 }

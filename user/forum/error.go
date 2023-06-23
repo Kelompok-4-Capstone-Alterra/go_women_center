@@ -5,12 +5,12 @@ import (
 )
 
 var (
-	ErrFailedGetReadingList       = errors.New("failed to get all forum data")
-	ErrFailedGetDetailReadingList = errors.New("failed to get forum data details")
-	ErrFailedCreateReadingList    = errors.New("failed created forum data")
-	ErrFailedUpdateReadingList    = errors.New("failed to updated forum data")
-	ErrFailedDeleteReadingList    = errors.New("failed to delete forum data")
-	ErrPageNotFound               = errors.New("page not found")
+	ErrFailedGetForum       = errors.New("failed to get all forum data")
+	ErrFailedGetDetailForum = errors.New("failed to get forum data details")
+	ErrFailedCreateForum    = errors.New("failed created forum data")
+	ErrFailedUpdateForum    = errors.New("failed to updated forum data")
+	ErrFailedDeleteForum    = errors.New("failed to delete forum data")
+	ErrPageNotFound         = errors.New("page not found")
 
 	ErrRequiredCategory = errors.New("category is required")
 	ErrRequiredLink     = errors.New("link is required")
