@@ -37,6 +37,8 @@ func isRequestValid(m interface{}) error {
 					return counselor.ErrInvalidTopic
 				case "sortby":
 					return counselor.ErrInvalidSort
+				case "isavailable":
+					return counselor.ErrInvalidIsAvailable
 			}
 
 		}
