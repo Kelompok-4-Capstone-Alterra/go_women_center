@@ -182,17 +182,17 @@ func main() {
 	adminScheduleUsecase := AdminScheduleUsecase.NewScheduleUsecase(adminCounselorRepo, adminScheduleRepo, googleUUID)
 	adminScheduleHandler := AdminScheduleHandler.NewScheduleHandler(adminScheduleUsecase)
 
+	userForumR := UserForumAdminRepository.NewMysqlUserForumRepository(db)
+	userForumU := UserForumAdminUsecase.NewUserForumUsecase(userForumR)
+	userForumH := UserForumAdminHandler.NewUserForumHandler(userForumU)
+
 	forumR := ForumUserRepository.NewMysqlForumRepository(db)
-	forumU := ForumUserUsecase.NewForumUsecase(forumR)
+	forumU := ForumUserUsecase.NewForumUsecase(forumR, userForumR)
 	forumH := ForumUserHandler.NewForumHandler(forumU)
 
 	forumAdminR := ForumAdminRepository.NewMysqlForumAdminRepository(db)
 	forumAdminU := ForumAdminUsecase.NewForumAdminUsecase(forumAdminR)
 	forumAdminH := ForumAdminHandler.NewForumAdminHandler(forumAdminU)
-
-	userForumR := UserForumAdminRepository.NewMysqlUserForumRepository(db)
-	userForumU := UserForumAdminUsecase.NewUserForumUsecase(userForumR)
-	userForumH := UserForumAdminHandler.NewUserForumHandler(userForumU)
 
 	adminCommentRepo := CommentAdminRepository.NewMysqlArticleRepository(db)
 	adminArticleRepo := ArticleAdminRepository.NewMysqlArticleRepository(db)
@@ -253,7 +253,7 @@ func main() {
 	{
 		midtrans.POST("/transaction/callback", userTransactionHandler.MidtransNotification)
 	}
-	
+
 	google := e.Group("/google")
 	{
 		google.GET("/google/login", userAuthHandler.LoginGoogleHandler)
@@ -270,6 +270,8 @@ func main() {
 			public.GET("/articles", userArticleHandler.GetAll)
 			public.GET("/articles/:id", userArticleHandler.GetById)
 			public.GET("/topics", topicHandler.GetAll)
+			public.GET("/public/forums", forumH.GetAll)
+			public.GET("/public/forums/:id", forumH.GetById)
 		}
 
 		auth := users.Group("/auth")
@@ -284,7 +286,7 @@ func main() {
 		}
 
 		restrictUsers := users.Group("", userAuthMidd.JWTUser(), userAuthMidd.CheckUser(userAuthUsecase))
-		
+
 		{
 			restrictUsers.GET("/profile", userHandler.GetById)
 			restrictUsers.PUT("/profile", userHandler.Update)
@@ -324,7 +326,6 @@ func main() {
 			restrictUsers.POST("/transactions/join", userTransactionHandler.UserJoinHandler)
 		}
 
-		
 	}
 
 	admin := e.Group("/admin")
