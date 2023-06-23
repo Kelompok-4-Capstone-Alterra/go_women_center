@@ -52,11 +52,11 @@ func(u *scheduleUsecase) GetCurrSchedule(counselorId string) (schedule.GetSchedu
 		return err
 	})
 
-		if err := g.Wait(); err != nil {
-			if err.Error() == "record not found" {
-				return schedule.GetScheduleResponse{}, schedule.ErrCounselorNotFound
-			}
-		return schedule.GetScheduleResponse{}, err
+	if err := g.Wait(); err != nil {
+		if err.Error() == "record not found" {
+			return schedule.GetScheduleResponse{}, schedule.ErrScheduleNotFound
+		}
+		return schedule.GetScheduleResponse{}, schedule.ErrInternalServerError
 	}
 
 	var scheduleTimes = make([]schedule.Time, len(timeCounselor))

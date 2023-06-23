@@ -23,7 +23,7 @@ import (
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/app/config"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
-	TopicHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/topic/handler"
+	TopicHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/topic/handler"
 
 	UserAuthHandler "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth/handler"
 	userAuthMidd "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/auth/handler/middleware"
@@ -140,8 +140,8 @@ func main() {
 	jwtConf := helper.NewAuthJWT(os.Getenv("JWT_SECRET_USER"), os.Getenv("JWT_SECRET_ADMIN"))
 	encryptor := helper.NewEncryptor()
 	otpGenerator := helper.NewOtpGenerator()
-	image := helper.NewImage("women-center")
 	googleUUID := helper.NewGoogleUUID()
+	image := helper.NewImage("women-center", googleUUID)
 	log.Print(db, googleUUID)
 
 	// handler
@@ -160,7 +160,7 @@ func main() {
 
 	userArticleRepo := ArticleUserRepository.NewMysqlArticleRepository(db)
 	userCommentRepo := CommentUserRepository.NewMysqlArticleRepository(db)
-	userArticleUsecase := ArticleUserUsecase.NewArticleUsecase(userArticleRepo, userCommentRepo, userAuthRepo)
+	userArticleUsecase := ArticleUserUsecase.NewArticleUsecase(userArticleRepo, userCommentRepo, userAuthRepo, googleUUID)
 	userArticleHandler := ArticleUserHandler.NewArticleHandler(userArticleUsecase)
 
 	adminAuthRepo := AdminAuthRepo.NewAdminRepo(db)
@@ -168,7 +168,7 @@ func main() {
 	adminAuthHandler := AdminAuthHandler.NewAuthHandler(adminAuthUsecase, jwtConf)
 
 	adminCareerRepo := CareerAdminRepository.NewMysqlCareerRepository(db)
-	adminCareerUsecase := CareerAdminUsecase.NewCareerUsecase(adminCareerRepo, image)
+	adminCareerUsecase := CareerAdminUsecase.NewCareerUsecase(adminCareerRepo, image, googleUUID)
 	adminCareerHandler := CareerAdminHandler.NewCareerHandler(adminCareerUsecase)
 
 	adminUsersRepo := UsersAdminRepository.NewMysqlUserRepository(db)
@@ -177,7 +177,7 @@ func main() {
 
 	adminCounselorRepo := CounselorAdminRepo.NewMysqlCounselorRepository(db)
 	adminScheduleRepo := AdminScheduleRepo.NewMysqlScheduleRepository(db)
-	adminCounselorUsecase := CounselorAdminUsecase.NewCounselorUsecase(adminCounselorRepo, adminScheduleRepo, image)
+	adminCounselorUsecase := CounselorAdminUsecase.NewCounselorUsecase(adminCounselorRepo, adminScheduleRepo, image, googleUUID)
 	adminCounselorHandler := CounselorAdminHandler.NewCounselorHandler(adminCounselorUsecase)
 	adminScheduleUsecase := AdminScheduleUsecase.NewScheduleUsecase(adminCounselorRepo, adminScheduleRepo, googleUUID)
 	adminScheduleHandler := AdminScheduleHandler.NewScheduleHandler(adminScheduleUsecase)
@@ -196,7 +196,7 @@ func main() {
 
 	adminCommentRepo := CommentAdminRepository.NewMysqlArticleRepository(db)
 	adminArticleRepo := ArticleAdminRepository.NewMysqlArticleRepository(db)
-	adminArticleUsecase := ArticleAdminUsecase.NewArticleUsecase(adminArticleRepo, adminCommentRepo, userAuthRepo, image)
+	adminArticleUsecase := ArticleAdminUsecase.NewArticleUsecase(adminArticleRepo, adminCommentRepo, userAuthRepo, image, googleUUID)
 	adminArticleHandler := ArticleAdminHandler.NewArticleHandler(adminArticleUsecase)
 
 	ReadingListR := ReadingListRepository.NewMysqlReadingListRepository(db)
@@ -228,7 +228,7 @@ func main() {
 	userScheduleHandler := UserScheduleHandler.NewScheduleHandler(userScheduleUseCase)
 
 	userReviewRepo := CounselorUserRepo.NewMysqlReviewRepository(db)
-	userCounselorUsecase := CounselorUserUsecase.NewCounselorUsecase(userCounselorRepo, userReviewRepo, userAuthRepo, userTransactionRepo)
+	userCounselorUsecase := CounselorUserUsecase.NewCounselorUsecase(userCounselorRepo, userReviewRepo, userAuthRepo, userTransactionRepo, googleUUID)
 	userCounselorHandler := CounselorUserHandler.NewCounselorHandler(userCounselorUsecase)
 
 	adminTransactionRepo := TransactionAdminRepo.NewMysqltransactionRepository(db)

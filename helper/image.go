@@ -23,10 +23,11 @@ type Image interface {
 
 type image struct{
 	bucket string
+	uuidGenerator UuidGenerator
 }
 
-func NewImage(bucket string) Image {
-	return &image{bucket}
+func NewImage(bucket string, uuidGenerator UuidGenerator) Image {
+	return &image{bucket, uuidGenerator}
 }
 
 func(i *image) IsImageValid(fh *multipart.FileHeader) bool {
@@ -89,7 +90,12 @@ func(i *image) UploadImageToS3(fh *multipart.FileHeader) (string, error) {
 
 	uploader := manager.NewUploader(client)
 
-	uuid, _ := NewGoogleUUID().GenerateUUID()
+	uuid, err := i.uuidGenerator.GenerateUUID()
+
+	if err != nil {
+		return "", err
+	}
+
 	currentTime := time.Now().UnixNano()
 
 	newFileName :=  uuid +  "-" + strconv.Itoa(int(currentTime)) + ext

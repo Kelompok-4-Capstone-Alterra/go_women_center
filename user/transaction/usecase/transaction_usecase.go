@@ -198,7 +198,7 @@ func (u *transactionUsecase) SendTransaction(trRequest transaction.SendTransacti
 func (u *transactionUsecase) GetAll(userId, trStatus, search string) ([]entity.Transaction, error) {
 	data, err := u.repo.GetAll(userId, trStatus, search)
 	if err != nil {
-		return nil, err
+		return nil, transaction.ErrInternalServerError
 	}
 	return data, nil
 }
@@ -209,9 +209,9 @@ func (u *transactionUsecase) GetTransactionDetail(userId, transactionId string) 
 	
 	if err != nil {
 		if err.Error() == transaction.ErrRecordNotFound.Error() {
-			return http.StatusBadRequest, entity.Transaction{}, err
+			return http.StatusBadRequest, entity.Transaction{}, transaction.ErrorTransactionNotFound
 		}
-		return http.StatusInternalServerError, entity.Transaction{}, err
+		return http.StatusInternalServerError, entity.Transaction{}, transaction.ErrInternalServerError
 	}
 
 	if data.UserId != userId {
@@ -237,12 +237,15 @@ func (u *transactionUsecase) UpdateStatus(transactionId string, transactionStatu
 
 	savedTransaction, err := u.verifyById(transactionId)
 	if err != nil {
-		return err
+		if err == transaction.ErrRecordNotFound {
+			return transaction.ErrorTransactionNotFound
+		}
+		return transaction.ErrInternalServerError
 	}
 
 	_, err = u.repo.UpdateStatusByData(savedTransaction, transactionStatus)
 	if err != nil {
-		return transaction.ErrorInsertDB
+		return transaction.ErrInternalServerError
 	}
 
 	return nil
@@ -253,7 +256,7 @@ func (u *transactionUsecase) UserJoinNotification(transactionId string) error {
 	err := u.repo.UpdateStatusById(transactionId, "completed")
 	// better error handling
 	if err != nil {
-		return err
+		return transaction.ErrInternalServerError
 	}
 	return nil
 }

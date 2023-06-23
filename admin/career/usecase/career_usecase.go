@@ -23,10 +23,11 @@ type CareerUsecase interface {
 type careerUsecase struct {
 	careerRepo repository.CareerRepository
 	image      helper.Image
+	uuidGenerator        helper.UuidGenerator
 }
 
-func NewCareerUsecase(CRepo repository.CareerRepository, Image helper.Image) CareerUsecase {
-	return &careerUsecase{careerRepo: CRepo, image: Image}
+func NewCareerUsecase(CRepo repository.CareerRepository, Image helper.Image, UuidGenerator helper.UuidGenerator) CareerUsecase {
+	return &careerUsecase{careerRepo: CRepo, image: Image, uuidGenerator: UuidGenerator}
 }
 
 func (u *careerUsecase) GetAll(search, sortBy string, offset, limit int) ([]career.GetAllResponse, int, error) {
@@ -76,7 +77,11 @@ func (u *careerUsecase) Create(inputDetail career.CreateRequest, inputImage *mul
 		return career.ErrInternalServerError
 	}
 
-	uuid, _ := helper.NewGoogleUUID().GenerateUUID()
+	uuid, err := u.uuidGenerator.GenerateUUID()
+
+	if err != nil {
+		return career.ErrInternalServerError
+	}
 
 	newCareer := entity.Career{
 		ID:            uuid,
