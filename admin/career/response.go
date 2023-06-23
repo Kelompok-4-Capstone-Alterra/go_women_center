@@ -22,6 +22,5 @@ type GetByResponse struct {
 	MinExperience int     `json:"min_experience"`
 	LastEducation string  `json:"last_education"`
 	Description   string  `json:"description"`
-	Requirement   string  `json:"requirement"`
 	CompanyEmail  string  `json:"company_email" validate:"required,email"`
 }

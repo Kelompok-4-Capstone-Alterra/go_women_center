@@ -18,7 +18,6 @@ type Career struct {
 	LastEducation string  `gorm:"type:varchar(150);not null"`
 	CompanyEmail  string  `gorm:"type:varchar(150);not null"`
 	Description   string
-	Requirement   string
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 	DeletedAt     gorm.DeletedAt `gorm:"index"`
