@@ -32,12 +32,6 @@ func(h *ScheduleHandler) GetCurrSchedule(c echo.Context) error {
 	if err != nil {
 		status := http.StatusInternalServerError
 
-		switch err {
-			case schedule.ErrScheduleNotFound:
-				status = http.StatusNotFound
-			
-		}
-
 		return c.JSON(status, helper.ResponseData(err.Error(), status, nil))
 	}
 

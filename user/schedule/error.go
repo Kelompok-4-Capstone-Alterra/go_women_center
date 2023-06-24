@@ -15,7 +15,6 @@ var (
 	ErrTimesRequired = errors.New("times required")
 
 	// not found
-	ErrScheduleNotFound = errors.New("counselor doesn't have schedule today")
 	ErrPageNotFound = errors.New("page not found")
 
 	// bad request
