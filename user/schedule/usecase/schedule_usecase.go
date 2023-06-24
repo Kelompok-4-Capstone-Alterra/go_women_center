@@ -54,7 +54,7 @@ func(u *scheduleUsecase) GetCurrSchedule(counselorId string) (schedule.GetSchedu
 
 	if err := g.Wait(); err != nil {
 		if err.Error() == "record not found" {
-			return schedule.GetScheduleResponse{}, schedule.ErrScheduleNotFound
+			return schedule.GetScheduleResponse{}, nil
 		}
 		return schedule.GetScheduleResponse{}, schedule.ErrInternalServerError
 	}

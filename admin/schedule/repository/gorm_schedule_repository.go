@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"log"
+
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"gorm.io/gorm"
 )
@@ -104,7 +106,6 @@ func (r *mysqlScheduleRepository) Update(counselorId string, dates []entity.Date
 		if err != nil {
 			return err
 		}
-
 		
 		err = tx.Create(&dates).Error
 
@@ -123,6 +124,7 @@ func (r *mysqlScheduleRepository) Update(counselorId string, dates []entity.Date
 	
 
 	if err != nil {
+		log.Println(err)
 		return err
 	}
 

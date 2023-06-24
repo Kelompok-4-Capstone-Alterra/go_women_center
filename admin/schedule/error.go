@@ -17,6 +17,7 @@ var (
 	// not found
 	ErrCounselorNotFound = errors.New("counselor not found")
 	ErrPageNotFound = errors.New("page not found")
+	ErrScheduleNotFound = errors.New("counselor doesn't have schedule")
 
 	// bad request
 	ErrIdFormat = errors.New("id must be a valid uuid")
