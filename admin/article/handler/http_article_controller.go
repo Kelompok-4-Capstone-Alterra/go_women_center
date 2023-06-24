@@ -192,7 +192,15 @@ func (h *articleHandler) GetAllComment(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, helper.ResponseData(err.Error(), http.StatusInternalServerError, nil))
 	}
 
+	var totalComments int
+
+	for i := range comments {
+		i++
+		totalComments = i
+	}
+
 	return c.JSON(http.StatusOK, helper.ResponseData("success get all article comment", http.StatusOK, echo.Map{
+		"comment_count": totalComments,
 		"comments":      comments,
 		"current_pages": page,
 		"total_pages":   totalPages,
