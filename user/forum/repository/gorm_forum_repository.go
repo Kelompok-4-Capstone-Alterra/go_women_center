@@ -7,8 +7,8 @@ import (
 )
 
 type ForumRepository interface {
-	GetAll(getAllRequest forum.GetAllRequest, category string) ([]forum.ResponseForum, int64, error)
-	GetAllSortBy(getAllRequest forum.GetAllRequest, category string) ([]forum.ResponseForum, int64, error)
+	GetAll(getAllRequest forum.GetAllRequest, category string) ([]forum.ResponseForum, error)
+	GetAllSortBy(getAllRequest forum.GetAllRequest, category string) ([]forum.ResponseForum, error)
 	GetById(id, user_id string) (*forum.ResponseForum, error)
 	Create(forum *entity.Forum) error
 	Update(id string, forumId *entity.Forum) error
@@ -23,10 +23,9 @@ func NewMysqlForumRepository(db *gorm.DB) ForumRepository {
 	return &mysqlForumRepository{DB: db}
 }
 
-func (fr mysqlForumRepository) GetAll(getAllRequest forum.GetAllRequest, category string) ([]forum.ResponseForum, int64, error) {
+func (fr mysqlForumRepository) GetAll(getAllRequest forum.GetAllRequest, category string) ([]forum.ResponseForum, error) {
 	var logicOperationCategory string
 	var logicOperationUser string
-	var totalData int64
 
 	if category == "" {
 		logicOperationCategory = "!="
@@ -44,20 +43,19 @@ func (fr mysqlForumRepository) GetAll(getAllRequest forum.GetAllRequest, categor
 	err := fr.DB.Table("forums").
 		Select("forums.id, forums.user_id, forums.category, forums.link, forums.topic, COUNT(user_forums.id) AS member, forums.created_at").
 		Joins("LEFT JOIN user_forums ON forums.id = user_forums.forum_id").Where("forums.user_id "+logicOperationUser+" ? AND forums.category "+logicOperationCategory+" ? AND forums.topic LIKE ?", getAllRequest.MyForum, category, "%"+getAllRequest.Topic+"%").
-		Group("forums.id").Count(&totalData).Offset(getAllRequest.Offset).Limit(getAllRequest.Limit).Preload("UserForums").
+		Group("forums.id").Preload("UserForums").Preload("Users").
 		Find(&response).Error
 
 	if err != nil {
-		return nil, totalData, err
+		return nil, err
 	}
 
-	return response, totalData, nil
+	return response, nil
 }
 
-func (fr mysqlForumRepository) GetAllSortBy(getAllRequest forum.GetAllRequest, category string) ([]forum.ResponseForum, int64, error) {
+func (fr mysqlForumRepository) GetAllSortBy(getAllRequest forum.GetAllRequest, category string) ([]forum.ResponseForum, error) {
 	var logicOperationCategory string
 	var logicOperationUser string
-	var totalData int64
 
 	if category == "" {
 		logicOperationCategory = "!="
@@ -75,15 +73,15 @@ func (fr mysqlForumRepository) GetAllSortBy(getAllRequest forum.GetAllRequest, c
 	err := fr.DB.Table("forums").
 		Select("forums.id, forums.user_id, forums.category, forums.link, forums.topic, COUNT(user_forums.id) AS member, forums.created_at").
 		Joins("LEFT JOIN user_forums ON forums.id = user_forums.forum_id").Where("forums.user_id "+logicOperationUser+" ? AND forums.category "+logicOperationCategory+" ? AND topic LIKE ?", getAllRequest.MyForum, category, "%"+getAllRequest.Topic+"%").
-		Group("forums.id").Count(&totalData).
-		Order(getAllRequest.SortBy).Offset(getAllRequest.Offset).Limit(getAllRequest.Limit).Preload("UserForums").
+		Group("forums.id").
+		Order(getAllRequest.SortBy).Preload("UserForums").
 		Find(&response).Error
 
 	if err != nil {
-		return nil, totalData, err
+		return nil, err
 	}
 
-	return response, totalData, nil
+	return response, nil
 }
 
 func (fr mysqlForumRepository) GetById(id, user_id string) (*forum.ResponseForum, error) {

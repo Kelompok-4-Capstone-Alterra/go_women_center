@@ -39,24 +39,15 @@ func (fh ForumHandler) GetAll(c echo.Context) error {
 		getAllRequest.UserId = user.ID
 	}
 
-	getAllRequest.Page, getAllRequest.Offset, getAllRequest.Limit = helper.GetPaginateData(getAllRequest.Page, getAllRequest.Limit)
-
 	if err := isRequestValid(getAllRequest); err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
 	}
 
-	forums, totalPages, err := fh.ForumU.GetAll(getAllRequest)
+	forums, err := fh.ForumU.GetAll(getAllRequest)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
 	}
-	if getAllRequest.Page > totalPages {
-		return c.JSON(http.StatusNotFound, helper.ResponseData("page not found", http.StatusNotFound, nil))
-	}
-	return c.JSON(http.StatusOK, helper.ResponseData("success to get all forum data", http.StatusOK, echo.Map{
-		"forums":        forums,
-		"current_pages": getAllRequest.Page,
-		"total_pages":   totalPages,
-	}))
+	return c.JSON(http.StatusOK, helper.ResponseData("success to get all forum data", http.StatusOK, forums))
 }
 
 func (fh ForumHandler) GetById(c echo.Context) error {
