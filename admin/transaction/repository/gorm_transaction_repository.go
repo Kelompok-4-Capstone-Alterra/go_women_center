@@ -126,17 +126,17 @@ func (tr *mysqlTransactionRepository) GetAllForReport(tReq transaction.ReportReq
 
 	if tReq.StartDate != "" && tReq.EndDate != "" {
 		dbQuery.
-			Where("created_at BETWEEN ? AND ?", tReq.StartDate, tReq.EndDate)
+			Where("transactions.created_at BETWEEN ? AND ?", tReq.StartDate, tReq.EndDate)
 	}
 
 	if tReq.StartDate != "" && tReq.EndDate == "" {
 		dbQuery.
-			Where("created_at >= ?", tReq.StartDate)
+			Where("transactions.created_at >= ?", tReq.StartDate)
 	}
 
 	if tReq.StartDate == "" && tReq.EndDate != "" {
 		dbQuery.
-			Where("created_at <= ?", tReq.EndDate)
+			Where("transactions.created_at <= ?", tReq.EndDate)
 	}
 
 	dbQuery.
