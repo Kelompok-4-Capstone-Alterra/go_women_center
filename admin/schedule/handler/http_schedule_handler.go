@@ -72,9 +72,10 @@ func (h *scheduleHandler) Create(c echo.Context) error {
 			case schedule.ErrCounselorNotFound:
 				status = http.StatusNotFound
 			case schedule.ErrTimeInvalid,
-				schedule.ErrScheduleAlreadyExist,
 				schedule.ErrDateInvalid:
 				status = http.StatusBadRequest
+			case schedule.ErrScheduleAlreadyExist:
+				status = http.StatusConflict
 		}
 
 		return c.JSON(status,
@@ -103,7 +104,9 @@ func(h *scheduleHandler) Update(c echo.Context) error {
 		status := http.StatusInternalServerError
 
 		switch err {
-			case schedule.ErrCounselorNotFound:
+			case 
+				schedule.ErrScheduleNotFound,
+				schedule.ErrCounselorNotFound:
 				status = http.StatusNotFound
 			case schedule.ErrTimeInvalid,
 				schedule.ErrDateInvalid:
@@ -134,9 +137,17 @@ func(h *scheduleHandler) Delete(c echo.Context) error {
 
 	if err != nil {
 		status := http.StatusInternalServerError
-		if err == schedule.ErrCounselorNotFound{
-			status = http.StatusNotFound
+
+		switch err {
+			case 
+				schedule.ErrScheduleNotFound,
+				schedule.ErrCounselorNotFound:
+				status = http.StatusNotFound
+			case schedule.ErrTimeInvalid,
+				schedule.ErrDateInvalid:
+				status = http.StatusBadRequest
 		}
+
 		return c.JSON(status,
 			helper.ResponseData(err.Error(), status, nil),
 		)
