@@ -32,9 +32,9 @@ func (tr *mysqlTransactionRepository) GetAll(search, sortBy string, offset, limi
 		Debug().
 		Model(&entity.Transaction{}).
 		Preload("Counselor").
+		Joins("left join counselors on counselors.id = transactions.counselor_id").
 		Where(
-			"consultation_method LIKE ? OR date_id LIKE ? OR time_id LIKE ? OR id LIKE ? OR user_id LIKE ? OR counselor_id LIKE ? OR status LIKE ?",
-			"%"+search+"%",
+			"transactions.consultation_method LIKE ? OR transactions.id LIKE ? OR transactions.user_id LIKE ? OR transactions.counselor_id LIKE ? OR transactions.status LIKE ? OR counselors.username LIKE ?",
 			"%"+search+"%",
 			"%"+search+"%",
 			"%"+search+"%",
@@ -48,8 +48,11 @@ func (tr *mysqlTransactionRepository) GetAll(search, sortBy string, offset, limi
 		Find(&transactionData).Error
 
 	if err != nil {
+		log.Println(err)
 		return nil, 0, err
 	}
+
+	log.Println(transactionData)
 
 	return transactionData, count, nil
 }
@@ -101,9 +104,9 @@ func (tr *mysqlTransactionRepository) GetAllForReport(tReq transaction.ReportReq
 		Debug().
 		Model(&entity.Transaction{}).
 		Preload("Counselor").
+		Joins("left join counselors on counselors.id = transactions.counselor_id").
 		Where(
-			"consultation_method LIKE ? OR date_id LIKE ? OR time_id LIKE ? OR id LIKE ? OR user_id LIKE ? OR counselor_id LIKE ? OR status LIKE ?",
-			"%"+search+"%",
+			"transactions.consultation_method LIKE ? OR transactions.id LIKE ? OR transactions.user_id LIKE ? OR transactions.counselor_id LIKE ? OR transactions.status LIKE ? OR counselors.username LIKE ?",
 			"%"+search+"%",
 			"%"+search+"%",
 			"%"+search+"%",

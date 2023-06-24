@@ -46,6 +46,7 @@ func isRequestValid(m interface{}) error {
 }
 
 var validUrlHost = map[string]bool{
+	"us05web.zoom.us": true,
 	"zoom.us": true,
 	"t.me": true,
 }
