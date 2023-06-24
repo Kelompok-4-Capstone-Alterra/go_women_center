@@ -12,7 +12,7 @@ import (
 )
 
 type ForumUsecaseInterface interface {
-	GetAll(getAllRequest forum.GetAllRequest) ([]forum.ResponseForum, int, error)
+	GetAll(getAllRequest forum.GetAllRequest) ([]forum.ResponseForum, error)
 	GetById(id, user_id string) (*forum.ResponseForum, error)
 	Create(createRequest *forum.CreateRequest) error
 	Update(id, user_id string, updateRequest *forum.UpdateRequest) error
@@ -31,10 +31,9 @@ func NewForumUsecase(ForumR repository.ForumRepository, UserForumR repositoryUse
 	}
 }
 
-func (fu ForumUsecase) GetAll(getAllRequest forum.GetAllRequest) ([]forum.ResponseForum, int, error) {
+func (fu ForumUsecase) GetAll(getAllRequest forum.GetAllRequest) ([]forum.ResponseForum, error) {
 	var forums []forum.ResponseForum
 	var err error
-	var totalData int64
 
 	switch getAllRequest.SortBy {
 	case "oldest":
@@ -57,13 +56,13 @@ func (fu ForumUsecase) GetAll(getAllRequest forum.GetAllRequest) ([]forum.Respon
 	}
 
 	if getAllRequest.SortBy != "" {
-		forums, totalData, err = fu.ForumR.GetAllSortBy(getAllRequest, newCategory)
+		forums, err = fu.ForumR.GetAllSortBy(getAllRequest, newCategory)
 	} else {
-		forums, totalData, err = fu.ForumR.GetAll(getAllRequest, newCategory)
+		forums, err = fu.ForumR.GetAll(getAllRequest, newCategory)
 	}
 
 	if err != nil {
-		return nil, 0, forum.ErrFailedGetForum
+		return nil, forum.ErrFailedGetForum
 	}
 
 	if getAllRequest.UserId != "" {
@@ -77,9 +76,7 @@ func (fu ForumUsecase) GetAll(getAllRequest forum.GetAllRequest) ([]forum.Respon
 		}
 	}
 
-	totalPages := helper.GetTotalPages(int(totalData), getAllRequest.Limit)
-
-	return forums, totalPages, nil
+	return forums, nil
 }
 
 func (fu ForumUsecase) GetById(id, user_id string) (*forum.ResponseForum, error) {

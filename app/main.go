@@ -270,8 +270,8 @@ func main() {
 			public.GET("/articles", userArticleHandler.GetAll)
 			public.GET("/articles/:id", userArticleHandler.GetById)
 			public.GET("/topics", topicHandler.GetAll)
-			public.GET("/public/forums", forumH.GetAll)
-			public.GET("/public/forums/:id", forumH.GetById)
+			public.GET("/forums", forumH.GetAll)
+			public.GET("/forums/:id", forumH.GetById)
 		}
 
 		auth := users.Group("/auth")
