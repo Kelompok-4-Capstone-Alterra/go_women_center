@@ -26,7 +26,7 @@ type UpdateRequest struct {
 	LastEducation string                `form:"last_education" validate:"omitempty"`
 	Description   string                `form:"description" validate:"omitempty"`
 	CompanyEmail  string                `form:"company_email" validate:"omitempty,email"`
-	Image         *multipart.FileHeader `form:"image" validate:"omitempty,required"`
+	Image         *multipart.FileHeader `form:"image" validate:"omitempty"`
 }
 
 type GetAllRequest struct {

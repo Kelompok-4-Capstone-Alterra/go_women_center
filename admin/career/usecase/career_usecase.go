@@ -71,6 +71,11 @@ func (u *careerUsecase) GetById(id string) (career.GetByResponse, error) {
 }
 
 func (u *careerUsecase) Create(inputDetail career.CreateRequest, inputImage *multipart.FileHeader) error {
+
+	if !u.image.IsImageValid(inputImage){
+		return career.ErrImageFormat
+	}
+
 	path, err := u.image.UploadImageToS3(inputImage)
 
 	if err != nil {
@@ -127,6 +132,11 @@ func (u *careerUsecase) Update(inputDetail career.UpdateRequest, inputImage *mul
 	}
 
 	if inputImage != nil {
+		
+		if !u.image.IsImageValid(inputImage){
+			return career.ErrImageFormat
+		}
+
 		err := u.image.DeleteImageFromS3(careerData.Image)
 
 		if err != nil {

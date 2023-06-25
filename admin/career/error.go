@@ -13,8 +13,7 @@ var (
 	ErrPageNotFound = errors.New("page not found")
 	
 	// bad request
-	ErrImageFormat = errors.New("image must be an image and png/jpg/jpeg format")
-	ErrImageSize = errors.New("image size must be less than 10MB")
+	ErrImageFormat = errors.New("image must be an png/jpg/jpeg and less than 2MB")
 	ErrEmailFormat = errors.New("email must be a valid email")
 	ErrIdFormat = errors.New("id must be a valid uuid")
 	ErrRequired = errors.New("all fields are required")

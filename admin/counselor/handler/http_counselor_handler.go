@@ -134,8 +134,8 @@ func (h *counselorHandler) Update(c echo.Context) error {
 
 	if err != nil {
 		return c.JSON(
-			http.StatusInternalServerError,
-			helper.ResponseData(err.Error(), http.StatusInternalServerError, nil),
+			http.StatusBadRequest,
+			helper.ResponseData(err.Error(), http.StatusBadRequest, nil),
 		)
 	}
 
@@ -159,8 +159,8 @@ func (h *counselorHandler) Delete(c echo.Context) error {
 
 	if err != nil {
 		return c.JSON(
-			http.StatusInternalServerError,
-			helper.ResponseData(err.Error(), http.StatusInternalServerError, nil),
+			http.StatusBadRequest,
+			helper.ResponseData(err.Error(), http.StatusBadRequest, nil),
 		)
 	}
 

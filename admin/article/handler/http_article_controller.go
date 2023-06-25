@@ -34,7 +34,7 @@ func (h *articleHandler) Create(c echo.Context) error {
 		)
 	}
 
-	err := h.ArticleUsecase.Create(articleReq, imgInput)
+	err := h.ArticleUsecase.Create(articleReq, articleReq.Image)
 
 	if err != nil {
 		return c.JSON(
@@ -96,7 +96,7 @@ func (h *articleHandler) GetById(c echo.Context) error {
 		)
 	}
 
-	article, err := h.ArticleUsecase.GetById(id.ID)
+	articleRes, err := h.ArticleUsecase.GetById(id.ID)
 
 	if err != nil {
 		return c.JSON(
@@ -105,7 +105,7 @@ func (h *articleHandler) GetById(c echo.Context) error {
 		)
 	}
 
-	return c.JSON(http.StatusOK, helper.ResponseData("success get article by id", http.StatusOK, article))
+	return c.JSON(http.StatusOK, helper.ResponseData("success get article by id", http.StatusOK, articleRes))
 }
 
 func (h *articleHandler) Update(c echo.Context) error {
