@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"sync"
+	"time"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/schedule"
@@ -76,17 +77,18 @@ func(u *scheduleUsecase) GetCurrSchedule(counselorId string) (schedule.GetSchedu
 	wg.Wait()
 
 	// check if time is available
-	for i, time := range timeCounselor {
+	for i, timeDb := range timeCounselor {
 		wg.Add(1)
-		go func(i int, time entity.Time) {
+		go func(i int, timeDb entity.Time) {
 			defer wg.Done()
+			timeParsed, _ := time.Parse("15:04:05", timeDb.Time)
 			scheduleTime := schedule.Time{
-				ID:          time.ID,
-				Time:        time.Time,
-				IsAvailable: !transactionMap[time.ID],
+				ID:          timeDb.ID,
+				Time:        timeParsed.Format("15:04"),
+				IsAvailable: !transactionMap[timeDb.ID],
 			}
 			scheduleTimes[i] = scheduleTime
-		}(i, time)
+		}(i, timeDb)
 	}
 	wg.Wait()
 	

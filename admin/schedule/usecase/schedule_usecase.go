@@ -86,12 +86,13 @@ func(u *scheduleUsecase) GetByCounselorId(counselorId string) (schedule.GetAllRe
 		}(i, date)
 	}
 
-	for i, time := range times {
+	for i, timeDb := range times {
 		wg.Add(1)
-		go func(i int, time entity.Time) {
+		go func(i int, timeDb entity.Time) {
 			defer wg.Done()
-			timesRes[i] = time.Time
-		}(i, time)
+			timeParsed, _ := time.Parse("15:04:05", timeDb.Time)
+			timesRes[i] = timeParsed.Format("15:04")
+		}(i, timeDb)
 	}
 	wg.Wait()
 
