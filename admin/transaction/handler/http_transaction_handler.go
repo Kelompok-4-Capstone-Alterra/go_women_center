@@ -54,6 +54,10 @@ func (th *transactionHandler) GetAll(c echo.Context) error {
 		))
 	}
 
+	if page > totalPages {
+		return c.JSON(http.StatusNotFound, helper.ResponseData(transaction.ErrPageNotFound.Error(), http.StatusNotFound, nil))
+	}
+
 	return c.JSON(http.StatusOK, helper.ResponseData("success get all transaction", http.StatusOK, echo.Map{
 		"current_pages": page,
 		"total_pages":   totalPages,
@@ -180,6 +184,10 @@ func (th *transactionHandler) GetReport(c echo.Context) error {
 			http.StatusInternalServerError,
 			nil,
 		))
+	}
+
+	if page > totalPages {
+		return c.JSON(http.StatusNotFound, helper.ResponseData(transaction.ErrPageNotFound.Error(), http.StatusNotFound, nil))
 	}
 
 	return c.JSON(http.StatusOK, helper.ResponseData("success get all transaction", http.StatusOK, echo.Map{

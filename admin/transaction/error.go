@@ -22,4 +22,6 @@ var (
 	ErrInvalidLink      = errors.New("invalid link format")
 	ErrInvalidStartDate = errors.New("invalid start date")
 	ErrInvalidEndDate   = errors.New("invalid end date")
+
+	ErrPageNotFound = errors.New("page not found")
 )
