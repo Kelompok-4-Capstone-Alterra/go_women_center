@@ -43,6 +43,8 @@ func(h *ProfileHandler) Update(c echo.Context) error {
 
 	c.Bind(&req)
 
+	helper.RemoveWhiteSpace(&req)
+
 	if err := isRequestValid(req) ;err != nil {
 		return c.JSON(http.StatusInternalServerError, helper.ResponseData(err.Error(), http.StatusInternalServerError, nil))
 	}
@@ -77,8 +79,10 @@ func(h *ProfileHandler) UpdatePassword(c echo.Context) error {
 
 	c.Bind(&req)
 
+	helper.RemoveWhiteSpace(&req)
+
 	if err := isRequestValid(req); err != nil {
-		return c.JSON(http.StatusInternalServerError, helper.ResponseData(err.Error(), http.StatusInternalServerError, nil))
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
 	}
 
 	req.ID = user.ID
