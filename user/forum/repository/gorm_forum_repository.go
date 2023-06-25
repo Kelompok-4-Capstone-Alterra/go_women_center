@@ -74,7 +74,7 @@ func (fr mysqlForumRepository) GetAllSortBy(getAllRequest forum.GetAllRequest, c
 		Select("forums.id, forums.user_id, forums.category, forums.link, forums.topic, COUNT(user_forums.id) AS member, forums.created_at").
 		Joins("LEFT JOIN user_forums ON forums.id = user_forums.forum_id").Where("forums.user_id "+logicOperationUser+" ? AND forums.category "+logicOperationCategory+" ? AND topic LIKE ?", getAllRequest.MyForum, category, "%"+getAllRequest.Topic+"%").
 		Group("forums.id").
-		Order(getAllRequest.SortBy).Preload("UserForums").
+		Order(getAllRequest.SortBy).Preload("UserForums").Preload("Users").
 		Find(&response).Error
 
 	if err != nil {
@@ -90,7 +90,7 @@ func (fr mysqlForumRepository) GetById(id, user_id string) (*forum.ResponseForum
 	err := fr.DB.Table("forums").
 		Select("forums.id, forums.user_id, forums.category, forums.link, forums.topic, COUNT(user_forums.id) AS member, forums.created_at").
 		Joins("LEFT JOIN user_forums ON forums.id = user_forums.forum_id").Preload("UserForums").
-		Group("forums.id").Having("forums.id =?", id).
+		Group("forums.id").Having("forums.id =?", id).Preload("Users").
 		Find(&forumDetail).Error
 
 	if err != nil {
