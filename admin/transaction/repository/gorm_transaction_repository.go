@@ -116,14 +116,6 @@ func (tr *mysqlTransactionRepository) GetAllForReport(tReq transaction.ReportReq
 
 	log.Println(transactionData)
 
-	// for pagination
-	if !tReq.IsDownload {
-		dbQuery.
-			Count(&count).
-			Offset(tReq.Offset).
-			Limit(tReq.Limit)
-	}
-
 	if tReq.StartDate != "" && tReq.EndDate != "" {
 		dbQuery.
 			Where("transactions.created_at BETWEEN ? AND ?", tReq.StartDate, tReq.EndDate)
@@ -137,6 +129,14 @@ func (tr *mysqlTransactionRepository) GetAllForReport(tReq transaction.ReportReq
 	if tReq.StartDate == "" && tReq.EndDate != "" {
 		dbQuery.
 			Where("transactions.created_at <= ?", tReq.EndDate)
+	}
+
+	// for pagination
+	if !tReq.IsDownload {
+		dbQuery.
+			Count(&count).
+			Offset(tReq.Offset).
+			Limit(tReq.Limit)
 	}
 
 	dbQuery.
