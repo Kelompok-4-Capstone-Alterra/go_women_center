@@ -16,7 +16,7 @@ var (
 
 	// not found
 	ErrPageNotFound = errors.New("page not found")
-
+	ErrCounselorNotFound = errors.New("counselor not found")
 	// bad request
 	ErrIdFormat = errors.New("id must be a valid uuid")
 	ErrDateInvalid = errors.New("date must be a valid date")

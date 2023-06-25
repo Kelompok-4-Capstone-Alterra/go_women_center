@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
+	counselorRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/counselor/repository"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/schedule"
 	repo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/schedule/repository"
 	transactionRepo "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/transaction/repository"
@@ -18,14 +19,28 @@ type ScheduleUsecase interface {
 // TODO tambahkan repo transaction
 type scheduleUsecase struct {
 	scheduleRepo repo.ScheduleRepository
+	counselorRepo counselorRepo.CounselorRepository
 	transRepo  transactionRepo.MysqlTransactionRepository
 }
 
-func NewScheduleUsecase(scheduleRepo repo.ScheduleRepository, transRepo  transactionRepo.MysqlTransactionRepository) ScheduleUsecase{
-	return &scheduleUsecase{scheduleRepo, transRepo}
+func NewScheduleUsecase(
+		scheduleRepo repo.ScheduleRepository,
+		transRepo  transactionRepo.MysqlTransactionRepository,
+		counselorRepo counselorRepo.CounselorRepository,
+		) ScheduleUsecase{
+	return &scheduleUsecase{scheduleRepo, counselorRepo, transRepo}
 }
 
 func(u *scheduleUsecase) GetCurrSchedule(counselorId string) (schedule.GetScheduleResponse, error) {
+
+	_, err := u.counselorRepo.GetById(counselorId)
+
+	if err != nil {
+		if err.Error() == "record not found" {
+			return schedule.GetScheduleResponse{}, schedule.ErrCounselorNotFound
+		}
+		return schedule.GetScheduleResponse{}, schedule.ErrInternalServerError
+	}
 
 	g := errgroup.Group{}
 	

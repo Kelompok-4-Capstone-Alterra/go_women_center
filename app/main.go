@@ -224,7 +224,7 @@ func main() {
 	userTransactionUsecase := TransactionUserUsecase.NewtransactionUsecase(midtransServerKey, googleUUID, userTransactionRepo, midtransNotifHandler, userCounselorRepo, userScheduleRepo, userVoucherRepo)
 	userTransactionHandler := TransactionUserHandler.NewTransactionHandler(userTransactionUsecase)
 
-	userScheduleUseCase := UserScheduleUsecase.NewScheduleUsecase(userScheduleRepo, userTransactionRepo)
+	userScheduleUseCase := UserScheduleUsecase.NewScheduleUsecase(userScheduleRepo, userTransactionRepo, userCounselorRepo)
 	userScheduleHandler := UserScheduleHandler.NewScheduleHandler(userScheduleUseCase)
 
 	userReviewRepo := CounselorUserRepo.NewMysqlReviewRepository(db)
