@@ -68,8 +68,7 @@ func (h *careerHandler) Create(c echo.Context) error {
 			helper.ResponseData(err.Error(), http.StatusBadRequest, nil),
 		)
 	}
-
-	err := h.CareerUsecase.Create(careerReq, imgInput)
+	err := h.CareerUsecase.Create(careerReq, careerReq.Image)
 
 	if err != nil {
 		return c.JSON(
@@ -122,7 +121,7 @@ func (h *careerHandler) Update(c echo.Context) error {
 		)
 	}
 
-	err := h.CareerUsecase.Update(careerReq, imgInput)
+	err := h.CareerUsecase.Update(careerReq, careerReq.Image)
 
 	if err != nil {
 		return c.JSON(

@@ -127,6 +127,11 @@ func (u *articleUsecase) GetById(id string) (article.GetByResponse, error) {
 }
 
 func (u *articleUsecase) Create(inputDetail article.CreateRequest, inputImage *multipart.FileHeader) error {
+	
+	if !u.image.IsImageValid(inputImage){
+		return article.ErrImageFormat
+	}
+	
 	path, err := u.image.UploadImageToS3(inputImage)
 
 	if err != nil {
@@ -180,6 +185,11 @@ func (u *articleUsecase) Update(inputDetail article.UpdateRequest, inputImage *m
 	}
 
 	if inputImage != nil {
+
+		if !u.image.IsImageValid(inputImage){
+			return article.ErrImageFormat
+		}
+
 		err := u.image.DeleteImageFromS3(articleData.Image)
 
 		if err != nil {

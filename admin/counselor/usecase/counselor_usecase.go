@@ -155,6 +155,11 @@ func(u *counselorUsecase) Update(input counselor.UpdateRequest) error {
 	}
 
 	if input.ProfilePicture != nil {
+
+		if !u.Image.IsImageValid(input.ProfilePicture) {
+			return counselor.ErrProfilePictureFormat
+		}
+
 		err := u.Image.DeleteImageFromS3(counselorData.ProfilePicture)
 
 		if err != nil {
