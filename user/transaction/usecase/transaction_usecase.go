@@ -3,6 +3,7 @@ package usecase
 import (
 	// "log"
 
+	"log"
 	"net/http"
 	"time"
 
@@ -196,10 +197,20 @@ func (u *transactionUsecase) SendTransaction(trRequest transaction.SendTransacti
 
 // completed or ongoing only
 func (u *transactionUsecase) GetAll(userId, trStatus, search string) ([]entity.Transaction, error) {
-	data, err := u.repo.GetAll(userId, trStatus, search)
+	var data []entity.Transaction
+	var err error
+
+	if trStatus == "waiting" {
+		log.Println("masuk ke waiting di usecase")
+		data, err = u.repo.GetAll(userId, search, "waiting", "ongoing")
+	} else {
+		data, err = u.repo.GetAll(userId, search, "completed")
+	}
+
 	if err != nil {
 		return nil, transaction.ErrInternalServerError
 	}
+
 	return data, nil
 }
 

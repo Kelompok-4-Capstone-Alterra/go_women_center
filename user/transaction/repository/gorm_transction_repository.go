@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"log"
 	"time"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
@@ -10,7 +11,7 @@ import (
 
 type MysqlTransactionRepository interface {
 	CreateTransaction(transaction entity.Transaction) (entity.Transaction, error)
-	GetAll(userId, trStatus, search string) ([]entity.Transaction, error)
+	GetAll(userId, search string, trStatus... string) ([]entity.Transaction, error)
 	GetById(id string) (entity.Transaction, error)
 	UpdateStatusByData(savedData entity.Transaction, newStatus string) (entity.Transaction, error)
 	UpdateStatusById(id string, newStatus string) error
@@ -35,11 +36,20 @@ func (tr *mysqlTransactionRepository) CreateTransaction(transaction entity.Trans
 	return transaction, nil
 }
 
-func (tr *mysqlTransactionRepository) GetAll(userId, trStatus, search string) ([]entity.Transaction, error) {
+func (tr *mysqlTransactionRepository) GetAll(userId, search string, trStatus... string) ([]entity.Transaction, error) {
 	allUserTransaction := []entity.Transaction{}
-	gormQuery := tr.DB.
-		Preload("Counselor").
-		Where("user_id = ? AND status = ?", userId, trStatus)
+	gormQuery := tr.DB.Debug().Preload("Counselor")
+
+	log.Println(trStatus[0])
+	
+	if len(trStatus) > 1 {
+		gormQuery.
+			Where("user_id = ?", userId).
+			Where("status = ? OR status = ?", trStatus[0], trStatus[1])
+	} else {
+		gormQuery.
+			Where("user_id = ? AND status = ?", userId, trStatus[0])
+	}
 
 	if search != "" {
 		gormQuery.Where(
