@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"log"
 	"time"
 
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
@@ -38,18 +37,9 @@ func (tr *mysqlTransactionRepository) CreateTransaction(transaction entity.Trans
 
 func (tr *mysqlTransactionRepository) GetAll(userId, search string, trStatus... string) ([]entity.Transaction, error) {
 	allUserTransaction := []entity.Transaction{}
-	gormQuery := tr.DB.Debug().Preload("Counselor")
-
-	log.Println(trStatus[0])
-	
-	if len(trStatus) > 1 {
-		gormQuery.
-			Where("user_id = ?", userId).
-			Where("status = ? OR status = ?", trStatus[0], trStatus[1])
-	} else {
-		gormQuery.
-			Where("user_id = ? AND status = ?", userId, trStatus[0])
-	}
+	gormQuery := tr.DB.Debug().
+		Preload("Counselor").
+		Where("user_id = ? AND status IN (?)", userId, trStatus)
 
 	if search != "" {
 		gormQuery.Where(
