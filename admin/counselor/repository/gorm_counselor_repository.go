@@ -164,7 +164,7 @@ func(r *mysqlCounselorRepository) Delete(id string) error {
 			return err
 		}
 
-		err = tx.Model(&entity.Counselor{}).Unscoped().Where("id = ?", id).Delete(&entity.Counselor{}).Error
+		err = tx.Model(&entity.Counselor{}).Where("id = ?", id).Delete(&entity.Counselor{}).Error
 
 		if err != nil {
 			return err
