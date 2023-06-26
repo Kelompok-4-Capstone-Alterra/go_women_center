@@ -38,8 +38,9 @@ func (tr *mysqlTransactionRepository) CreateTransaction(transaction entity.Trans
 func (tr *mysqlTransactionRepository) GetAll(userId, search string, trStatus... string) ([]entity.Transaction, error) {
 	allUserTransaction := []entity.Transaction{}
 	gormQuery := tr.DB.Debug().
-		Preload("Counselor").
-		Where("user_id = ? AND status IN (?)", userId, trStatus)
+		Preload("Counselor", func (tx *gorm.DB) *gorm.DB {
+			return tx.Unscoped()
+		}).Where("user_id = ? AND status IN (?)", userId, trStatus)
 
 	if search != "" {
 		gormQuery.Where(
