@@ -10,7 +10,7 @@ import (
 
 type MysqlTransactionRepository interface {
 	CreateTransaction(transaction entity.Transaction) (entity.Transaction, error)
-	GetAll(userId, trStatus, search string) ([]entity.Transaction, error)
+	GetAll(userId, search string, trStatus... string) ([]entity.Transaction, error)
 	GetById(id string) (entity.Transaction, error)
 	UpdateStatusByData(savedData entity.Transaction, newStatus string) (entity.Transaction, error)
 	UpdateStatusById(id string, newStatus string) error
@@ -35,11 +35,11 @@ func (tr *mysqlTransactionRepository) CreateTransaction(transaction entity.Trans
 	return transaction, nil
 }
 
-func (tr *mysqlTransactionRepository) GetAll(userId, trStatus, search string) ([]entity.Transaction, error) {
+func (tr *mysqlTransactionRepository) GetAll(userId, search string, trStatus... string) ([]entity.Transaction, error) {
 	allUserTransaction := []entity.Transaction{}
-	gormQuery := tr.DB.
+	gormQuery := tr.DB.Debug().
 		Preload("Counselor").
-		Where("user_id = ? AND status = ?", userId, trStatus)
+		Where("user_id = ? AND status IN (?)", userId, trStatus)
 
 	if search != "" {
 		gormQuery.Where(
