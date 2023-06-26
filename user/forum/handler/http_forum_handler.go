@@ -83,7 +83,13 @@ func (fh ForumHandler) Create(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
 	}
 
-	err := fh.ForumU.Create(&createRequest)
+	err := helper.IsValidUrl(createRequest.Link, validUrlHost)
+
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
+	}
+
+	err = fh.ForumU.Create(&createRequest)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
@@ -103,7 +109,13 @@ func (fh ForumHandler) Update(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
 	}
 
-	err := fh.ForumU.Update(id, user.ID, &updateRequest)
+	err := helper.IsValidUrl(updateRequest.Link, validUrlHost)
+
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
+	}
+
+	err = fh.ForumU.Update(id, user.ID, &updateRequest)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
 	}

@@ -43,3 +43,7 @@ func isRequestValid(m interface{}) error {
 
 	return nil
 }
+
+var validUrlHost = map[string]bool{
+	"t.me": true,
+}
