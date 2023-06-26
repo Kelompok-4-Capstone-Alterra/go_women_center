@@ -7,7 +7,7 @@ import (
 )
 
 type CareerRepository interface {
-	GetAll(search, sortBy  string, offset, limit int) ([]career.GetAllResponse, int64, error)
+	GetAll(search, sortBy  string) ([]career.GetAllResponse, error)
 	GetById(id string) (entity.Career, error)
 	GetBySearch(search string) ([]career.GetAllResponse, error)
 	Count() (int, error)
@@ -21,7 +21,7 @@ func NewMysqlCareerRepository(db *gorm.DB) CareerRepository {
 	return &mysqlCareerRepository{DB: db}
 }
 
-func (r *mysqlCareerRepository) GetAll(search, sortBy  string, offset, limit int) ([]career.GetAllResponse, int64, error) {
+func (r *mysqlCareerRepository) GetAll(search, sortBy  string) ([]career.GetAllResponse, error) {
 	//added sort
 	var career []career.GetAllResponse
 	var count int64
@@ -29,15 +29,13 @@ func (r *mysqlCareerRepository) GetAll(search, sortBy  string, offset, limit int
 		Where("job_position LIKE ? OR company_name LIKE ? OR Location LIKE ? OR CAST(Salary AS CHAR) LIKE ? OR company_email LIKE ?",
 			"%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
 		Count(&count).
-		Offset(offset).
-		Limit(limit).
 		Order(sortBy).
 		Find(&career).Error
 
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
-	return career, count, nil
+	return career, nil
 }
 
 func (r *mysqlCareerRepository) GetById(id string) (entity.Career, error) {

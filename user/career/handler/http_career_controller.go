@@ -26,13 +26,9 @@ func (h *careerHandler) GetAll(c echo.Context) error {
 
 	if err := isRequestValid(&getAllReq); err != nil {
 		return c.JSON(http.StatusBadRequest, helper.ResponseData(err.Error(), http.StatusBadRequest, nil))
-	}
+	}	
 
-	page := getAllReq.Page
-	limit := getAllReq.Limit
-
-	page, offset, limit := helper.GetPaginateData(page, limit)
-	careers, totalPages, err := h.CareerUsecase.GetAll(getAllReq.Search, getAllReq.SortBy, offset, limit)
+	careers, err := h.CareerUsecase.GetAll(getAllReq.Search, getAllReq.SortBy)
 
 	if err != nil {
 		return c.JSON(
@@ -40,16 +36,8 @@ func (h *careerHandler) GetAll(c echo.Context) error {
 			helper.ResponseData(err.Error(), http.StatusInternalServerError, nil))
 	}
 
-	if page > totalPages {
-		return c.JSON(
-			http.StatusNotFound,
-			helper.ResponseData(career.ErrPageNotFound.Error(), http.StatusBadRequest, nil))
-	}
-
 	return c.JSON(http.StatusOK, helper.ResponseData("success get all career", http.StatusOK, echo.Map{
 		"careers":       careers,
-		"current_pages": page,
-		"total_pages":   totalPages,
 	}))
 }
 

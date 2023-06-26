@@ -3,7 +3,6 @@ package usecase
 import (
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/constant"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/entity"
-	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/helper"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum"
 	"github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/forum/repository"
 	userForum "github.com/Kelompok-4-Capstone-Alterra/go_women_center/user/user_forum"
@@ -106,15 +105,6 @@ func (fu ForumUsecase) Create(createRequest *forum.CreateRequest) error {
 		newCategory = category[0]
 	}
 
-	var validUrlHost = map[string]bool{
-		"t.me": true,
-	}
-	err := helper.IsValidUrl(createRequest.Link, validUrlHost)
-	if err == helper.ErrInvalidUrl {
-		return helper.ErrInvalidUrl
-	} else if err == helper.ErrInvalidUrlHost {
-		return forum.ErrInvalidUrlHost
-	}
 
 	createForum := entity.Forum{
 		ID:       createRequest.ID,
@@ -126,7 +116,7 @@ func (fu ForumUsecase) Create(createRequest *forum.CreateRequest) error {
 		Member:   createRequest.Member,
 	}
 
-	err = fu.ForumR.Create(&createForum)
+	err := fu.ForumR.Create(&createForum)
 	if err != nil {
 		return forum.ErrFailedCreateForum
 	}
@@ -146,6 +136,7 @@ func (fu ForumUsecase) Create(createRequest *forum.CreateRequest) error {
 }
 
 func (fu ForumUsecase) Update(id, user_id string, updateRequest *forum.UpdateRequest) error {
+	
 	forumId, err := fu.ForumR.GetById(id, user_id)
 	if err != nil {
 		return err
