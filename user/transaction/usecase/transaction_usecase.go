@@ -264,7 +264,16 @@ func (u *transactionUsecase) UpdateStatus(transactionId string, transactionStatu
 
 // user join the consultation
 func (u *transactionUsecase) UserJoinNotification(transactionId string) error {
-	err := u.repo.UpdateStatusById(transactionId, "completed")
+	data, err := u.repo.GetById(transactionId)
+	if err != nil {
+		return transaction.ErrInternalServerError
+	}
+	
+	if data.Status == "ongoing" {
+		return transaction.ErrLinkNotAvailable
+	}
+
+	err = u.repo.UpdateStatusById(transactionId, "completed")
 	// better error handling
 	if err != nil {
 		return transaction.ErrInternalServerError
