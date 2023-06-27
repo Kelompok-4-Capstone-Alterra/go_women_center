@@ -40,7 +40,7 @@ func (h *counselorHandler) GetAll(c echo.Context) error {
 		return c.JSON(http.StatusNotFound, helper.ResponseData(counselor.ErrPageNotFound.Error(), http.StatusNotFound, nil))
 	}
 
-	return c.JSON(http.StatusOK, helper.ResponseData("success get all conselor", http.StatusOK, echo.Map{
+	return c.JSON(http.StatusOK, helper.ResponseData("success get all counselor", http.StatusOK, echo.Map{
 		"counselors":    counselors,
 		"current_pages": page,
 		"total_pages":   totalPages,
