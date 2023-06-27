@@ -33,6 +33,7 @@ func (tr *mysqlTransactionRepository) GetAll(search, sortBy string, offset, limi
 		Model(&entity.Transaction{}).
 		Preload("Counselor").
 		Joins("left join counselors on counselors.id = transactions.counselor_id").
+		Where("transactions.status != ?", "pending").
 		Where(
 			"transactions.consultation_method LIKE ? OR transactions.id LIKE ? OR transactions.user_id LIKE ? OR transactions.counselor_id LIKE ? OR transactions.status LIKE ? OR counselors.username LIKE ?",
 			"%"+search+"%",
@@ -105,6 +106,7 @@ func (tr *mysqlTransactionRepository) GetAllForReport(tReq transaction.ReportReq
 		Model(&entity.Transaction{}).
 		Preload("Counselor").
 		Joins("left join counselors on counselors.id = transactions.counselor_id").
+		Where("transactions.status != ?", "pending").
 		Where(
 			"transactions.consultation_method LIKE ? OR transactions.id LIKE ? OR transactions.user_id LIKE ? OR transactions.counselor_id LIKE ? OR transactions.status LIKE ? OR counselors.username LIKE ?",
 			"%"+search+"%",
