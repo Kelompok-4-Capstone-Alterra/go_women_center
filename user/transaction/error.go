@@ -19,11 +19,12 @@ var (
 	ErrVoucherExpired            error = errors.New("voucher unavailable")
 	ErrCounselorNotFound         error = errors.New("counselor not found")
 	ErrDeletingVoucher           error = errors.New("error deleting voucher")
-	ErrInternalServerError 	 	 error = errors.New("internal server error")
+	ErrInternalServerError       error = errors.New("internal server error")
+	ErrLinkNotAvailable          error = errors.New("link isn't ready yet")
 )
 
 var (
 	// scuffed db error handling
-	ErrDuplicateKey error = errors.New("duplicated key not allowed")
+	ErrDuplicateKey   error = errors.New("duplicated key not allowed")
 	ErrRecordNotFound error = errors.New("record not found")
 )
