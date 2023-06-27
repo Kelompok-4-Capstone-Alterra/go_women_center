@@ -54,6 +54,7 @@ func(r *mysqlCounselorRepository) GetAllHasSchedule(search, sortBy string, offse
 	var totalData int64
 	// get counselor that has schedule
 	err := r.DB.Table("counselors").
+		Where("deleted_at IS NULL").
 		Joins("INNER JOIN dates ON counselors.id = dates.counselor_id").
 		Where("counselors.name LIKE ? OR counselors.topic LIKE ? OR counselors.username LIKE ? OR counselors.email LIKE ?",
 		"%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").
@@ -80,6 +81,7 @@ func(r *mysqlCounselorRepository) GetAllNotHasSchedule(search, sortBy string, of
 
 	// get counselor that not has schedule
 	err := r.DB.Table("counselors").
+		Where("deleted_at IS NULL").
 		Joins("LEFT JOIN dates ON counselors.id = dates.counselor_id").
 		Where("dates.counselor_id IS NULL").
 		Where("counselors.name LIKE ? OR counselors.topic LIKE ? OR counselors.username LIKE ? OR counselors.email LIKE ?",
